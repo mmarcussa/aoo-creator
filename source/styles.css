@@ -514,3 +514,57 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
 [data-theme=win95] .brand-button,[data-theme=bios] .brand-button,
 [data-theme=gyaru] .brand-button{border:0;padding:0;background:transparent;border-radius:3px}
 [data-theme=win95] .brand-button:active{border:0}
+
+/* ================= batch 1: AO3, Nokia LCD, Doom 1993 ================= */
+
+/* --- AO3: the real archive. Its brand colour is a dark red, which collides
+       with the destructive role, so danger moves to a clearly separate
+       orange-red and the link blue takes the system role. --- */
+[data-theme=ao3]{color-scheme:light;
+  --bg:#f4f4f4;--panel:#fff;--panel2:#f0f0f0;--line:#ccc;--line2:#ddd;
+  --text:#2a2a2a;--muted:#666;--cyan:#1e6bb8;--yellow:#900;--red:#d84315;--green:#2e7d32;
+  --on-accent:#fff;--shadow:0 8px 22px #00000014}
+[data-theme=ao3] body{font-family:Georgia,"Lucida Grande","Segoe UI",serif}
+[data-theme=ao3] .app-header{background:#900;box-shadow:none;border-bottom:3px solid #6f0000}
+[data-theme=ao3] .app-header,[data-theme=ao3] .brand strong,[data-theme=ao3] .brand span,
+[data-theme=ao3] .app-header button{color:#fff}
+[data-theme=ao3] .app-header .secondary{background:#7a0000;border-color:#5c0000;color:#fff}
+[data-theme=ao3] .app-header .primary{background:#fff;border-color:#fff;color:#900}
+[data-theme=ao3] .manuscript{background:#fff;font-family:Georgia,serif}
+[data-theme=ao3] .editor-tabs button.active{color:#900;border-bottom-color:#900}
+
+/* --- Nokia LCD: one hue, so danger keeps a warm tint to stay separable --- */
+[data-theme=nokia]{color-scheme:light;
+  --bg:#b3c169;--panel:#aebc64;--panel2:#a5b35b;--line:#6f7c3a;--line2:#6f7c3a;
+  --text:#22300e;--muted:#4c5a26;--cyan:#3d5218;--yellow:#25330f;--red:#5e2a14;--green:#344a14;
+  --on-accent:#b3c169;--shadow:none}
+[data-theme=nokia] body{font-family:Consolas,"Cascadia Mono",monospace}
+[data-theme=nokia] *{border-radius:0 !important}
+[data-theme=nokia] button{border:1px solid var(--line);background:transparent;color:var(--text);box-shadow:none}
+[data-theme=nokia] button:hover{background:#25330f;color:#b3c169}
+[data-theme=nokia] .manuscript{background:#bccb70;font-family:Consolas,monospace}
+[data-theme=nokia] .nav-item.active,[data-theme=nokia] .strip-item.active{
+  background:#25330f;color:#b3c169;box-shadow:none}
+[data-theme=nokia] .nav-item.active .work-by,[data-theme=nokia] .strip-item.active small{color:#8fa04e}
+
+/* --- Doom 1993: the status bar. Muddy browns, raised bezels, blood red --- */
+[data-theme=doom]{color-scheme:dark;
+  --bg:#16110d;--panel:#2a2018;--panel2:#3a2d22;--line:#6b5b3d;--line2:#6b5b3d;
+  --text:#d6c8ac;--muted:#93805e;--cyan:#6f9a3f;--yellow:#d09a1e;--red:#a02020;--green:#5f8f3f;
+  --on-accent:#16110d;--shadow:none}
+[data-theme=doom] *{border-radius:0 !important}
+[data-theme=doom] body{font-family:"Trebuchet MS","Segoe UI",sans-serif;letter-spacing:.01em}
+[data-theme=doom] button{border:2px outset #7d6b48;background:#3a2d22;color:var(--text);box-shadow:none;font-weight:700}
+[data-theme=doom] button:hover{background:#4a3a2b;color:#f0dfbc;border-color:#9a855c}
+[data-theme=doom] button:active{border-style:inset}
+[data-theme=doom] .primary{background:#a02020;border:2px outset #d05a5a;color:#f6e6c8}
+[data-theme=doom] .danger-strong{background:#7a1414;border:2px outset #b85050;color:#f6e6c8}
+[data-theme=doom] input,[data-theme=doom] select,[data-theme=doom] textarea{
+  border:2px inset #7d6b48;background:#1e1711;color:var(--text)}
+[data-theme=doom] .chapter-strip,[data-theme=doom] .notes,[data-theme=doom] .edit-card,
+[data-theme=doom] .author-row,[data-theme=doom] .manuscript{border:2px inset #7d6b48;background:#231a14}
+[data-theme=doom] .app-header,[data-theme=doom] .rail{background:#2a2018;border-color:#6b5b3d}
+[data-theme=doom] .nav-item.active,[data-theme=doom] .strip-item.active{
+  background:#4a3222;box-shadow:inset 3px 0 0 #d09a1e}
+[data-theme=nokia] .strip-item.active .strip-num{background:transparent;color:#b3c169}
+[data-theme=nokia] .nav-item.active .work-state{box-shadow:none}

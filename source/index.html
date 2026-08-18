@@ -16,10 +16,21 @@
     <div class="header-actions">
       <label class="compact">Theme
         <select id="themeSelect">
-          <option value="aoo">AOO</option><option value="night">Midnight</option>
-          <option value="light">Paper</option><option value="contrast">High contrast</option>
-          <option value="win95">Windows 95</option><option value="matrix">The Matrix</option>
-          <option value="bios">BIOS setup</option><option value="gyaru">Gyaru</option>
+          <optgroup label="Core">
+            <option value="aoo">AOO</option><option value="night">Midnight</option>
+            <option value="light">Paper</option><option value="contrast">High contrast</option>
+          </optgroup>
+          <optgroup label="Archive">
+            <option value="ao3">AO3</option>
+          </optgroup>
+          <optgroup label="Old hardware">
+            <option value="win95">Windows 95</option><option value="bios">BIOS setup</option>
+            <option value="matrix">The Matrix</option><option value="nokia">Nokia LCD</option>
+            <option value="doom">Doom 1993</option>
+          </optgroup>
+          <optgroup label="Aesthetic">
+            <option value="gyaru">Gyaru</option>
+          </optgroup>
         </select>
       </label>
       <button id="tutorialBtn" class="ghost">Tutorial</button>
