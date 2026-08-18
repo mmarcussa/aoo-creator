@@ -136,10 +136,12 @@ $("#duplicateWorkBtn").addEventListener("click",()=>{const source=currentWork();
 $("#deleteWorkBtn").addEventListener("click",async()=>{const w=currentWork();if(!w)return;const yes=await ask(`\u201c${w.title||"Untitled work"}\u201d and all of its chapters will be removed.`,{title:"Delete work?",okLabel:"Delete",danger:true});if(!yes)return;mutate(()=>{project.works=project.works.filter(x=>x.id!==w.id);selectedWorkId=project.works[0]?.id||null;selectedChapterId=currentWork()?.chapters[0]?.id||null},{full:true,message:"Work deleted."})});
 $("#projectSettingsBtn").addEventListener("click",()=>showTab("project"));$("#workSearch").addEventListener("input",renderWorks);$("#runValidationBtn").addEventListener("click",renderValidation);
 $("#previewWidth").addEventListener("change",event=>$("#aooPreview").classList.toggle("narrow",event.target.value==="narrow"));
-function showWelcome(){$("#welcomeScreen").hidden=false;$("#welcomeExamples").hidden=true}
+function showWelcome(){$("#welcomeScreen").hidden=false;$("#welcomeExamples").hidden=true;$("#welcomeClose").textContent=localStorage.getItem("aoo-creator-welcome-seen")?"Close":"Skip"}
 function closeWelcome(){$("#welcomeScreen").hidden=true;localStorage.setItem("aoo-creator-welcome-seen","1")}
 $("#tutorialBtn").addEventListener("click",()=>{closeWelcome();startTour()});
 $("#welcomeClose").addEventListener("click",closeWelcome);
+$("#welcomeBtn").addEventListener("click",showWelcome);
+addEventListener("keydown",event=>{if(event.key==="Escape"&&!$("#welcomeScreen").hidden)closeWelcome()});
 $("#welcomeScreen").addEventListener("click",event=>{
   const pick=event.target.closest("[data-example]");
   if(pick){closeWelcome();snapshot();library.projects[project.id]=project;adoptCollection(withId(getExample(pick.dataset.example)),"Example opened as a new collection.");return}

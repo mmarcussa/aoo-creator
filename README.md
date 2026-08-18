@@ -85,7 +85,7 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   transform and opacity animate, so nothing triggers layout. The manuscript, works list and
   chapter strip never shift position. All of it is disabled under
   `prefers-reduced-motion: reduce`, verified with the browser flag rather than assumed.
-- **Welcome screen.** First run opens a full screen offering four real paths rather than a
+- **Welcome screen.** Clicking the logo reopens it at any time; Escape closes it. First run opens a full screen offering four real paths rather than a
   list of steps: start blank, take the tour, open one of the four worked examples, or import
   a saved `.aoopack.json`. It also states the thing a writer most needs to know up front —
   that the browser is not a backup. The mark is inline SVG using `currentColor`, so it

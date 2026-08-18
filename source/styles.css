@@ -504,3 +504,13 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
 [data-theme=gyaru] .welcome-examples{border-radius:14px}
 [data-theme=gyaru] .welcome-examples button{border-radius:10px;padding-left:.85rem;padding-right:.85rem}
 [data-theme=gyaru] .welcome-note{border-radius:0 12px 12px 0}
+
+/* --- the logo reopens the welcome screen; it is a button, but should not
+       look or behave like one in any theme --- */
+.brand-button{display:grid;place-items:center;padding:0;border:0;background:transparent;
+  border-radius:3px;cursor:pointer;transition:opacity 120ms ease}
+.brand-button:hover{background:transparent;opacity:.75}
+.brand-button img{display:block;object-fit:contain}
+[data-theme=win95] .brand-button,[data-theme=bios] .brand-button,
+[data-theme=gyaru] .brand-button{border:0;padding:0;background:transparent;border-radius:3px}
+[data-theme=win95] .brand-button:active{border:0}
