@@ -505,6 +505,14 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
 @media(max-width:760px){.welcome-grid,.welcome-examples{grid-template-columns:1fr}
   .welcome-head{flex-direction:column;gap:.6rem}}
 
+/* --- Gyaru: the pill is for controls, not for structure. Any button that is
+       really a card or a list row must be listed here, or it becomes a lozenge
+       whose curves eat its own text. Add new structural buttons to this rule. --- */
+[data-theme=gyaru] .welcome-card{border-radius:16px;padding:1.05rem 1.25rem}
+[data-theme=gyaru] .welcome-examples{border-radius:14px}
+[data-theme=gyaru] .welcome-examples button{border-radius:10px;padding-left:.85rem;padding-right:.85rem}
+[data-theme=gyaru] .welcome-note{border-radius:0 12px 12px 0}
+
 </style>
 </head>
 <body>
