@@ -255,6 +255,41 @@ button[disabled]:hover{background:transparent;color:var(--muted)}
 .author-search,.collection-select,.card-fields input,.card-fields select,.card-fields textarea,
 .author-row input,.author-row select{border-color:var(--line)}
 
+/* ================= widescreen, arrows, corners =================
+   Reported from a 16:9 display: actions stranded at the far edge with a
+   dead gap beside the manuscript, select arrows jammed against the border,
+   and corners round enough to read as generic.
+   ============================================================== */
+
+/* --- 1. content stops at a readable width instead of chasing the viewport --- */
+.pane{max-width:1240px}
+.pane-heading{max-width:1240px}
+.write-layout{max-width:1180px}
+.chapter-strip{max-width:260px}
+.card-list,.validation-list{max-width:1100px}
+/* Add chapter now lives in the strip header, beside the chapters it adds */
+.strip-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding-right:.35rem}
+.strip-head .icon-button{width:1.6rem;height:1.6rem;font-size:1.05rem;line-height:1}
+/* the comments pane keeps its header action, but no longer at the far edge */
+#commentsPane .pane-heading{justify-content:flex-start;gap:1.5rem}
+#commentsPane .pane-heading>div{flex:none}
+
+/* --- 2. select arrows sit inside the field, not against the border --- */
+select{appearance:none;-webkit-appearance:none;padding-right:2rem;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%238b9b9a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .7rem center;background-size:11px 8px}
+select::-ms-expand{display:none}
+.compact select{padding-right:1.8rem;background-position:right .6rem center}
+
+/* --- 3. corners sharpened: deliberate, not default --- */
+:root{--radius:3px}
+button,input,select,textarea,.badge{border-radius:2px}
+.chapter-strip,.notes,.edit-card,.author-row,.manuscript,.aoo-preview,.help-callout{border-radius:3px}
+.nav-item,.strip-item{border-radius:2px}
+.strip-num{border-radius:2px}
+.badge,.attention,.backup-state{border-radius:2px}
+.icon-button{border-radius:2px}
+
 </style>
 </head>
 <body>
@@ -333,11 +368,10 @@ button[disabled]:hover{background:transparent;color:var(--muted)}
       <div id="writePane" class="pane active">
         <div class="pane-heading">
           <div><span class="eyebrow">Manuscript</span><h1 id="workHeading">Untitled work</h1></div>
-          <div class="pane-actions"><button id="addChapterBtn" class="primary">Add chapter</button></div>
         </div>
         <div class="write-layout">
           <aside class="chapter-strip">
-            <div class="strip-head">Chapters</div>
+            <div class="strip-head">Chapters<button id="addChapterBtn" class="icon-button" title="Add chapter">+</button></div>
             <div id="chapterStrip" class="strip-list"></div>
           </aside>
           <div id="chapterEditor" class="chapter-editor"></div>
