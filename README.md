@@ -111,6 +111,12 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   transform and opacity animate, so nothing triggers layout. The manuscript, works list and
   chapter strip never shift position. All of it is disabled under
   `prefers-reduced-motion: reduce`, verified with the browser flag rather than assumed.
+- **Boot sequence.** The tool powers on rather than appearing: a CRT line opens into the
+  field, the mark resolves out of a channel-split glitch inside a spinning reticle, four POST
+  lines report the framework contract, schema, library and *network — not required*, and a
+  fill bar wipes the screen away. Purely cosmetic, follows the theme tokens so a Windows 95
+  boot looks like one, skippable with any key or click, and skipped entirely under reduced
+  motion. About 2.1 seconds.
 - **Welcome screen.** Clicking the logo reopens it at any time; Escape closes it. First run opens a full screen offering four real paths rather than a
   list of steps: start blank, take the tour, open one of the four worked examples, or import
   a saved `.aoopack.json`. It also states the thing a writer most needs to know up front —

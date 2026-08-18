@@ -510,7 +510,9 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
 .brand-button{display:grid;place-items:center;padding:0;border:0;background:transparent;
   border-radius:3px;cursor:pointer;transition:opacity 120ms ease}
 .brand-button:hover{background:transparent;opacity:.75}
-.brand-button img{display:block;object-fit:contain}
+.brand-logo{display:block;width:44px;height:44px;background:var(--logo) center/contain no-repeat}
+.boot-logo{grid-area:1/1;display:block;width:72px;height:72px;background:var(--logo) center/contain no-repeat;
+  animation:mark-resolve 900ms cubic-bezier(.2,.9,.25,1) 300ms both}
 [data-theme=win95] .brand-button,[data-theme=bios] .brand-button,
 [data-theme=gyaru] .brand-button{border:0;padding:0;background:transparent;border-radius:3px}
 [data-theme=win95] .brand-button:active{border:0}
@@ -832,6 +834,7 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
    Themes override the tokens, so a terminal theme gets a terminal voice
    throughout rather than only in its body text.
    ============================================== */
+:root{--logo:url("assets/aoo-logo.png")}
 :root{
   --font-display:"Bahnschrift SemiCondensed","Bahnschrift","Franklin Gothic Medium","Segoe UI",sans-serif;
   --font-ui:"Corbel","Candara","Segoe UI",system-ui,sans-serif;
@@ -942,3 +945,77 @@ button{font-family:var(--font-display);letter-spacing:.02em}
   radial-gradient(1000px 560px at 50% -18%,#b2ff5926,transparent 62%),
   linear-gradient(180deg,#1b6339 0%,#14512f 100%)}
 [data-theme=ao3] body{background:linear-gradient(180deg,#fafafa 0%,#f4f4f4 100%)}
+
+/* ================= boot sequence =================
+   Cosmetic only. A deck powering on: scanline sweep, the mark resolving out of
+   a channel-split glitch, POST lines, then a wipe. It follows the theme tokens,
+   so a Windows 95 boot looks like one and a Matrix boot looks like another.
+   Skippable by any input, and skipped outright under reduced motion.
+   ================================================= */
+.boot{position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:var(--bg);
+  color:var(--text);overflow:hidden}
+.boot[hidden]{display:none}
+.boot.out{animation:boot-out 420ms cubic-bezier(.7,0,.3,1) forwards}
+@keyframes boot-out{to{opacity:0;transform:scale(1.04);filter:blur(6px)}}
+
+/* CRT power-on: a bright line opens into a full field */
+.boot::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;
+  background:var(--yellow);box-shadow:0 0 24px var(--yellow);
+  animation:crt-open 620ms cubic-bezier(.6,0,.2,1) forwards}
+@keyframes crt-open{0%{transform:scaleX(0);opacity:0}
+  22%{transform:scaleX(1);opacity:1}
+  100%{transform:scaleX(1) scaleY(90);opacity:0}}
+/* scanlines over everything, faint */
+.boot::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,#00000026 3px 4px);opacity:.55}
+
+.boot-frame{position:relative;z-index:1;display:grid;justify-items:center;gap:.55rem;
+  animation:boot-fade 420ms ease-out 260ms both}
+@keyframes boot-fade{from{opacity:0}to{opacity:1}}
+
+.boot-mark{position:relative;display:grid;place-items:center;width:120px;height:120px;margin-bottom:.4rem}
+
+@keyframes mark-resolve{
+  0%{opacity:0;transform:scale(.82);filter:blur(3px)}
+  35%{opacity:1;transform:scale(1.03) translateX(-3px);filter:none}
+  42%{transform:scale(1.03) translateX(3px)}
+  48%{transform:scale(1.03) translateX(-2px)}
+  55%{transform:scale(1) translateX(0)}
+  100%{opacity:1;transform:none}}
+.boot-reticle{grid-area:1/1;width:120px;height:120px;color:var(--yellow);opacity:.8}
+.ret-ring{opacity:.28;animation:ret-in 700ms ease-out 260ms both}
+.ret-tick{opacity:.6;animation:ret-in 700ms ease-out 380ms both}
+@keyframes ret-in{from{opacity:0;transform:scale(.9);transform-origin:center}to{transform:none}}
+.ret-spin{animation:ret-spin 1400ms linear 300ms infinite;transform-origin:center;color:var(--cyan);
+  stroke:var(--cyan)}
+@keyframes ret-spin{to{transform:rotate(360deg)}}
+
+.boot-title{font-family:var(--font-display);font-size:1.35rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--yellow);animation:boot-line 420ms ease-out 620ms both}
+.boot-sub{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.24em;color:var(--muted);
+  animation:boot-line 420ms ease-out 720ms both}
+
+.boot-lines{list-style:none;margin:1.1rem 0 .4rem;padding:0;display:grid;gap:.28rem;
+  width:min(360px,80vw);font-family:var(--font-mono);font-size:.72rem}
+.boot-lines li{display:flex;align-items:baseline;gap:.5rem;color:var(--muted);
+  animation:boot-line 300ms ease-out both}
+.boot-lines li::after{content:"";flex:1;order:1;border-bottom:1px dotted currentColor;opacity:.35;
+  transform:translateY(-.2em)}
+.boot-lines li b{order:2;color:var(--green);font-weight:700;letter-spacing:.06em}
+.boot-lines li:nth-child(1){animation-delay:820ms}
+.boot-lines li:nth-child(2){animation-delay:940ms}
+.boot-lines li:nth-child(3){animation-delay:1060ms}
+.boot-lines li:nth-child(4){animation-delay:1180ms}
+.boot-lines li:nth-child(4) b{color:var(--cyan)}
+@keyframes boot-line{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.boot-bar{width:min(360px,80vw);height:3px;background:color-mix(in srgb,var(--line) 70%,transparent);
+  overflow:hidden;animation:boot-line 300ms ease-out 800ms both}
+.boot-bar i{display:block;height:100%;width:100%;transform-origin:left;background:var(--yellow);
+  box-shadow:0 0 12px var(--yellow);animation:boot-fill 900ms cubic-bezier(.5,0,.3,1) 820ms both}
+@keyframes boot-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+.boot-skip{margin-top:.9rem;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);opacity:0;animation:boot-line 400ms ease-out 1500ms both}
+
+@media (prefers-reduced-motion:reduce){.boot{display:none !important}}

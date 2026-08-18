@@ -10,7 +10,7 @@
 <body>
   <header class="app-header">
     <div class="brand">
-      <button id="welcomeBtn" class="brand-button" type="button" title="Show the welcome screen"><img src="assets/aoo-logo.png" alt="Show the welcome screen" width="44" height="44"></button>
+      <button id="welcomeBtn" class="brand-button" type="button" title="Show the welcome screen"><span class="brand-logo" role="img" aria-label="Archive of Our Overwrites"></span></button>
       <div><strong>AOO Creator</strong><span>Framework pack builder · v0.2.0</span></div>
     </div>
     <div class="header-actions">
@@ -226,6 +226,30 @@
   <datalist id="relationshipPresets"><option value="Kerry Eurodyne/Johnny Silverhand"><option value="V/Judy Alvarez"><option value="V/Panam Palmer"></datalist>
   <datalist id="characterPresets"><option value="V"><option value="Johnny Silverhand"><option value="Kerry Eurodyne"><option value="Judy Alvarez"><option value="Panam Palmer"></datalist>
   <datalist id="tagPresets"><option value="Slow Burn"><option value="Angst"><option value="Found Family"><option value="Fluff"><option value="Alternate Universe"><option value="Unreliable Narrator"></datalist>
+
+  <div id="boot" class="boot" hidden>
+    <div class="boot-frame">
+      <div class="boot-mark">
+        <svg class="boot-reticle" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ret-ring" cx="60" cy="60" r="54" fill="none" stroke="currentColor" stroke-width="1"/>
+          <circle class="ret-spin" cx="60" cy="60" r="46" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-dasharray="42 250" stroke-linecap="round"/>
+          <path class="ret-tick" d="M60 2v10M60 108v10M2 60h10M108 60h10" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span class="boot-logo" role="img" aria-label=""></span>
+      </div>
+      <div class="boot-title">Archive of Our Overwrites</div>
+      <div class="boot-sub">Creator v0.2.0</div>
+      <ol class="boot-lines">
+        <li><span>framework contract 1.0.0</span><b>ok</b></li>
+        <li><span>creator schema v1</span><b>ok</b></li>
+        <li><span>local library</span><b>mounted</b></li>
+        <li><span>network</span><b>not required</b></li>
+      </ol>
+      <div class="boot-bar"><i></i></div>
+      <div class="boot-skip">press any key to skip</div>
+    </div>
+  </div>
 
   <div id="tutorialRoot"></div>
 

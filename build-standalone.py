@@ -66,12 +66,14 @@ for frag, label in ((css, "css"), (bundle, "js")):
 # --- rewrite index.html: inline stylesheet, logo, script ---
 html_n, n1 = re.subn(r'<link rel="stylesheet" href="styles\.css">',
                      lambda m: "<style>\n" + css + "\n</style>", html, count=1)
-html_n, n2 = re.subn(r'src="assets/aoo-logo\.png"',
-                     lambda m: 'src="data:image/png;base64,' + logo + '"', html_n, count=1)
+# the logo is declared once as a CSS custom property and referenced from there,
+# so the base64 is embedded a single time however many places display it
+html_n, n2 = re.subn(r'url\("assets/aoo-logo\.png"\)',
+                     lambda m: 'url("data:image/png;base64,' + logo + '")', html_n)
 html_n, n3 = re.subn(r'<script type="module" src="app\.js"></script>',
                      lambda m: "<script>\n" + bundle + "</script>", html_n, count=1)
-if (n1, n2, n3) != (1, 1, 1):
-    sys.exit(f"FAIL: html rewrite counts were {(n1, n2, n3)}, expected (1, 1, 1)")
+if n1 != 1 or n2 < 1 or n3 != 1:
+    sys.exit(f"FAIL: html rewrite counts were {(n1, n2, n3)}; expected 1 stylesheet, >=1 logo, 1 script")
 
 if "styles.css" in html_n or 'src="app.js"' in html_n or "assets/aoo-logo.png" in html_n:
     sys.exit("FAIL: an external reference survived inlining")

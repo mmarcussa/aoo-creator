@@ -167,4 +167,17 @@ $("#buildBtn").addEventListener("click",()=>{renderValidation();const issues=val
 
 document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();if(!undoStack.length)return;redoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(undoStack.pop()));selectedWorkId=project.works.find(w=>w.id===selectedWorkId)?.id||project.works[0]?.id||null;save("Undo autosaved.");render()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){event.preventDefault();if(!redoStack.length)return;undoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(redoStack.pop()));selectedWorkId=project.works[0]?.id||null;save("Redo autosaved.");render()}});
 
-const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();if(!localStorage.getItem("aoo-creator-welcome-seen"))showWelcome();status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);
+const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();function afterBoot(){if(!localStorage.getItem("aoo-creator-welcome-seen"))showWelcome()}
+function runBoot(){
+  const el=$("#boot");
+  const skip=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!el||skip){afterBoot();return}
+  el.hidden=false;
+  let done=false;
+  const finish=()=>{if(done)return;done=true;
+    removeEventListener("keydown",finish,true);removeEventListener("pointerdown",finish,true);
+    el.classList.add("out");setTimeout(()=>{el.hidden=true;el.classList.remove("out");afterBoot()},380)};
+  addEventListener("keydown",finish,true);addEventListener("pointerdown",finish,true);
+  setTimeout(finish,2150);
+}
+runBoot();status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);
