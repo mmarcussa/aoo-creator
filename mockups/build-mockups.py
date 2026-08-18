@@ -13,7 +13,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 BODY = """
 <header class="app-header">
   <div class="brand">
-    <div class="brand-mark">AO</div>
+    <img class="brand-logo" src="../source/assets/aoo-logo.png" alt="" width="44" height="44">
     <div><strong>AOO Creator</strong><span>Framework pack builder &middot; v0.2.0</span></div>
   </div>
   <div class="header-actions">
@@ -153,7 +153,7 @@ button:hover{border-color:var(--cyan);color:var(--cyan)}
 .icon-button{width:2rem;height:2rem;padding:0;clip-path:none;border-radius:2px}
 input,select{border:1px solid var(--line);background:#0a0f12;padding:.5rem .6rem;clip-path:var(--cut)}
 .app-header{border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel),#0a0e11)}
-.brand-mark{width:40px;height:40px;display:grid;place-items:center;background:var(--yellow);color:#07090b;font:800 15px/1 var(--display);letter-spacing:.05em;clip-path:var(--cut)}
+.brand-logo{width:44px;height:44px;object-fit:contain}
 .brand strong{font-size:1.05rem;color:var(--yellow)}
 .brand span{font-size:.68rem;color:var(--muted);text-transform:none;letter-spacing:.04em;font-family:var(--mono)}
 .status-bar{background:#0a1417;border-bottom:1px solid var(--line);font:.72rem/1.5 var(--mono);color:var(--cyan)}
@@ -200,7 +200,7 @@ button:hover{border-color:var(--muted)}
 .icon-button{width:1.9rem;height:1.9rem;padding:0}
 input,select{border:1px solid var(--line);background:#171412;padding:.5rem .6rem;border-radius:2px}
 .app-header{border-bottom:2px solid var(--line);background:var(--panel)}
-.brand-mark{width:38px;height:38px;display:grid;place-items:center;border:2px solid var(--yellow);color:var(--yellow);font:700 15px/1 var(--serif);border-radius:50%}
+.brand-logo{width:44px;height:44px;object-fit:contain}
 .brand strong{font:700 1.2rem var(--serif);color:var(--text)}
 .brand span{font-size:.72rem;color:var(--muted)}
 .status-bar{background:#171412;border-bottom:1px solid var(--line);font-size:.74rem;color:var(--muted)}
@@ -250,7 +250,7 @@ button:hover{border-color:var(--cyan);color:var(--cyan)}
 .icon-button{width:2rem;height:2rem;padding:0}
 input,select{border:1px solid var(--line);background:#0d1519;padding:.5rem .6rem;border-radius:4px}
 .app-header{border-bottom:1px solid var(--line);background:linear-gradient(180deg,#16222899,#0c1417);box-shadow:0 10px 30px #0006}
-.brand-mark{width:40px;height:40px;display:grid;place-items:center;background:linear-gradient(140deg,var(--yellow),#c9971f);color:#0b1114;font:800 15px/1 "Segoe UI";border-radius:6px}
+.brand-logo{width:44px;height:44px;object-fit:contain}
 .brand strong{font-size:1.12rem;color:var(--yellow);letter-spacing:.01em}
 .brand span{font-size:.72rem;color:var(--muted)}
 .status-bar{background:#0e1b1f;border-bottom:1px solid var(--line);font-size:.75rem;color:var(--muted)}
