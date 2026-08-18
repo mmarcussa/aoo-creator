@@ -136,8 +136,19 @@ $("#duplicateWorkBtn").addEventListener("click",()=>{const source=currentWork();
 $("#deleteWorkBtn").addEventListener("click",async()=>{const w=currentWork();if(!w)return;const yes=await ask(`\u201c${w.title||"Untitled work"}\u201d and all of its chapters will be removed.`,{title:"Delete work?",okLabel:"Delete",danger:true});if(!yes)return;mutate(()=>{project.works=project.works.filter(x=>x.id!==w.id);selectedWorkId=project.works[0]?.id||null;selectedChapterId=currentWork()?.chapters[0]?.id||null},{full:true,message:"Work deleted."})});
 $("#projectSettingsBtn").addEventListener("click",()=>showTab("project"));$("#workSearch").addEventListener("input",renderWorks);$("#runValidationBtn").addEventListener("click",renderValidation);
 $("#previewWidth").addEventListener("change",event=>$("#aooPreview").classList.toggle("narrow",event.target.value==="narrow"));
-$("#tutorialBtn").addEventListener("click",startTour);
-$("#startTourBtn").addEventListener("click",()=>setTimeout(startTour,120));
+function showWelcome(){$("#welcomeScreen").hidden=false;$("#welcomeExamples").hidden=true}
+function closeWelcome(){$("#welcomeScreen").hidden=true;localStorage.setItem("aoo-creator-welcome-seen","1")}
+$("#tutorialBtn").addEventListener("click",()=>{closeWelcome();startTour()});
+$("#welcomeClose").addEventListener("click",closeWelcome);
+$("#welcomeScreen").addEventListener("click",event=>{
+  const pick=event.target.closest("[data-example]");
+  if(pick){closeWelcome();snapshot();library.projects[project.id]=project;adoptCollection(withId(getExample(pick.dataset.example)),"Example opened as a new collection.");return}
+  const card=event.target.closest("[data-welcome]")?.dataset.welcome;if(!card)return;
+  if(card==="example"){const box=$("#welcomeExamples");box.hidden=!box.hidden;return}
+  if(card==="import"){closeWelcome();$("#importFile").click();return}
+  closeWelcome();
+  if(card==="tour")setTimeout(startTour,140);
+});
 $("#tutorialRoot").addEventListener("click",event=>{const a=event.target.closest("[data-tour]")?.dataset.tour;if(!a)return;
   if(a==="skip")return endTour();
   if(a==="back"){tourAt=Math.max(0,tourAt-1);return renderTourStep()}
@@ -154,4 +165,4 @@ $("#buildBtn").addEventListener("click",()=>{renderValidation();const issues=val
 
 document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();if(!undoStack.length)return;redoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(undoStack.pop()));selectedWorkId=project.works.find(w=>w.id===selectedWorkId)?.id||project.works[0]?.id||null;save("Undo autosaved.");render()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){event.preventDefault();if(!redoStack.length)return;undoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(redoStack.pop()));selectedWorkId=project.works[0]?.id||null;save("Redo autosaved.");render()}});
 
-const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();if(!localStorage.getItem("aoo-creator-tutorial-seen")){setTimeout(()=>$("#tutorialDialog").showModal(),350);localStorage.setItem("aoo-creator-tutorial-seen","1")}status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);
+const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();if(!localStorage.getItem("aoo-creator-welcome-seen"))showWelcome();status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);

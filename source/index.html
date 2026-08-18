@@ -219,22 +219,58 @@
     </form>
   </dialog>
 
-  <dialog id="tutorialDialog">
-    <form method="dialog" class="dialog-card">
-      <button class="dialog-close" aria-label="Close">×</button>
-      <span class="eyebrow">First time here</span><h1>Publish a fic collection</h1>
-      <ol class="tutorial-steps">
-        <li><strong>Set up the collection.</strong><span>The gear beside <em>Collection</em> names your pack. Its namespace is permanent once you publish, so choose it deliberately.</span></li>
-        <li><strong>Add your authors.</strong><span>Every pseud gets a hidden permanent ID. Rename an author later and nothing breaks.</span></li>
-        <li><strong>Write.</strong><span>The <em>Write</em> tab is your manuscript. Add chapters down the left side; word counts keep themselves up to date.</span></li>
-        <li><strong>Fill in Details.</strong><span>Rating, archive warnings, tags and summary &mdash; the metadata readers browse on the Shard Market.</span></li>
-        <li><strong>Check Preview and Validation.</strong><span>Preview renders the work card the way the game will. Errors block the build; warnings are only advice.</span></li>
-        <li><strong>Save your project, then build the ZIP.</strong><span><em>Save project</em> writes a <code>.aoopack.json</code> file. Build makes the mod you upload to Nexus.</span></li>
-      </ol>
-      <p class="tutorial-note"><strong>Keep that <code>.aoopack.json</code> somewhere safe.</strong> Re-import it whenever you publish an update. Rebuilding a collection from scratch generates new internal IDs, and readers lose everything they recovered from the old version.</p>
-      <div class="dialog-actions"><button value="close" class="ghost">Explore on my own</button><button value="close" id="startTourBtn" class="primary">Take the tour</button></div>
-    </form>
-  </dialog>
+  <div id="welcomeScreen" class="welcome" hidden>
+    <div class="welcome-inner">
+      <div class="welcome-head">
+        <svg class="welcome-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <defs><linearGradient id="wmg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="currentColor" stop-opacity=".85"/>
+            <stop offset="1" stop-color="currentColor" stop-opacity=".25"/>
+          </linearGradient></defs>
+          <path d="M8 46 L32 8 L56 46" fill="none" stroke="url(#wmg)" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M18 46 L32 24 L46 46" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45"/>
+          <line x1="6" y1="54" x2="58" y2="54" stroke="currentColor" stroke-width="2" opacity=".7"/>
+        </svg>
+        <div>
+          <span class="eyebrow">Archive of Our Overwrites</span>
+          <h1>Build a fic collection</h1>
+          <p class="welcome-sub">Everything happens on your machine. Nothing is uploaded, and there is no account.</p>
+        </div>
+      </div>
+
+      <div class="welcome-grid">
+        <button class="welcome-card" data-welcome="blank">
+          <span class="welcome-card-title">Start writing</span>
+          <span class="welcome-card-text">A blank collection with one author and one work. Best if you already know what you are making.</span>
+        </button>
+        <button class="welcome-card" data-welcome="tour">
+          <span class="welcome-card-title">Take the tour</span>
+          <span class="welcome-card-text">Ten steps through the real interface, from naming a collection to building the mod.</span>
+        </button>
+        <button class="welcome-card" data-welcome="example">
+          <span class="welcome-card-title">Open an example</span>
+          <span class="welcome-card-text">Four finished collections to read and pull apart. The fastest way to see what a pack looks like.</span>
+        </button>
+        <button class="welcome-card" data-welcome="import">
+          <span class="welcome-card-title">Import a project</span>
+          <span class="welcome-card-text">Continue from a <code>.aoopack.json</code> you saved earlier, keeping its internal IDs intact.</span>
+        </button>
+      </div>
+
+      <div id="welcomeExamples" class="welcome-examples" hidden>
+        <button data-example="oneshot"><strong>Inactive one-shot</strong><small>One chapter, archived comments</small></button>
+        <button data-example="complete"><strong>Complete multi-chapter</strong><small>Finished, immediately readable</small></button>
+        <button data-example="active"><strong>Active timed WIP</strong><small>Chapters unlock on a schedule</small></button>
+        <button data-example="collection"><strong>Multi-author collection</strong><small>Three authors, three works</small></button>
+      </div>
+
+      <p class="welcome-note"><strong>Your browser is not a backup.</strong> The tool autosaves here, but a
+      <code>.aoopack.json</code> saved to disk is the only thing that lets you publish an update your readers
+      keep their library through. Save one early.</p>
+
+      <button id="welcomeClose" class="ghost welcome-close">Skip</button>
+    </div>
+  </div>
   <script type="module" src="app.js"></script>
 </body>
 </html>

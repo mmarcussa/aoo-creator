@@ -456,3 +456,43 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
   --on-accent:#0a0c10;--shadow:0 12px 30px #00000055}
 [data-theme=night] .app-header{box-shadow:0 6px 18px #00000040}
 [data-theme=night] .work-state.error{box-shadow:none}
+
+/* ================= first-run welcome =================
+   Full screen, drawn not painted: the mark is inline SVG using currentColor,
+   so it follows every theme and costs nothing in file size.
+   ===================================================== */
+.welcome{position:fixed;inset:0;z-index:200;display:grid;place-items:center;overflow:auto;padding:2rem 1.5rem;
+  background:radial-gradient(1100px 600px at 50% -10%,color-mix(in srgb,var(--cyan) 9%,transparent),transparent),
+             color-mix(in srgb,var(--bg) 97%,transparent);
+  animation:welcome-in 220ms ease-out}
+.welcome[hidden]{display:none}
+@keyframes welcome-in{from{opacity:0}to{opacity:1}}
+.welcome-inner{width:min(920px,100%);display:grid;gap:1.4rem}
+.welcome-head{display:flex;align-items:flex-start;gap:1.1rem}
+.welcome-mark{width:64px;height:64px;flex:none;color:var(--yellow)}
+.welcome-head h1{margin:.2rem 0 .35rem;font-size:1.9rem;color:var(--text)}
+.welcome-sub{margin:0;color:var(--muted);max-width:56ch;line-height:1.6}
+
+.welcome-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+.welcome-card{display:grid;gap:.35rem;align-content:start;text-align:left;padding:1rem 1.1rem;
+  border:1px solid var(--line);background:var(--panel);border-radius:3px;transition:border-color 120ms ease,background-color 120ms ease}
+.welcome-card:hover{border-color:var(--yellow);background:var(--panel2)}
+.welcome-card-title{font-size:1rem;font-weight:800;color:var(--text)}
+.welcome-card-text{font-size:.85rem;font-weight:400;color:var(--muted);line-height:1.55}
+
+.welcome-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem;
+  padding:.7rem;border:1px solid var(--line);border-left:3px solid var(--cyan);background:var(--panel)}
+.welcome-examples button{display:grid;gap:.15rem;text-align:left;padding:.55rem .7rem;border-color:transparent}
+.welcome-examples button:hover{background:var(--panel2)}
+.welcome-examples strong{color:var(--text);font-size:.88rem}
+.welcome-examples small{color:var(--muted);font-weight:400}
+
+.welcome-note{margin:0;padding:.85rem 1rem;border-left:3px solid var(--yellow);
+  background:color-mix(in srgb,var(--yellow) 8%,transparent);color:var(--muted);font-size:.88rem;line-height:1.6}
+.welcome-note strong{color:var(--yellow)}
+.welcome-note code,.welcome-card-text code{padding:.05rem .3rem;border-radius:2px;
+  background:color-mix(in srgb,var(--cyan) 14%,transparent);color:var(--cyan);font-size:.92em}
+.welcome-close{justify-self:end}
+
+@media(max-width:760px){.welcome-grid,.welcome-examples{grid-template-columns:1fr}
+  .welcome-head{flex-direction:column;gap:.6rem}}
