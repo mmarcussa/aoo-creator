@@ -94,6 +94,18 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   those looks are not palettes. Text on solid accents moved to an `--on-accent` token, since
   the old `var(--bg)` assumption breaks where a theme's background does not contrast with its
   accent.
+- **A four-role type system.** The base stack used to be `"Segoe UI", Inter, system-ui` — one
+  face for everything, naming the font most associated with generic interfaces. It is now four
+  tokens: a condensed display face for headings, labels and tabs; a humanist face for body; a
+  serif for prose; and a monospace for numerals, counts and identifiers, so data reads as data.
+  Themes override the tokens rather than only `body`, so a terminal theme gets a terminal voice
+  in its headings too. System faces only — the file still fetches nothing.
+- **One orchestrated arrival.** The welcome screen reveals in a stagger — mark, heading, a rule
+  sweeping out under it, then the four cards in sequence. One well-made moment at first open
+  rather than motion scattered through a tool people write in for hours.
+- **Atmosphere in the chrome.** Twelve themes layer gradients behind the interface. Deliberately
+  never behind the manuscript, and never on a surface that carries text, so the contrast audit
+  keeps its measurements.
 - **Motion, restrained.** Panes rise slightly on switch, dialogs and the tour card scale in,
   status messages flash on change, and hover states settle over 120ms. Only colour, shadow,
   transform and opacity animate, so nothing triggers layout. The manuscript, works list and
