@@ -432,3 +432,27 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
 [data-theme=gyaru] .editor-tabs button{border-radius:0;padding-left:.8rem;padding-right:.8rem}
 /* the rail entries are wide rows, not pills */
 [data-theme=gyaru] .nav-item,[data-theme=gyaru] .strip-item{border-radius:10px;padding-left:.8rem}
+
+/* ================= reworked base themes =================
+   High contrast is deliberately untouched: it exists to be legible, not to
+   have character. AOO gets a polish, not a personality.
+   ======================================================== */
+
+/* --- AOO: light touch. Slightly stronger lines and a more legible muted
+       tone, because this is the one people stare at for hours --- */
+[data-theme=aoo]{--panel:#101a1f;--panel2:#162127;--line:#274c51;--muted:#93aba9}
+
+/* --- Paper (value stays "light"): warm ground, dark ink, for long reading --- */
+[data-theme=light]{color-scheme:light;
+  --bg:#f4efe6;--panel:#fffcf7;--panel2:#efe8db;--line:#d8ccb8;--line2:#c9b2a6;
+  --text:#241f1a;--muted:#6f6558;--cyan:#0f6f78;--yellow:#9c6900;--red:#a8322f;--green:#2f7a4f;
+  --on-accent:#fffcf7;--shadow:0 14px 34px #2a1f1422}
+[data-theme=light] .manuscript{background:#fffdf9}
+
+/* --- Midnight (value stays "night"): dim and desaturated, for late writing --- */
+[data-theme=night]{color-scheme:dark;
+  --bg:#0a0c10;--panel:#10141a;--panel2:#161b23;--line:#252c39;--line2:#3a2b33;
+  --text:#b9c1cf;--muted:#6d7688;--cyan:#6295b9;--yellow:#b99753;--red:#b8636e;--green:#5fa07a;
+  --on-accent:#0a0c10;--shadow:0 12px 30px #00000055}
+[data-theme=night] .app-header{box-shadow:0 6px 18px #00000040}
+[data-theme=night] .work-state.error{box-shadow:none}

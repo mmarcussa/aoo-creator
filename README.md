@@ -68,6 +68,11 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   capped at a 74-character measure so prose is comfortable to read while typing. All of it
   is token-based, so the AOO, neutral dark, light and high-contrast themes follow without
   separate rules.
+- **Base themes reworked.** Light became **Paper** — warm ground and dark ink, better for
+  reading prose for hours than clinical grey. Neutral dark became **Midnight** — dim and
+  desaturated for late writing. High contrast is deliberately untouched: it exists to be
+  legible, not to have character. AOO got a polish, not a personality: stronger lines and a
+  more legible muted tone. Stored theme values are unchanged, so existing preferences resolve.
 - **Eight themes.** The original four (AOO, neutral dark, light, high contrast) plus Windows
   95, The Matrix, BIOS setup and Gyaru. Each keeps the four accent roles distinguishable, so
   the primary action never looks like the destructive one. Windows 95 and BIOS also carry
