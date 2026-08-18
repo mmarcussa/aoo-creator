@@ -69,8 +69,10 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   capped at a 74-character measure so prose is comfortable to read while typing. All of it
   is token-based, so the AOO, neutral dark, light and high-contrast themes follow without
   separate rules.
-- **Twenty-one themes**, grouped in the picker (Core / Archive / Old hardware / Aesthetic /
-  Uneasy). Every one is audited rather than eyeballed: `check-themes.py` walks all of them
+- **Twenty-four themes**, grouped in the picker (Core / Archive / Old hardware / Aesthetic /
+  Uneasy / Design). Three of them are structural rather than palettes: Frutiger Aero is
+  gloss and depth, Bauhaus flat is the deliberate absence of both, and Acid neo-brutalism
+  is thick rules with unblurred offsets. Every one is audited rather than eyeballed: `check-themes.py` walks all of them
   and computes WCAG contrast for thirteen pairs that have actually broken before.
 - **Base themes reworked.** Light became **Paper** — warm ground and dark ink, better for
   reading prose for hours than clinical grey. Neutral dark became **Midnight** — dim and
