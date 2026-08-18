@@ -61,7 +61,13 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   stat can no longer fall below the number of archived comments.
 - **Fresh projects no longer open on a validation error** — the badge reads `–` until the
   first edit.
-- **Restyled** — calmer panels, tighter fields, prose set in a serif.
+- **Restyled** — calmer panels, tighter fields, prose set in a serif. A later visual pass
+  added depth to the chrome, gradient selection states, anchored tabs, and fixed accent
+  roles: yellow for the primary action and current selection, cyan for system and counts,
+  red for section labels and destructive actions, green for ready. The writing column is
+  capped at a 74-character measure so prose is comfortable to read while typing. All of it
+  is token-based, so the AOO, neutral dark, light and high-contrast themes follow without
+  separate rules.
 - **Tutorial rewritten** for the new flow, including the rule that matters most: keep your
   `.aoopack.json` and re-import it to publish updates, or readers lose everything they
   recovered from the old version.
