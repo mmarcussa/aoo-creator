@@ -203,6 +203,8 @@
   <datalist id="characterPresets"><option value="V"><option value="Johnny Silverhand"><option value="Kerry Eurodyne"><option value="Judy Alvarez"><option value="Panam Palmer"></datalist>
   <datalist id="tagPresets"><option value="Slow Burn"><option value="Angst"><option value="Found Family"><option value="Fluff"><option value="Alternate Universe"><option value="Unreliable Narrator"></datalist>
 
+  <div id="tutorialRoot"></div>
+
   <dialog id="confirmDialog">
     <form method="dialog" class="dialog-card confirm-card">
       <span class="eyebrow" id="confirmEyebrow">Confirm</span>
@@ -228,7 +230,7 @@
         <li><strong>Save your project, then build the ZIP.</strong><span><em>Save project</em> writes a <code>.aoopack.json</code> file. Build makes the mod you upload to Nexus.</span></li>
       </ol>
       <p class="tutorial-note"><strong>Keep that <code>.aoopack.json</code> somewhere safe.</strong> Re-import it whenever you publish an update. Rebuilding a collection from scratch generates new internal IDs, and readers lose everything they recovered from the old version.</p>
-      <div class="dialog-actions"><button value="close" class="primary">Start writing</button></div>
+      <div class="dialog-actions"><button value="close" class="ghost">Explore on my own</button><button value="close" id="startTourBtn" class="primary">Take the tour</button></div>
     </form>
   </dialog>
   <script type="module" src="app.js"></script>

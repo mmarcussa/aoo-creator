@@ -281,3 +281,16 @@ button,input,select,textarea,.badge{border-radius:2px}
 .strip-num{border-radius:2px}
 .badge,.attention,.backup-state{border-radius:2px}
 .icon-button{border-radius:2px}
+
+/* ================= guided tour ================= */
+#tutorialRoot:empty{display:none}
+.tour-highlight{position:fixed;z-index:151;border:2px solid var(--yellow);border-radius:2px;pointer-events:none;
+  box-shadow:0 0 0 9999px #020607d9,0 0 24px color-mix(in srgb,var(--yellow) 45%,transparent);transition:all 180ms ease}
+.tour-card{position:fixed;z-index:152;width:min(360px,calc(100vw - 32px));padding:1.1rem 1.2rem;
+  border:1px solid var(--line);border-top:3px solid var(--yellow);border-radius:3px;
+  background:var(--panel);box-shadow:0 24px 70px #000a;pointer-events:auto}
+.tour-card h2{margin:.35rem 0 .5rem;font-size:1.08rem;color:var(--text)}
+.tour-card p{margin:0;color:var(--muted);line-height:1.6;font-size:.9rem}
+.tour-card footer{display:flex;align-items:center;gap:.4rem;margin-top:1.1rem}
+.tour-card footer button{padding:.4rem .7rem;font-size:.8rem}
+.tour-count{margin-right:auto;font-size:.7rem;font-weight:800;letter-spacing:.1em;color:var(--cyan)}

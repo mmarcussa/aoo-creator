@@ -68,7 +68,12 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   capped at a 74-character measure so prose is comfortable to read while typing. All of it
   is token-based, so the AOO, neutral dark, light and high-contrast themes follow without
   separate rules.
-- **Tutorial rewritten** for the new flow, including the rule that matters most: keep your
+- **Guided tour.** The tutorial is now interactive, following the pattern from Eddyline
+  Foundry: a dimmed backdrop, a highlight box around the element being described, and a
+  positioned card with Back, Next, Skip and a step counter. Ten steps, switching tabs as it
+  goes, ending on the build button. Arrow keys navigate; Escape exits. The first-run card
+  now offers the tour or exploring alone, and the Tutorial button restarts it any time.
+- **Tutorial text rewritten** for the new flow, including the rule that matters most: keep your
   `.aoopack.json` and re-import it to publish updates, or readers lose everything they
   recovered from the old version.
 - **Multiple collections.** The tool now keeps a library of collections instead of a single

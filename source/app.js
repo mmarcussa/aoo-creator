@@ -30,6 +30,32 @@ function save(message="Autosaved in this browser."){clearTimeout(saveTimer);save
   renderBackupState();
 },180)}
 function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-text ${kind}`}
+const tourSteps=[
+ {tab:"write",sel:"#collectionSelect",title:"Your collections",text:"Every collection you build lives here. Switching keeps each one\u2019s works, authors and settings separate. New starts another; nothing is lost when you do."},
+ {tab:"write",sel:"#projectSettingsBtn",title:"Name it carefully",text:"Settings holds the collection name and its namespace. The namespace is permanent once you publish \u2014 changing it later turns an update into a separate, competing mod."},
+ {tab:"write",sel:"#authorSummary",title:"Your authors",text:"Pseuds are in-world handles, up to 24 characters. Each gets a hidden permanent ID, so renaming an author never breaks anything."},
+ {tab:"write",sel:"#workList",title:"Works and their state",text:"Each work shows its author and chapter count, plus a dot: green ready, amber warnings, red errors. The heading counts anything still needing a fix."},
+ {tab:"write",sel:"#chapterStrip",title:"Write here",text:"Add chapters with the plus, then write in the panel beside this list. Word counts keep themselves up to date as you type."},
+ {tab:"details",sel:"#workForm",title:"Metadata readers see",text:"Rating, archive warnings, tags and summary. Release timing only appears on a work in progress, and the word count is counted for you."},
+ {tab:"preview",sel:"#aooPreview",title:"How it looks in game",text:"The work card as Archive of Our Overwrites will render it, including long titles and large tag walls."},
+ {tab:"validate",sel:"#validationList",title:"Errors block the build",text:"Every problem names the work and what to fix. Errors stop the export on purpose; warnings are only advice."},
+ {tab:"write",sel:"#backupState",title:"This is the one that matters",text:"Autosave lives only in this browser. Save project writes a .aoopack.json \u2014 keep it. Re-importing that file is the only way to publish an update your readers keep their library through."},
+ {tab:"write",sel:"#buildBtn",title:"Build the mod",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
+];
+let tourOn=false,tourAt=0;
+function startTour(){tourOn=true;tourAt=0;renderTourStep()}
+function endTour(){tourOn=false;tourAt=0;$("#tutorialRoot").innerHTML="";localStorage.setItem("aoo-creator-tutorial-seen","1");status("Tour finished. Reopen it any time from Tutorial.")}
+function renderTourStep(){
+  if(!tourOn)return;const step=tourSteps[tourAt];if(!step)return endTour();
+  if(activeTab!==step.tab){showTab(step.tab);return setTimeout(renderTourStep,60)}
+  const target=document.querySelector(step.sel);
+  if(!target||!target.getClientRects().length){tourAt+=1;return renderTourStep()}
+  const r=target.getBoundingClientRect(),pad=6,cardW=Math.min(360,innerWidth-32),cardH=250;
+  const below=r.bottom+cardH<innerHeight;
+  const top=below?Math.min(innerHeight-cardH-12,r.bottom+12):Math.max(12,r.top-cardH-12);
+  const left=Math.min(innerWidth-cardW-16,Math.max(16,r.left));
+  $("#tutorialRoot").innerHTML=`<div class="tour-highlight" style="left:${Math.max(0,r.left-pad)}px;top:${Math.max(0,r.top-pad)}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px"></div><article class="tour-card" role="dialog" aria-modal="true" style="left:${left}px;top:${top}px"><span class="eyebrow">Guided tour</span><h2>${esc(step.title)}</h2><p>${esc(step.text)}</p><footer><span class="tour-count">${tourAt+1} / ${tourSteps.length}</span><button data-tour="skip" class="ghost">Skip</button><button data-tour="back" class="ghost" ${tourAt===0?"disabled":""}>Back</button><button data-tour="next" class="primary">${tourAt===tourSteps.length-1?"Finish":"Next"}</button></footer></article>`;
+}
 function ask(body,{title="Are you sure?",eyebrow="Confirm",okLabel="Confirm",danger=false}={}){const d=$("#confirmDialog");$("#confirmEyebrow").textContent=eyebrow;$("#confirmTitle").textContent=title;$("#confirmBody").textContent=body;const ok=$("#confirmOk");ok.textContent=okLabel;ok.className=danger?"danger":"primary";d.showModal();return new Promise(resolve=>d.addEventListener("close",()=>resolve(d.returnValue==="ok"),{once:true}))}
 function currentWork(){return project.works.find(w=>w.id===selectedWorkId)||null}
 const countWords=t=>{const v=String(t||"").trim();return v?v.split(/\s+/).length:0};
@@ -110,7 +136,14 @@ $("#duplicateWorkBtn").addEventListener("click",()=>{const source=currentWork();
 $("#deleteWorkBtn").addEventListener("click",async()=>{const w=currentWork();if(!w)return;const yes=await ask(`\u201c${w.title||"Untitled work"}\u201d and all of its chapters will be removed.`,{title:"Delete work?",okLabel:"Delete",danger:true});if(!yes)return;mutate(()=>{project.works=project.works.filter(x=>x.id!==w.id);selectedWorkId=project.works[0]?.id||null;selectedChapterId=currentWork()?.chapters[0]?.id||null},{full:true,message:"Work deleted."})});
 $("#projectSettingsBtn").addEventListener("click",()=>showTab("project"));$("#workSearch").addEventListener("input",renderWorks);$("#runValidationBtn").addEventListener("click",renderValidation);
 $("#previewWidth").addEventListener("change",event=>$("#aooPreview").classList.toggle("narrow",event.target.value==="narrow"));
-$("#tutorialBtn").addEventListener("click",()=>$("#tutorialDialog").showModal());
+$("#tutorialBtn").addEventListener("click",startTour);
+$("#startTourBtn").addEventListener("click",()=>setTimeout(startTour,120));
+$("#tutorialRoot").addEventListener("click",event=>{const a=event.target.closest("[data-tour]")?.dataset.tour;if(!a)return;
+  if(a==="skip")return endTour();
+  if(a==="back"){tourAt=Math.max(0,tourAt-1);return renderTourStep()}
+  tourAt+=1;tourAt>=tourSteps.length?endTour():renderTourStep()});
+addEventListener("resize",()=>{if(tourOn)renderTourStep()});
+addEventListener("keydown",event=>{if(!tourOn)return;if(event.key==="Escape"){event.preventDefault();endTour()}if(event.key==="ArrowRight"){event.preventDefault();tourAt+=1;tourAt>=tourSteps.length?endTour():renderTourStep()}if(event.key==="ArrowLeft"){event.preventDefault();tourAt=Math.max(0,tourAt-1);renderTourStep()}});
 $("#themeSelect").addEventListener("change",event=>{document.documentElement.dataset.theme=event.target.value;localStorage.setItem(THEME,event.target.value)});
 $("#exampleSelect").addEventListener("change",event=>{if(!event.target.value)return;snapshot();library.projects[project.id]=project;adoptCollection(withId(getExample(event.target.value)),"Example added as a new collection.");event.target.value=""});
 $("#saveProjectBtn").addEventListener("click",()=>{download(new Blob([JSON.stringify(project,null,2)],{type:"application/json"}),`${project.pack.namespace||"aoo-project"}.aoopack.json`);pendingFileSave=true;save("Project file written. Keep it — you need it to publish updates.")});
