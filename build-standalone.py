@@ -1,0 +1,81 @@
+# Builds a dependency-free, single-file AOO Creator that runs on file:// (double-click).
+# Source of truth: dist/AOO-Creator-v0.1.0-build2/  (left untouched)
+import base64, pathlib, re, sys
+
+SRC = pathlib.Path(sys.argv[1])
+OUT = pathlib.Path(sys.argv[2])
+
+html  = (SRC / "index.html").read_text(encoding="utf-8")
+css   = (SRC / "styles.css").read_text(encoding="utf-8")
+core  = (SRC / "core.js").read_text(encoding="utf-8")
+app   = (SRC / "app.js").read_text(encoding="utf-8")
+logo  = base64.b64encode((SRC / "assets" / "aoo-logo.png").read_bytes()).decode("ascii")
+
+# --- de-module core.js: strip the `export ` keyword only in declaration position ---
+core_n, n_core = re.subn(r'(?m)^export\s+(?=(const|let|var|function|class|async)\b)', '', core)
+if re.search(r'(?m)^\s*export\b', core_n):
+    sys.exit("FAIL: unhandled export form left in core.js")
+
+# --- de-module app.js: drop the import line ---
+app_n, n_imp = re.subn(r'(?m)^import\s*\{[^}]*\}\s*from\s*["\']\./core\.js["\'];?\s*\n', '', app)
+if n_imp != 1:
+    sys.exit(f"FAIL: expected exactly 1 import in app.js, removed {n_imp}")
+if re.search(r'(?m)^\s*(import|export)\b', app_n):
+    sys.exit("FAIL: unhandled import/export left in app.js")
+
+# --- file:// hardening: storage may be denied, randomUUID may be absent ---
+for name in ("core", "app"):
+    pass
+core_n = core_n.replace("crypto.randomUUID()", "aooUUID()")
+app_n  = app_n.replace("crypto.randomUUID()", "aooUUID()")
+n_ls = len(re.findall(r'\blocalStorage\.', app_n))
+app_n = re.sub(r'\blocalStorage\.', 'AOOStore.', app_n)
+if n_ls < 6:
+    sys.exit(f"FAIL: expected at least 6 localStorage uses, found {n_ls}")
+
+PRELUDE = '''/* --- single-file shims: keep the app alive on file:// --- */
+var AOOStore = (function () {
+  var mem = {}, ok = false;
+  try { var k = "__aoo_probe__"; localStorage.setItem(k, "1"); localStorage.removeItem(k); ok = true; } catch (e) { ok = false; }
+  return ok ? localStorage : {
+    getItem: function (k) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+    setItem: function (k, v) { mem[k] = String(v); },
+    removeItem: function (k) { delete mem[k]; }
+  };
+})();
+function aooUUID() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  var b = new Uint8Array(16);
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) crypto.getRandomValues(b);
+  else for (var i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  var h = []; for (var j = 0; j < 16; j++) h.push((b[j] + 0x100).toString(16).slice(1));
+  return h.slice(0,4).join("")+"-"+h.slice(4,6).join("")+"-"+h.slice(6,8).join("")+"-"+h.slice(8,10).join("")+"-"+h.slice(10,16).join("");
+}
+if (typeof structuredClone !== "function") {
+  var structuredClone = function (v) { return JSON.parse(JSON.stringify(v)); };
+}
+'''
+
+bundle = "(function(){\n\"use strict\";\n" + PRELUDE + "\n/* ===== core.js ===== */\n" + core_n + "\n/* ===== app.js ===== */\n" + app_n + "\n})();\n"
+
+for frag, label in ((css, "css"), (bundle, "js")):
+    if "</script" in frag.lower() or "</style" in frag.lower():
+        sys.exit(f"FAIL: {label} contains a tag-closing sequence unsafe to inline")
+
+# --- rewrite index.html: inline stylesheet, logo, script ---
+html_n, n1 = re.subn(r'<link rel="stylesheet" href="styles\.css">',
+                     lambda m: "<style>\n" + css + "\n</style>", html, count=1)
+html_n, n2 = re.subn(r'src="assets/aoo-logo\.png"',
+                     lambda m: 'src="data:image/png;base64,' + logo + '"', html_n, count=1)
+html_n, n3 = re.subn(r'<script type="module" src="app\.js"></script>',
+                     lambda m: "<script>\n" + bundle + "</script>", html_n, count=1)
+if (n1, n2, n3) != (1, 1, 1):
+    sys.exit(f"FAIL: html rewrite counts were {(n1, n2, n3)}, expected (1, 1, 1)")
+
+if "styles.css" in html_n or 'src="app.js"' in html_n or "assets/aoo-logo.png" in html_n:
+    sys.exit("FAIL: an external reference survived inlining")
+
+OUT.write_text(html_n, encoding="utf-8")
+print(f"OK  exports stripped: {n_core}  localStorage rewired: {n_ls}")
+print(f"OK  wrote {OUT}  ({OUT.stat().st_size:,} bytes)")

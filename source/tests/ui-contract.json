@@ -1,0 +1,112 @@
+{
+  "bindings": {
+    "data-bind": [
+      "active",
+      "authorId",
+      "category",
+      "complete",
+      "notesBefore",
+      "pseud",
+      "rating",
+      "releaseIntervalDays",
+      "summary",
+      "title",
+      "warning"
+    ],
+    "data-bind-list": [
+      "characters",
+      "fandoms",
+      "relationships",
+      "tags"
+    ],
+    "data-bind-stat": [
+      "comments",
+      "props",
+      "reads",
+      "stashes"
+    ],
+    "data-pack": [
+      "creator",
+      "credits",
+      "description",
+      "license",
+      "name",
+      "namespace",
+      "nexus",
+      "version"
+    ],
+    "data-chapter-field": [
+      "body",
+      "notesAfter",
+      "notesBefore",
+      "price",
+      "title"
+    ],
+    "data-comment-field": [
+      "body",
+      "chapterIndex",
+      "date",
+      "user"
+    ],
+    "data-author-field": [
+      "pseud",
+      "status"
+    ]
+  },
+  "idsUsed": [
+    "addAuthorBtn",
+    "addChapterBtn",
+    "addCommentBtn",
+    "addWorkBtn",
+    "aooPreview",
+    "authorRows",
+    "authorSearch",
+    "authorSelect",
+    "authorSummary",
+    "buildBtn",
+    "chapterCount",
+    "chapterEditor",
+    "chapterStrip",
+    "chapterWords",
+    "collectionSelect",
+    "commentCount",
+    "commentList",
+    "confirmBody",
+    "confirmDialog",
+    "confirmEyebrow",
+    "confirmOk",
+    "confirmTitle",
+    "deleteCollectionBtn",
+    "deleteWorkBtn",
+    "detailsHeading",
+    "duplicateWorkBtn",
+    "emptyState",
+    "exampleSelect",
+    "importBtn",
+    "importFile",
+    "issueCount",
+    "manageAuthorsBtn",
+    "newProjectBtn",
+    "previewWidth",
+    "projectForm",
+    "projectSettingsBtn",
+    "projectSummary",
+    "releaseIntervalField",
+    "releaseModelField",
+    "runValidationBtn",
+    "saveProjectBtn",
+    "statusBar",
+    "tagTotal",
+    "themeSelect",
+    "tutorialBtn",
+    "tutorialDialog",
+    "validationList",
+    "validationSummary",
+    "wordCountField",
+    "workForm",
+    "workHeading",
+    "workList",
+    "workSearch"
+  ],
+  "idsMissing": []
+}
