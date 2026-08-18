@@ -95,6 +95,8 @@
     "projectForm",
     "projectSettingsBtn",
     "projectSummary",
+    "ratingChips",
+    "ratingValue",
     "readyState",
     "releaseIntervalField",
     "releaseModelField",

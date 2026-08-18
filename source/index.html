@@ -139,61 +139,108 @@
           <div><span class="eyebrow">Work metadata</span><h1 id="detailsHeading">Untitled work</h1></div>
           <div class="pane-actions"><button id="duplicateWorkBtn" class="ghost">Duplicate</button><button id="deleteWorkBtn" class="danger">Delete</button></div>
         </div>
-        <form id="workForm" class="form-grid" autocomplete="off">
-          <label class="span-2">Title <span class="counter" data-counter="title"></span>
-            <input data-bind="title" maxlength="120" required>
-          </label>
-          <label>Author
-            <select data-bind="authorId" id="authorSelect"></select>
-          </label>
-          <label>Pseud shown on work <span class="counter" data-counter="pseud"></span>
-            <input data-bind="pseud" maxlength="24" required>
-          </label>
-          <label>Rating
-            <select data-bind="rating"><option value="General">General</option><option value="Teen">Teen And Up</option><option value="Mature">Mature</option><option value="Explicit">Explicit</option><option value="NotRated">Not Rated</option></select>
-          </label>
-          <label>Category
-            <select data-bind="category"><option>Gen</option><option>F/F</option><option>F/M</option><option>M/M</option><option>Multi</option><option>Other</option></select>
-          </label>
-          <label>Archive warning
-            <select data-bind="warning"><option value="None">No Archive Warnings Apply</option><option value="ChooseNotToWarn">Creator Chose Not To Use Archive Warnings</option><option value="GraphicViolence">Graphic Depictions Of Violence</option><option value="MajorDeath">Major Character Death</option><option value="Underage">Underage</option><option value="NonCon">Rape/Non-Con</option></select>
-          </label>
-          <label>Status
-            <select data-bind="complete"><option value="true">Complete</option><option value="false">Work in progress</option></select>
-          </label>
-          <label id="releaseModelField">Release model
-            <select data-bind="active"><option value="false">Immediate availability</option><option value="true">Timed active-author release</option></select>
-          </label>
-          <label id="releaseIntervalField">Release interval (days)
-            <input data-bind="releaseIntervalDays" type="number" min="3" max="365" step="1">
-            <small>Only used by an incomplete timed work whose registered author is active; minimum 3 days.</small>
-          </label>
-          <label>Words <span class="counter">auto</span>
-            <input id="wordCountField" type="text" readonly tabindex="-1" aria-readonly="true">
-            <small>Counted from chapter text as you write.</small>
-          </label>
-          <label class="span-2">Summary <span class="counter" data-counter="summary"></span>
-            <textarea data-bind="summary" maxlength="140" rows="3"></textarea>
-            <small>Market cards allow 140 characters; preview shows the final wrap.</small>
-          </label>
-          <fieldset class="span-2 tags-fieldset">
-            <legend>AO3 tags <span id="tagTotal" class="badge">0 / 100</span></legend>
-            <label>Fandoms <input data-bind-list="fandoms" list="fandomPresets" placeholder="Comma-separated"></label>
-            <label>Relationships <input data-bind-list="relationships" list="relationshipPresets" placeholder="Comma-separated"></label>
-            <label>Characters <input data-bind-list="characters" list="characterPresets" placeholder="Comma-separated"></label>
-            <label>Additional tags <input data-bind-list="tags" list="tagPresets" placeholder="Comma-separated"></label>
-            <small class="span-2">Each tag may be 80 characters. The in-game work page collapses large tag walls behind “Show all”.</small>
-          </fieldset>
-          <fieldset class="span-2 stats-fieldset">
-            <legend>Archive stats</legend>
-            <label>Props <input data-bind-stat="props" type="number" min="0"></label>
-            <label>Reads <input data-bind-stat="reads" type="number" min="0"></label>
-            <label>Stashes <input data-bind-stat="stashes" type="number" min="0"></label>
-            <label>Comments <input data-bind-stat="comments" type="number" min="0"><small>Never below archived comments.</small></label>
-          </fieldset>
-          <label class="span-2">Author notes before work
-            <textarea data-bind="notesBefore" rows="3" placeholder="Optional"></textarea>
-          </label>
+        <form id="workForm" class="record" autocomplete="off">
+
+          <section class="record-block">
+            <h2 class="record-rubric">Byline</h2>
+            <div class="record-grid">
+              <label class="span-2">Title <span class="counter" data-counter="title"></span>
+                <input data-bind="title" maxlength="120" required>
+              </label>
+              <label>Author
+                <select data-bind="authorId" id="authorSelect"></select>
+              </label>
+              <label>Pseud shown on work <span class="counter" data-counter="pseud"></span>
+                <input data-bind="pseud" maxlength="24" required>
+              </label>
+            </div>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Rating and warnings</h2>
+            <div class="rating-row">
+              <div class="rating-chips" id="ratingChips" role="radiogroup" aria-label="Rating">
+                <button type="button" data-rating="General"><b>G</b><span>General</span></button>
+                <button type="button" data-rating="Teen"><b>T</b><span>Teen and up</span></button>
+                <button type="button" data-rating="Mature"><b>M</b><span>Mature</span></button>
+                <button type="button" data-rating="Explicit"><b>E</b><span>Explicit</span></button>
+                <button type="button" data-rating="NotRated"><b>N</b><span>Not rated</span></button>
+              </div>
+              <input data-bind="rating" id="ratingValue" class="visually-bound" tabindex="-1" aria-hidden="true">
+            </div>
+            <div class="record-grid">
+              <label>Archive warning
+                <select data-bind="warning"><option value="None">No Archive Warnings Apply</option><option value="ChooseNotToWarn">Creator Chose Not To Use Archive Warnings</option><option value="GraphicViolence">Graphic Depictions Of Violence</option><option value="MajorDeath">Major Character Death</option><option value="Underage">Underage</option><option value="NonCon">Rape/Non-Con</option></select>
+              </label>
+              <label>Category
+                <select data-bind="category"><option>Gen</option><option>F/F</option><option>F/M</option><option>M/M</option><option>Multi</option><option>Other</option></select>
+              </label>
+              <label>Status
+                <select data-bind="complete"><option value="true">Complete</option><option value="false">Work in progress</option></select>
+              </label>
+              <label id="releaseModelField">Release model
+                <select data-bind="active"><option value="false">Immediate availability</option><option value="true">Timed active-author release</option></select>
+              </label>
+              <label id="releaseIntervalField">Release interval (days)
+                <input data-bind="releaseIntervalDays" type="number" min="3" max="365" step="1">
+                <small>Only used by an incomplete timed work whose registered author is active; minimum 3 days.</small>
+              </label>
+            </div>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Summary <span class="counter" data-counter="summary"></span></h2>
+            <textarea data-bind="summary" maxlength="140" rows="3" class="record-summary"></textarea>
+            <small>Market cards allow 140 characters; the preview shows the final wrap.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Tags <span id="tagTotal" class="badge">0 / 100</span></h2>
+            <div class="tag-fields">
+              <div class="tag-field" data-tagfield="fandoms">
+                <span class="tag-kind">Fandoms</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="fandomPresets" placeholder="Type a fandom, press Enter">
+                <input data-bind-list="fandoms" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="relationships">
+                <span class="tag-kind">Relationships</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="relationshipPresets" placeholder="Type a pairing, press Enter">
+                <input data-bind-list="relationships" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="characters">
+                <span class="tag-kind">Characters</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="characterPresets" placeholder="Type a character, press Enter">
+                <input data-bind-list="characters" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="tags">
+                <span class="tag-kind">Additional tags</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="tagPresets" placeholder="Type a tag, press Enter">
+                <input data-bind-list="tags" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+            </div>
+            <small>Each tag may be 80 characters. The in-game work page collapses large tag walls behind &ldquo;Show all&rdquo;.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">How the archive received it</h2>
+            <div class="reception">
+              <label><span>Props</span><input data-bind-stat="props" type="number" min="0"></label>
+              <label><span>Reads</span><input data-bind-stat="reads" type="number" min="0"></label>
+              <label><span>Stashes</span><input data-bind-stat="stashes" type="number" min="0"></label>
+              <label><span>Comments</span><input data-bind-stat="comments" type="number" min="0"><small>Never below archived comments.</small></label>
+              <label class="derived"><span>Words</span><input id="wordCountField" type="text" readonly tabindex="-1" aria-readonly="true"><small>Counted as you write.</small></label>
+            </div>
+            <small>These are the numbers a reader sees on the work card. They are fiction, not a real count.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Author&rsquo;s note before the work</h2>
+            <textarea data-bind="notesBefore" rows="3" placeholder="Optional" class="record-summary"></textarea>
+          </section>
         </form>
       </div>
 

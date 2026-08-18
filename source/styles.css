@@ -1119,3 +1119,73 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 .write-preview .preview-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .5rem}
 .write-preview .preview-tag{max-width:100%}
 .write-preview .preview-meta{grid-template-columns:96px 1fr}
+
+/* ================= the work record =================
+   Details was a three-column form. A writer here is describing their work for
+   an archive, not setting options, so it reads as a record: numbered rubrics,
+   rating as marks you pick, tags as chips you collect, and the fake engagement
+   numbers named for what they are.
+   =================================================== */
+.record{display:grid;gap:1.6rem;max-width:1160px;counter-reset:rubric}
+.record-block{display:grid;gap:.7rem}
+.record-rubric{display:flex;align-items:center;gap:.6rem;margin:0;padding-bottom:.45rem;
+  border-bottom:1px solid var(--line);font-family:var(--font-display);font-size:.76rem;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--text)}
+.record-rubric::before{counter-increment:rubric;content:counter(rubric,decimal-leading-zero);
+  font-family:var(--font-mono);color:var(--cyan);opacity:.7;font-size:.72rem;letter-spacing:.02em}
+.record-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem 1rem}
+.record-grid>label{display:grid;align-content:start;gap:.28rem;font-family:var(--font-display);
+  font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.record-grid input,.record-grid select{width:100%;padding:.5rem .6rem;color:var(--text)}
+.record-grid .span-2{grid-column:span 2}
+.record-grid>label[hidden]{display:none}
+.record-summary{width:100%;padding:.7rem .85rem;color:var(--text);resize:vertical;
+  font-family:var(--font-prose);font-size:1rem;line-height:1.6}
+.visually-bound{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* --- rating as marks, the way an archive shows them --- */
+.rating-chips{display:flex;flex-wrap:wrap;gap:.45rem}
+.rating-chips button{display:grid;grid-template-columns:auto auto;align-items:center;gap:.5rem;
+  padding:.45rem .8rem .45rem .55rem;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);font-family:var(--font-display);letter-spacing:.08em;text-transform:uppercase;
+  font-size:.72rem}
+.rating-chips b{display:grid;place-items:center;width:1.6rem;height:1.6rem;
+  font-family:var(--font-mono);font-size:.86rem;font-weight:800;
+  border:1px solid var(--line);color:var(--muted)}
+.rating-chips button:hover{border-color:var(--cyan);color:var(--text);background:var(--panel2)}
+.rating-chips button.on{border-color:var(--yellow);color:var(--text);
+  background:color-mix(in srgb,var(--yellow) 12%,var(--panel))}
+.rating-chips button.on b{border-color:var(--yellow);color:var(--yellow)}
+
+/* --- tags collected as chips rather than typed as one comma string --- */
+.tag-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+.tag-field{display:grid;gap:.4rem;align-content:start;padding:.7rem .8rem;
+  border:1px solid var(--line);border-radius:3px;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.tag-kind{font-family:var(--font-display);font-size:.68rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.tag-chips{display:flex;flex-wrap:wrap;gap:.3rem}
+.tag-chips:empty{display:none}
+.tag-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .3rem .2rem .55rem;
+  border:1px solid color-mix(in srgb,var(--cyan) 45%,var(--line));border-radius:2px;
+  background:color-mix(in srgb,var(--cyan) 10%,transparent);color:var(--text);font-size:.8rem;
+  max-width:100%;overflow-wrap:anywhere}
+.tag-chip button{padding:0 .2rem;border:0;background:transparent;color:var(--muted);
+  font-family:var(--font-mono);font-size:.9rem;line-height:1}
+.tag-chip button:hover{color:var(--red);background:transparent}
+.tag-entry{width:100%;padding:.42rem .55rem;color:var(--text);font-size:.85rem}
+
+/* --- the numbers are fiction; name them and set them as data --- */
+.reception{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.7rem}
+.reception label{display:grid;gap:.3rem;align-content:start}
+.reception span{font-family:var(--font-display);font-size:.66rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.reception input{width:100%;padding:.5rem .6rem;color:var(--text);font-family:var(--font-mono);
+  font-size:1.05rem;letter-spacing:.02em}
+.reception .derived input{color:var(--muted);background:transparent;border-style:dashed}
+
+@media(max-width:1080px){
+  .record-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tag-fields{grid-template-columns:1fr}
+  .reception{grid-template-columns:repeat(3,minmax(0,1fr))}
+}

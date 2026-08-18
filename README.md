@@ -111,6 +111,17 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   transform and opacity animate, so nothing triggers layout. The manuscript, works list and
   chapter strip never shift position. All of it is disabled under
   `prefers-reduced-motion: reduce`, verified with the browser flag rather than assumed.
+- **Details became a work record.** It was three columns of form fields — the surface that
+  most read as a mod utility, on the screen where a writer describes their work for an
+  archive. It is now numbered rubrics: byline, rating and warnings, summary, tags, and *how
+  the archive received it*. Rating is a row of marks you pick — G T M E N — rather than a
+  dropdown. Tags are chips you collect by typing and pressing Enter, with an × to drop one,
+  instead of one comma-separated string per category. The invented engagement numbers are
+  named for what they are and set in monospace.
+
+  The data path is deliberately untouched: every `data-bind` and `data-bind-list` input is
+  still there, and the chips write through them. The exporter reads exactly what it did
+  before — all 38 bindings intact through the restructure.
 - **Write beside the preview.** A toggle in the Write heading opens the AOO work card next to
   the manuscript, updating as you type the body, the title, the tags. Seeing a fic render as an
   in-game card was previously tab four of five; it is now the thing you write against. The

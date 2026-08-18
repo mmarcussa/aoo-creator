@@ -1128,6 +1128,76 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 .write-preview .preview-tag{max-width:100%}
 .write-preview .preview-meta{grid-template-columns:96px 1fr}
 
+/* ================= the work record =================
+   Details was a three-column form. A writer here is describing their work for
+   an archive, not setting options, so it reads as a record: numbered rubrics,
+   rating as marks you pick, tags as chips you collect, and the fake engagement
+   numbers named for what they are.
+   =================================================== */
+.record{display:grid;gap:1.6rem;max-width:1160px;counter-reset:rubric}
+.record-block{display:grid;gap:.7rem}
+.record-rubric{display:flex;align-items:center;gap:.6rem;margin:0;padding-bottom:.45rem;
+  border-bottom:1px solid var(--line);font-family:var(--font-display);font-size:.76rem;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--text)}
+.record-rubric::before{counter-increment:rubric;content:counter(rubric,decimal-leading-zero);
+  font-family:var(--font-mono);color:var(--cyan);opacity:.7;font-size:.72rem;letter-spacing:.02em}
+.record-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem 1rem}
+.record-grid>label{display:grid;align-content:start;gap:.28rem;font-family:var(--font-display);
+  font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.record-grid input,.record-grid select{width:100%;padding:.5rem .6rem;color:var(--text)}
+.record-grid .span-2{grid-column:span 2}
+.record-grid>label[hidden]{display:none}
+.record-summary{width:100%;padding:.7rem .85rem;color:var(--text);resize:vertical;
+  font-family:var(--font-prose);font-size:1rem;line-height:1.6}
+.visually-bound{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* --- rating as marks, the way an archive shows them --- */
+.rating-chips{display:flex;flex-wrap:wrap;gap:.45rem}
+.rating-chips button{display:grid;grid-template-columns:auto auto;align-items:center;gap:.5rem;
+  padding:.45rem .8rem .45rem .55rem;border:1px solid var(--line);background:var(--panel);
+  color:var(--muted);font-family:var(--font-display);letter-spacing:.08em;text-transform:uppercase;
+  font-size:.72rem}
+.rating-chips b{display:grid;place-items:center;width:1.6rem;height:1.6rem;
+  font-family:var(--font-mono);font-size:.86rem;font-weight:800;
+  border:1px solid var(--line);color:var(--muted)}
+.rating-chips button:hover{border-color:var(--cyan);color:var(--text);background:var(--panel2)}
+.rating-chips button.on{border-color:var(--yellow);color:var(--text);
+  background:color-mix(in srgb,var(--yellow) 12%,var(--panel))}
+.rating-chips button.on b{border-color:var(--yellow);color:var(--yellow)}
+
+/* --- tags collected as chips rather than typed as one comma string --- */
+.tag-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+.tag-field{display:grid;gap:.4rem;align-content:start;padding:.7rem .8rem;
+  border:1px solid var(--line);border-radius:3px;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.tag-kind{font-family:var(--font-display);font-size:.68rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.tag-chips{display:flex;flex-wrap:wrap;gap:.3rem}
+.tag-chips:empty{display:none}
+.tag-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .3rem .2rem .55rem;
+  border:1px solid color-mix(in srgb,var(--cyan) 45%,var(--line));border-radius:2px;
+  background:color-mix(in srgb,var(--cyan) 10%,transparent);color:var(--text);font-size:.8rem;
+  max-width:100%;overflow-wrap:anywhere}
+.tag-chip button{padding:0 .2rem;border:0;background:transparent;color:var(--muted);
+  font-family:var(--font-mono);font-size:.9rem;line-height:1}
+.tag-chip button:hover{color:var(--red);background:transparent}
+.tag-entry{width:100%;padding:.42rem .55rem;color:var(--text);font-size:.85rem}
+
+/* --- the numbers are fiction; name them and set them as data --- */
+.reception{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.7rem}
+.reception label{display:grid;gap:.3rem;align-content:start}
+.reception span{font-family:var(--font-display);font-size:.66rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.reception input{width:100%;padding:.5rem .6rem;color:var(--text);font-family:var(--font-mono);
+  font-size:1.05rem;letter-spacing:.02em}
+.reception .derived input{color:var(--muted);background:transparent;border-style:dashed}
+
+@media(max-width:1080px){
+  .record-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tag-fields{grid-template-columns:1fr}
+  .reception{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
 </style>
 </head>
 <body>
@@ -1262,61 +1332,108 @@ button{font-family:var(--font-display);letter-spacing:.02em}
           <div><span class="eyebrow">Work metadata</span><h1 id="detailsHeading">Untitled work</h1></div>
           <div class="pane-actions"><button id="duplicateWorkBtn" class="ghost">Duplicate</button><button id="deleteWorkBtn" class="danger">Delete</button></div>
         </div>
-        <form id="workForm" class="form-grid" autocomplete="off">
-          <label class="span-2">Title <span class="counter" data-counter="title"></span>
-            <input data-bind="title" maxlength="120" required>
-          </label>
-          <label>Author
-            <select data-bind="authorId" id="authorSelect"></select>
-          </label>
-          <label>Pseud shown on work <span class="counter" data-counter="pseud"></span>
-            <input data-bind="pseud" maxlength="24" required>
-          </label>
-          <label>Rating
-            <select data-bind="rating"><option value="General">General</option><option value="Teen">Teen And Up</option><option value="Mature">Mature</option><option value="Explicit">Explicit</option><option value="NotRated">Not Rated</option></select>
-          </label>
-          <label>Category
-            <select data-bind="category"><option>Gen</option><option>F/F</option><option>F/M</option><option>M/M</option><option>Multi</option><option>Other</option></select>
-          </label>
-          <label>Archive warning
-            <select data-bind="warning"><option value="None">No Archive Warnings Apply</option><option value="ChooseNotToWarn">Creator Chose Not To Use Archive Warnings</option><option value="GraphicViolence">Graphic Depictions Of Violence</option><option value="MajorDeath">Major Character Death</option><option value="Underage">Underage</option><option value="NonCon">Rape/Non-Con</option></select>
-          </label>
-          <label>Status
-            <select data-bind="complete"><option value="true">Complete</option><option value="false">Work in progress</option></select>
-          </label>
-          <label id="releaseModelField">Release model
-            <select data-bind="active"><option value="false">Immediate availability</option><option value="true">Timed active-author release</option></select>
-          </label>
-          <label id="releaseIntervalField">Release interval (days)
-            <input data-bind="releaseIntervalDays" type="number" min="3" max="365" step="1">
-            <small>Only used by an incomplete timed work whose registered author is active; minimum 3 days.</small>
-          </label>
-          <label>Words <span class="counter">auto</span>
-            <input id="wordCountField" type="text" readonly tabindex="-1" aria-readonly="true">
-            <small>Counted from chapter text as you write.</small>
-          </label>
-          <label class="span-2">Summary <span class="counter" data-counter="summary"></span>
-            <textarea data-bind="summary" maxlength="140" rows="3"></textarea>
-            <small>Market cards allow 140 characters; preview shows the final wrap.</small>
-          </label>
-          <fieldset class="span-2 tags-fieldset">
-            <legend>AO3 tags <span id="tagTotal" class="badge">0 / 100</span></legend>
-            <label>Fandoms <input data-bind-list="fandoms" list="fandomPresets" placeholder="Comma-separated"></label>
-            <label>Relationships <input data-bind-list="relationships" list="relationshipPresets" placeholder="Comma-separated"></label>
-            <label>Characters <input data-bind-list="characters" list="characterPresets" placeholder="Comma-separated"></label>
-            <label>Additional tags <input data-bind-list="tags" list="tagPresets" placeholder="Comma-separated"></label>
-            <small class="span-2">Each tag may be 80 characters. The in-game work page collapses large tag walls behind “Show all”.</small>
-          </fieldset>
-          <fieldset class="span-2 stats-fieldset">
-            <legend>Archive stats</legend>
-            <label>Props <input data-bind-stat="props" type="number" min="0"></label>
-            <label>Reads <input data-bind-stat="reads" type="number" min="0"></label>
-            <label>Stashes <input data-bind-stat="stashes" type="number" min="0"></label>
-            <label>Comments <input data-bind-stat="comments" type="number" min="0"><small>Never below archived comments.</small></label>
-          </fieldset>
-          <label class="span-2">Author notes before work
-            <textarea data-bind="notesBefore" rows="3" placeholder="Optional"></textarea>
-          </label>
+        <form id="workForm" class="record" autocomplete="off">
+
+          <section class="record-block">
+            <h2 class="record-rubric">Byline</h2>
+            <div class="record-grid">
+              <label class="span-2">Title <span class="counter" data-counter="title"></span>
+                <input data-bind="title" maxlength="120" required>
+              </label>
+              <label>Author
+                <select data-bind="authorId" id="authorSelect"></select>
+              </label>
+              <label>Pseud shown on work <span class="counter" data-counter="pseud"></span>
+                <input data-bind="pseud" maxlength="24" required>
+              </label>
+            </div>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Rating and warnings</h2>
+            <div class="rating-row">
+              <div class="rating-chips" id="ratingChips" role="radiogroup" aria-label="Rating">
+                <button type="button" data-rating="General"><b>G</b><span>General</span></button>
+                <button type="button" data-rating="Teen"><b>T</b><span>Teen and up</span></button>
+                <button type="button" data-rating="Mature"><b>M</b><span>Mature</span></button>
+                <button type="button" data-rating="Explicit"><b>E</b><span>Explicit</span></button>
+                <button type="button" data-rating="NotRated"><b>N</b><span>Not rated</span></button>
+              </div>
+              <input data-bind="rating" id="ratingValue" class="visually-bound" tabindex="-1" aria-hidden="true">
+            </div>
+            <div class="record-grid">
+              <label>Archive warning
+                <select data-bind="warning"><option value="None">No Archive Warnings Apply</option><option value="ChooseNotToWarn">Creator Chose Not To Use Archive Warnings</option><option value="GraphicViolence">Graphic Depictions Of Violence</option><option value="MajorDeath">Major Character Death</option><option value="Underage">Underage</option><option value="NonCon">Rape/Non-Con</option></select>
+              </label>
+              <label>Category
+                <select data-bind="category"><option>Gen</option><option>F/F</option><option>F/M</option><option>M/M</option><option>Multi</option><option>Other</option></select>
+              </label>
+              <label>Status
+                <select data-bind="complete"><option value="true">Complete</option><option value="false">Work in progress</option></select>
+              </label>
+              <label id="releaseModelField">Release model
+                <select data-bind="active"><option value="false">Immediate availability</option><option value="true">Timed active-author release</option></select>
+              </label>
+              <label id="releaseIntervalField">Release interval (days)
+                <input data-bind="releaseIntervalDays" type="number" min="3" max="365" step="1">
+                <small>Only used by an incomplete timed work whose registered author is active; minimum 3 days.</small>
+              </label>
+            </div>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Summary <span class="counter" data-counter="summary"></span></h2>
+            <textarea data-bind="summary" maxlength="140" rows="3" class="record-summary"></textarea>
+            <small>Market cards allow 140 characters; the preview shows the final wrap.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Tags <span id="tagTotal" class="badge">0 / 100</span></h2>
+            <div class="tag-fields">
+              <div class="tag-field" data-tagfield="fandoms">
+                <span class="tag-kind">Fandoms</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="fandomPresets" placeholder="Type a fandom, press Enter">
+                <input data-bind-list="fandoms" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="relationships">
+                <span class="tag-kind">Relationships</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="relationshipPresets" placeholder="Type a pairing, press Enter">
+                <input data-bind-list="relationships" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="characters">
+                <span class="tag-kind">Characters</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="characterPresets" placeholder="Type a character, press Enter">
+                <input data-bind-list="characters" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="tags">
+                <span class="tag-kind">Additional tags</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="tagPresets" placeholder="Type a tag, press Enter">
+                <input data-bind-list="tags" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+            </div>
+            <small>Each tag may be 80 characters. The in-game work page collapses large tag walls behind &ldquo;Show all&rdquo;.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">How the archive received it</h2>
+            <div class="reception">
+              <label><span>Props</span><input data-bind-stat="props" type="number" min="0"></label>
+              <label><span>Reads</span><input data-bind-stat="reads" type="number" min="0"></label>
+              <label><span>Stashes</span><input data-bind-stat="stashes" type="number" min="0"></label>
+              <label><span>Comments</span><input data-bind-stat="comments" type="number" min="0"><small>Never below archived comments.</small></label>
+              <label class="derived"><span>Words</span><input id="wordCountField" type="text" readonly tabindex="-1" aria-readonly="true"><small>Counted as you write.</small></label>
+            </div>
+            <small>These are the numbers a reader sees on the work card. They are fiction, not a real count.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Author&rsquo;s note before the work</h2>
+            <textarea data-bind="notesBefore" rows="3" placeholder="Optional" class="record-summary"></textarea>
+          </section>
         </form>
       </div>
 
@@ -1681,7 +1798,15 @@ function renderWorks(){const query=$("#workSearch").value.toLowerCase(),host=$("
       label=st?.errors?`${st.errors} error(s)`:st?.warnings?`${st.warnings} warning(s)`:"Ready";
     return `<button class="nav-item work-item ${w.id===selectedWorkId?"active":""}" data-work="${w.id}" title="${esc(w.title||"Untitled")} — ${label}"><span class="work-line"><span class="work-title">${esc(w.title||"Untitled")}</span><small class="work-by">${esc(a?.pseud||"no author")} · ${w.chapters.length} ch</small></span><i class="work-state ${pristine?"":state}" aria-hidden="true"></i></button>`}).join("")||`<small>No matching works.</small>`}
 
-function renderWorkForm(){const w=currentWork();if(!w)return;deriveWork(w);const t=w.title||"Untitled work";$("#workHeading").textContent=t;$("#detailsHeading").textContent=t;$("#authorSelect").innerHTML=project.authors.map(a=>`<option value="${a.id}">${esc(a.pseud)}</option>`).join("");$$('[data-bind]').forEach(el=>{const key=el.dataset.bind,value=w[key];el.value=typeof value==='boolean'?String(value):(value??'')});$$('[data-bind-list]').forEach(el=>el.value=(w[el.dataset.bindList]||[]).join(', '));$$('[data-bind-stat]').forEach(el=>el.value=w.stats?.[el.dataset.bindStat]??0);$("#chapterCount").textContent=w.chapters.length;$("#commentCount").textContent=w.comments.length;toggleConditionalFields(w);updateDerivedFields();updateCounters()}
+function renderWorkForm(){const w=currentWork();if(!w)return;deriveWork(w);const t=w.title||"Untitled work";$("#workHeading").textContent=t;$("#detailsHeading").textContent=t;$("#authorSelect").innerHTML=project.authors.map(a=>`<option value="${a.id}">${esc(a.pseud)}</option>`).join("");$$('[data-bind]').forEach(el=>{const key=el.dataset.bind,value=w[key];el.value=typeof value==='boolean'?String(value):(value??'')});$$('[data-bind-list]').forEach(el=>el.value=(w[el.dataset.bindList]||[]).join(', '));renderRatingChips(w);renderTagFields(w);$$('[data-bind-stat]').forEach(el=>el.value=w.stats?.[el.dataset.bindStat]??0);$("#chapterCount").textContent=w.chapters.length;$("#commentCount").textContent=w.comments.length;toggleConditionalFields(w);updateDerivedFields();updateCounters()}
+function renderRatingChips(w){const box=$("#ratingChips");if(!box)return;
+  $$("#ratingChips [data-rating]").forEach(b=>{const on=b.dataset.rating===w.rating;
+    b.classList.toggle("on",on);b.setAttribute("aria-checked",String(on))})}
+function renderTagFields(w){$$("[data-tagfield]").forEach(field=>{
+  const key=field.dataset.tagfield,values=w[key]||[],host=field.querySelector(".tag-chips");
+  host.innerHTML=values.map((t,i)=>`<span class="tag-chip">${esc(t)}<button type="button" data-drop="${i}" aria-label="Remove ${esc(t)}">×</button></span>`).join("")})}
+function writeTagField(field,values){const bound=field.querySelector("[data-bind-list]");
+  bound.value=values.join(", ");bound.dispatchEvent(new Event("input",{bubbles:true}))}
 function toggleConditionalFields(w){const wip=w.complete===false||String(w.complete)==="false";const m=$("#releaseModelField"),i=$("#releaseIntervalField");if(m)m.hidden=!wip;if(i)i.hidden=!wip}
 function updateCounters(){const w=currentWork();if(!w)return;$$('[data-counter]').forEach(el=>{const key=el.dataset.counter;el.textContent=`${String(w[key]||"").length} / ${key==="summary"?LIMITS.summary:key==="pseud"?LIMITS.author:LIMITS.title}`});const count=[...w.fandoms,...w.relationships,...w.characters,...w.tags].length;$("#tagTotal").textContent=`${count} / ${LIMITS.tags}`}
 
@@ -1726,6 +1851,19 @@ $("#livePreviewBtn").addEventListener("click",()=>{const p=$("#writePreview"),b=
   AOOStore.setItem("aoo-creator-live-preview",on?"1":"");if(on)renderPreview()});
 $("#manageAuthorsBtn").addEventListener("click",()=>showTab("authors"));
 $("#authorSummary").addEventListener("click",()=>showTab("authors"));
+$("#ratingChips").addEventListener("click",event=>{const b=event.target.closest("[data-rating]");if(!b)return;
+  const input=$("#ratingValue");input.value=b.dataset.rating;
+  input.dispatchEvent(new Event("input",{bubbles:true}));renderRatingChips(currentWork())});
+$("#workForm").addEventListener("keydown",event=>{if(event.key!=="Enter")return;
+  const entry=event.target.closest(".tag-entry");if(!entry)return;event.preventDefault();
+  const field=entry.closest("[data-tagfield]"),w=currentWork();if(!w)return;
+  const value=entry.value.trim();if(!value)return;
+  const next=(w[field.dataset.tagfield]||[]).concat(value);entry.value="";
+  writeTagField(field,next);renderTagFields(currentWork())});
+$("#workForm").addEventListener("click",event=>{const drop=event.target.closest("[data-drop]");if(!drop)return;
+  const field=drop.closest("[data-tagfield]"),w=currentWork();if(!w)return;
+  const next=(w[field.dataset.tagfield]||[]).filter((_,i)=>i!==Number(drop.dataset.drop));
+  writeTagField(field,next);renderTagFields(currentWork())});
 $("#authorSearch").addEventListener("input",renderAuthorsPane);
 $("#authorRows").addEventListener("input",event=>{const row=event.target.closest("[data-author-row]"),field=event.target.dataset.authorField;if(!row||!field)return;const a=project.authors.find(x=>x.id===row.dataset.authorRow);if(!a)return;snapshot();if(field==="pseud"){a.pseud=event.target.value.slice(0,LIMITS.author);project.works.filter(w=>w.authorId===a.id).forEach(w=>w.pseud=a.pseud)}else{a.status=event.target.value;row.querySelector(".author-dot").classList.toggle("active",a.status==="Active")}save("Author updated.");renderAuthors();renderSummary();renderWorkForm();renderPreview();renderValidationBadges()});
 $("#collectionSelect").addEventListener("change",event=>{const next=library.projects[event.target.value];if(!next||next.id===project.id)return;library.projects[project.id]=project;adoptCollection(next,`Switched to ${next.pack.name||"Untitled collection"}.`)});

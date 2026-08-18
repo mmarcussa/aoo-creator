@@ -87,7 +87,15 @@ function renderWorks(){const query=$("#workSearch").value.toLowerCase(),host=$("
       label=st?.errors?`${st.errors} error(s)`:st?.warnings?`${st.warnings} warning(s)`:"Ready";
     return `<button class="nav-item work-item ${w.id===selectedWorkId?"active":""}" data-work="${w.id}" title="${esc(w.title||"Untitled")} — ${label}"><span class="work-line"><span class="work-title">${esc(w.title||"Untitled")}</span><small class="work-by">${esc(a?.pseud||"no author")} · ${w.chapters.length} ch</small></span><i class="work-state ${pristine?"":state}" aria-hidden="true"></i></button>`}).join("")||`<small>No matching works.</small>`}
 
-function renderWorkForm(){const w=currentWork();if(!w)return;deriveWork(w);const t=w.title||"Untitled work";$("#workHeading").textContent=t;$("#detailsHeading").textContent=t;$("#authorSelect").innerHTML=project.authors.map(a=>`<option value="${a.id}">${esc(a.pseud)}</option>`).join("");$$('[data-bind]').forEach(el=>{const key=el.dataset.bind,value=w[key];el.value=typeof value==='boolean'?String(value):(value??'')});$$('[data-bind-list]').forEach(el=>el.value=(w[el.dataset.bindList]||[]).join(', '));$$('[data-bind-stat]').forEach(el=>el.value=w.stats?.[el.dataset.bindStat]??0);$("#chapterCount").textContent=w.chapters.length;$("#commentCount").textContent=w.comments.length;toggleConditionalFields(w);updateDerivedFields();updateCounters()}
+function renderWorkForm(){const w=currentWork();if(!w)return;deriveWork(w);const t=w.title||"Untitled work";$("#workHeading").textContent=t;$("#detailsHeading").textContent=t;$("#authorSelect").innerHTML=project.authors.map(a=>`<option value="${a.id}">${esc(a.pseud)}</option>`).join("");$$('[data-bind]').forEach(el=>{const key=el.dataset.bind,value=w[key];el.value=typeof value==='boolean'?String(value):(value??'')});$$('[data-bind-list]').forEach(el=>el.value=(w[el.dataset.bindList]||[]).join(', '));renderRatingChips(w);renderTagFields(w);$$('[data-bind-stat]').forEach(el=>el.value=w.stats?.[el.dataset.bindStat]??0);$("#chapterCount").textContent=w.chapters.length;$("#commentCount").textContent=w.comments.length;toggleConditionalFields(w);updateDerivedFields();updateCounters()}
+function renderRatingChips(w){const box=$("#ratingChips");if(!box)return;
+  $$("#ratingChips [data-rating]").forEach(b=>{const on=b.dataset.rating===w.rating;
+    b.classList.toggle("on",on);b.setAttribute("aria-checked",String(on))})}
+function renderTagFields(w){$$("[data-tagfield]").forEach(field=>{
+  const key=field.dataset.tagfield,values=w[key]||[],host=field.querySelector(".tag-chips");
+  host.innerHTML=values.map((t,i)=>`<span class="tag-chip">${esc(t)}<button type="button" data-drop="${i}" aria-label="Remove ${esc(t)}">×</button></span>`).join("")})}
+function writeTagField(field,values){const bound=field.querySelector("[data-bind-list]");
+  bound.value=values.join(", ");bound.dispatchEvent(new Event("input",{bubbles:true}))}
 function toggleConditionalFields(w){const wip=w.complete===false||String(w.complete)==="false";const m=$("#releaseModelField"),i=$("#releaseIntervalField");if(m)m.hidden=!wip;if(i)i.hidden=!wip}
 function updateCounters(){const w=currentWork();if(!w)return;$$('[data-counter]').forEach(el=>{const key=el.dataset.counter;el.textContent=`${String(w[key]||"").length} / ${key==="summary"?LIMITS.summary:key==="pseud"?LIMITS.author:LIMITS.title}`});const count=[...w.fandoms,...w.relationships,...w.characters,...w.tags].length;$("#tagTotal").textContent=`${count} / ${LIMITS.tags}`}
 
@@ -132,6 +140,19 @@ $("#livePreviewBtn").addEventListener("click",()=>{const p=$("#writePreview"),b=
   localStorage.setItem("aoo-creator-live-preview",on?"1":"");if(on)renderPreview()});
 $("#manageAuthorsBtn").addEventListener("click",()=>showTab("authors"));
 $("#authorSummary").addEventListener("click",()=>showTab("authors"));
+$("#ratingChips").addEventListener("click",event=>{const b=event.target.closest("[data-rating]");if(!b)return;
+  const input=$("#ratingValue");input.value=b.dataset.rating;
+  input.dispatchEvent(new Event("input",{bubbles:true}));renderRatingChips(currentWork())});
+$("#workForm").addEventListener("keydown",event=>{if(event.key!=="Enter")return;
+  const entry=event.target.closest(".tag-entry");if(!entry)return;event.preventDefault();
+  const field=entry.closest("[data-tagfield]"),w=currentWork();if(!w)return;
+  const value=entry.value.trim();if(!value)return;
+  const next=(w[field.dataset.tagfield]||[]).concat(value);entry.value="";
+  writeTagField(field,next);renderTagFields(currentWork())});
+$("#workForm").addEventListener("click",event=>{const drop=event.target.closest("[data-drop]");if(!drop)return;
+  const field=drop.closest("[data-tagfield]"),w=currentWork();if(!w)return;
+  const next=(w[field.dataset.tagfield]||[]).filter((_,i)=>i!==Number(drop.dataset.drop));
+  writeTagField(field,next);renderTagFields(currentWork())});
 $("#authorSearch").addEventListener("input",renderAuthorsPane);
 $("#authorRows").addEventListener("input",event=>{const row=event.target.closest("[data-author-row]"),field=event.target.dataset.authorField;if(!row||!field)return;const a=project.authors.find(x=>x.id===row.dataset.authorRow);if(!a)return;snapshot();if(field==="pseud"){a.pseud=event.target.value.slice(0,LIMITS.author);project.works.filter(w=>w.authorId===a.id).forEach(w=>w.pseud=a.pseud)}else{a.status=event.target.value;row.querySelector(".author-dot").classList.toggle("active",a.status==="Active")}save("Author updated.");renderAuthors();renderSummary();renderWorkForm();renderPreview();renderValidationBadges()});
 $("#collectionSelect").addEventListener("change",event=>{const next=library.projects[event.target.value];if(!next||next.id===project.id)return;library.projects[project.id]=project;adoptCollection(next,`Switched to ${next.pack.name||"Untitled collection"}.`)});
