@@ -111,6 +111,14 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   transform and opacity animate, so nothing triggers layout. The manuscript, works list and
   chapter strip never shift position. All of it is disabled under
   `prefers-reduced-motion: reduce`, verified with the browser flag rather than assumed.
+- **The shell reads as a console.** The masthead leads with the collection you are building
+  rather than the tool's own name, which is now a monospace footnote under it. A HUD frame
+  brackets the working area. Tabs are numbered `01`–`05` so they read as a sequence rather
+  than five peers, and the rail sections are numbered to match — both via CSS counters, so no
+  markup carries the numbers. Registration ticks mark the corner of the working panels. All
+  of it is structure and type rather than colour, so it holds across every theme; the themes
+  with their own strong language (Windows 95, BIOS, Nokia, Bauhaus, brutalism) opt out of the
+  frame rather than fight it.
 - **Boot sequence.** The tool powers on rather than appearing: a CRT line opens into the
   field, the mark resolves out of a channel-split glitch inside a spinning reticle, four POST
   lines report the framework contract, schema, library and *network — not required*, and a

@@ -1032,3 +1032,53 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 @keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
 
 @media (prefers-reduced-motion:reduce){.boot{display:none !important}}
+
+/* ================= phase 2: the shell =================
+   Structure, type and rhythm rather than colour, so the identity survives all
+   twenty-four themes. The tool should read as an archive console, not a form.
+   ====================================================== */
+
+/* --- masthead: the collection is the headline, the app is the footnote --- */
+.masthead{display:grid;gap:.1rem;min-width:0}
+.masthead strong{font-family:var(--font-display);font-size:1.24rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:38ch}
+.masthead-sub{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted)}
+.masthead-sub i{font-style:normal;color:var(--cyan)}
+.brand{gap:.85rem;min-width:0}
+.app-header{gap:1.5rem}
+
+/* --- a HUD frame around the working area --- */
+.hud{position:fixed;inset:104px 10px 10px;pointer-events:none;z-index:5}
+.hud i{position:absolute;width:16px;height:16px;border:2px solid var(--yellow);opacity:.42}
+.hud i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0}
+.hud i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0}
+.hud i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0}
+.hud i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0}
+
+/* --- tabs read as a sequence, not five peers --- */
+.editor-tabs{counter-reset:tab}
+.editor-tabs button::before{counter-increment:tab;
+  content:counter(tab,decimal-leading-zero);margin-right:.5rem;font-family:var(--font-mono);
+  font-size:.68rem;letter-spacing:.06em;opacity:.5}
+.editor-tabs button.active::before{opacity:1;color:var(--cyan)}
+
+/* --- the rail reads as an index --- */
+.rail{counter-reset:railsec}
+.rail-section>.section-title h2::before{counter-increment:railsec;
+  content:counter(railsec,decimal-leading-zero) " ";font-family:var(--font-mono);
+  color:var(--cyan);opacity:.65;letter-spacing:.02em;margin-right:.15rem}
+
+/* --- registration ticks on the working panels --- */
+.chapter-strip,.manuscript{position:relative}
+.chapter-strip::after,.manuscript::after{content:"";position:absolute;right:6px;bottom:6px;
+  width:10px;height:10px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);
+  opacity:.75;pointer-events:none}
+
+/* structural themes opt out of the frame, which would fight their own language */
+[data-theme=win95] .hud,[data-theme=bauhaus] .hud,[data-theme=brutal] .hud,
+[data-theme=bios] .hud,[data-theme=nokia] .hud{display:none}
+[data-theme=win95] .chapter-strip::after,[data-theme=win95] .manuscript::after,
+[data-theme=bauhaus] .chapter-strip::after,[data-theme=bauhaus] .manuscript::after,
+[data-theme=brutal] .chapter-strip::after,[data-theme=brutal] .manuscript::after{display:none}
