@@ -219,8 +219,8 @@ button[disabled]{opacity:.35;cursor:not-allowed}
 button[disabled]:hover{background:transparent;color:var(--muted)}
 
 /* --- the one action you came here for --- */
-.primary{background:var(--yellow);border-color:var(--yellow);color:var(--bg);font-weight:700}
-.primary:hover{background:var(--yellow);color:var(--bg);filter:brightness(1.08)}
+.primary{background:var(--yellow);border-color:var(--yellow);color:var(--on-accent);font-weight:700}
+.primary:hover{background:var(--yellow);color:var(--on-accent);filter:brightness(1.08)}
 
 /* --- kept bordered on purpose: this is the one that prevents data loss --- */
 .secondary{background:var(--panel2);border-color:var(--line);color:var(--text);font-weight:700}
@@ -233,8 +233,8 @@ button[disabled]:hover{background:transparent;color:var(--muted)}
 /* --- routine destructive recedes; collection-wide stays loud --- */
 .danger{background:transparent;border-color:transparent;color:var(--red)}
 .danger:hover{background:color-mix(in srgb,var(--red) 14%,transparent);border-color:transparent;color:var(--red)}
-.danger-strong{background:var(--red);border-color:var(--red);color:var(--bg);font-weight:700}
-.danger-strong:hover:not([disabled]){background:var(--red);color:var(--bg);filter:brightness(1.08)}
+.danger-strong{background:var(--red);border-color:var(--red);color:var(--on-accent);font-weight:700}
+.danger-strong:hover:not([disabled]){background:var(--red);color:var(--on-accent);filter:brightness(1.08)}
 
 /* --- tabs are underlined, not boxed --- */
 .editor-tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;box-shadow:none;padding:.55rem .8rem;color:var(--muted)}
@@ -351,6 +351,77 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
     transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
 
+/* on-accent text defaults to the page background, which is what the four
+   original themes want; a theme overrides it when its accent and background
+   do not contrast (Windows 95 navy on teal, for one) */
+:root{--on-accent:var(--bg)}
+
+/* ================= novelty themes =================
+   Each keeps the four accent roles distinguishable: yellow primary and
+   selection, cyan system and counts, red destructive, green ready. Two of
+   them also need structural rules, because their look is not a palette.
+   ================================================== */
+
+/* --- Windows 95: the look is bevels, not grey --- */
+[data-theme=win95]{color-scheme:light;
+  --bg:#008080;--panel:#c0c0c0;--panel2:#d4d0c8;--line:#808080;--line2:#808080;
+  --text:#000;--muted:#404040;--cyan:#008080;--yellow:#000080;--red:#800000;--green:#006000;
+  --on-accent:#fff;--shadow:none}
+[data-theme=win95] body{font-family:"MS Sans Serif",Tahoma,"Segoe UI",sans-serif}
+[data-theme=win95] *{border-radius:0 !important}
+[data-theme=win95] button{border:2px outset #f0f0f0;background:#c0c0c0;color:#000;font-weight:400;box-shadow:none}
+[data-theme=win95] button:hover{background:#c8c8c8;color:#000;border-color:#f0f0f0}
+[data-theme=win95] button:active{border-style:inset}
+[data-theme=win95] .primary{background:#000080;color:#fff;border:2px outset #6a6ad0;font-weight:700}
+[data-theme=win95] .danger-strong{background:#800000;color:#fff;border:2px outset #c06a6a}
+[data-theme=win95] input,[data-theme=win95] select,[data-theme=win95] textarea{border:2px inset #f0f0f0;background:#fff;color:#000}
+[data-theme=win95] .chapter-strip,[data-theme=win95] .notes,[data-theme=win95] .edit-card,
+[data-theme=win95] .author-row,[data-theme=win95] .manuscript,[data-theme=win95] .aoo-preview{
+  border:2px inset #f0f0f0;background:#fff;box-shadow:none}
+[data-theme=win95] .app-header,[data-theme=win95] .rail{background:#c0c0c0;box-shadow:none}
+[data-theme=win95] .status-bar{background:#c0c0c0;border-top:2px inset #f0f0f0}
+[data-theme=win95] .editor-tabs button.active{background:#c0c0c0;border:2px outset #f0f0f0;border-bottom-color:#c0c0c0}
+[data-theme=win95] .nav-item.active,[data-theme=win95] .strip-item.active{background:#000080;color:#fff;box-shadow:none}
+[data-theme=win95] .nav-item.active .work-by,[data-theme=win95] .strip-item.active small{color:#c8c8ff}
+
+/* --- The Matrix: phosphor on black; red survives so danger still reads --- */
+[data-theme=matrix]{color-scheme:dark;
+  --bg:#000;--panel:#020c04;--panel2:#04170a;--line:#0f4a1f;--line2:#0f4a1f;
+  --text:#00ff41;--muted:#149c43;--cyan:#8affc0;--yellow:#00ff41;--red:#ff3b3b;--green:#00c853;
+  --on-accent:#001a06}
+[data-theme=matrix] body{font-family:Consolas,"Cascadia Mono",monospace}
+[data-theme=matrix] .manuscript{font-family:Consolas,"Cascadia Mono",monospace;font-size:.95rem}
+[data-theme=matrix] h1,[data-theme=matrix] .brand strong{text-shadow:0 0 12px #00ff4166}
+[data-theme=matrix] .app-header{background:linear-gradient(180deg,#020c04,#000)}
+
+/* --- BIOS setup: blue field, grey panel, everything square --- */
+[data-theme=bios]{color-scheme:dark;
+  --bg:#0000a8;--panel:#000088;--panel2:#00006e;--line:#a8a8a8;--line2:#a8a8a8;
+  --text:#d8d8d8;--muted:#9a9ad0;--cyan:#55ffff;--yellow:#ffff55;--red:#ff5555;--green:#55ff55;
+  --on-accent:#000088;--shadow:none}
+[data-theme=bios] body{font-family:Consolas,"Cascadia Mono",monospace}
+[data-theme=bios] *{border-radius:0 !important}
+[data-theme=bios] button{border:1px solid var(--line);background:transparent;color:var(--text);box-shadow:none}
+[data-theme=bios] button:hover{background:#a8a8a8;color:#000088}
+[data-theme=bios] .nav-item.active,[data-theme=bios] .strip-item.active{background:#a8a8a8;color:#000088;box-shadow:none}
+[data-theme=bios] .nav-item.active .work-by{color:#000088}
+[data-theme=bios] .manuscript{background:#000070;color:#d8d8d8;font-family:Consolas,monospace}
+[data-theme=bios] .chapter-strip,[data-theme=bios] .notes{background:#000070}
+
+/* --- Gyaru: gold primary, hot pink as the system accent, crimson still danger --- */
+[data-theme=gyaru]{color-scheme:light;
+  --bg:#fff0f7;--panel:#fff;--panel2:#ffe6f2;--line:#f2a8cd;--line2:#f2a8cd;
+  --text:#3d1030;--muted:#9b5a80;--cyan:#ff4fa3;--yellow:#e0a200;--red:#d81b60;--green:#00a884;
+  --on-accent:#fff;--shadow:0 14px 34px #d81b6024}
+[data-theme=gyaru] .app-header{background:linear-gradient(180deg,#ffd9ec,#fff0f7)}
+[data-theme=gyaru] button,[data-theme=gyaru] input,[data-theme=gyaru] select,[data-theme=gyaru] textarea{border-radius:999px}
+[data-theme=gyaru] .manuscript,[data-theme=gyaru] .chapter-strip,[data-theme=gyaru] .notes,
+[data-theme=gyaru] .edit-card,[data-theme=gyaru] .author-row{border-radius:14px}
+[data-theme=gyaru] .manuscript{background:#fff}
+[data-theme=gyaru] .nav-item.active,[data-theme=gyaru] .strip-item.active{
+  background:linear-gradient(90deg,#ff4fa333,#ff4fa30d)}
+[data-theme=bios] .strip-item.active small,[data-theme=bios] .strip-item.active .strip-num{color:#000088;background:transparent}
+
 </style>
 </head>
 <body>
@@ -364,6 +435,8 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
         <select id="themeSelect">
           <option value="aoo">AOO</option><option value="night">Neutral dark</option>
           <option value="light">Light</option><option value="contrast">High contrast</option>
+          <option value="win95">Windows 95</option><option value="matrix">The Matrix</option>
+          <option value="bios">BIOS setup</option><option value="gyaru">Gyaru</option>
         </select>
       </label>
       <button id="tutorialBtn" class="ghost">Tutorial</button>

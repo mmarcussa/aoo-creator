@@ -68,6 +68,13 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   capped at a 74-character measure so prose is comfortable to read while typing. All of it
   is token-based, so the AOO, neutral dark, light and high-contrast themes follow without
   separate rules.
+- **Eight themes.** The original four (AOO, neutral dark, light, high contrast) plus Windows
+  95, The Matrix, BIOS setup and Gyaru. Each keeps the four accent roles distinguishable, so
+  the primary action never looks like the destructive one. Windows 95 and BIOS also carry
+  structural rules — bevelled outset/inset borders and square corners respectively — because
+  those looks are not palettes. Text on solid accents moved to an `--on-accent` token, since
+  the old `var(--bg)` assumption breaks where a theme's background does not contrast with its
+  accent.
 - **Motion, restrained.** Panes rise slightly on switch, dialogs and the tour card scale in,
   status messages flash on change, and hover states settle over 120ms. Only colour, shadow,
   transform and opacity animate, so nothing triggers layout. The manuscript, works list and
