@@ -86,6 +86,11 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   to a file* or *Saved to a file* per collection, and the wording says autosave lives only
   in this browser. This is the highest-stakes misunderstanding in the tool: losing the
   `.aoopack.json` means never publishing a compatible update.
+- **Import is explicit about replacing.** A project file carries the collection's identity,
+  so importing one whose id matches a collection already in the browser replaces it — that
+  is the update flow. It now says so and asks first, naming the collection; importing a file
+  with a new id still adds a collection silently, because nothing is at risk. Imported
+  collections are marked as file-backed, since that is where they came from.
 - **Collection settings has a label.** It held the permanent namespace behind an unlabelled
   gear icon. It is now a **Settings** button beside New and Delete, and the namespace itself
   is shown in the rail so the irreversible value is visible without opening anything.
