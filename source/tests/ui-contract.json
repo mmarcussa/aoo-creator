@@ -63,6 +63,7 @@
     "authorSearch",
     "authorSelect",
     "authorSummary",
+    "backupState",
     "buildBtn",
     "chapterCount",
     "chapterEditor",
@@ -106,7 +107,8 @@
     "workForm",
     "workHeading",
     "workList",
-    "workSearch"
+    "workSearch",
+    "worksAttention"
   ],
   "idsMissing": []
 }

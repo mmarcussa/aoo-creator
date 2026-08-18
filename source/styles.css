@@ -102,3 +102,25 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
 .collection-actions{display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-top:.5rem}
 .collection-actions button{padding:.4rem .5rem;font-size:.76rem}
 .collection-actions button[disabled]{opacity:.35;cursor:not-allowed}
+
+/* ===== backup honesty, labelled settings, work status ===== */
+.backup-state{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .55rem;border:1px solid var(--line);border-radius:99px;font-size:.7rem;font-weight:700;letter-spacing:.04em;white-space:nowrap;cursor:help}
+.backup-state::before{content:"";width:.5rem;height:.5rem;border-radius:50%}
+.backup-state.dirty{border-color:var(--yellow);color:var(--yellow);background:color-mix(in srgb,var(--yellow) 10%,transparent)}
+.backup-state.dirty::before{background:var(--yellow)}
+.backup-state.clean{border-color:var(--green);color:var(--green);background:color-mix(in srgb,var(--green) 10%,transparent)}
+.backup-state.clean::before{background:var(--green)}
+
+.collection-actions{grid-template-columns:repeat(3,1fr)}
+.project-summary .ns{display:block;margin-top:.15rem;font-size:.68rem;color:var(--cyan);word-break:break-all;cursor:help}
+.attention{margin-left:.4rem;padding:.08rem .38rem;border-radius:99px;background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red);font-size:.62rem;font-weight:800;letter-spacing:.04em;text-transform:none}
+.attention[hidden]{display:none}
+
+.work-item{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.5rem}
+.work-line{display:grid;gap:.1rem;min-width:0}
+.work-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.work-by{color:var(--muted);font-weight:400;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.work-state{width:.5rem;height:.5rem;border-radius:50%;background:var(--muted);opacity:.5}
+.work-state.ok{background:var(--green);opacity:1}
+.work-state.warning{background:var(--yellow);opacity:1}
+.work-state.error{background:var(--red);opacity:1;box-shadow:0 0 7px var(--red)}

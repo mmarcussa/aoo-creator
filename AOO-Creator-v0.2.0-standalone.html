@@ -111,6 +111,28 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
 .collection-actions button{padding:.4rem .5rem;font-size:.76rem}
 .collection-actions button[disabled]{opacity:.35;cursor:not-allowed}
 
+/* ===== backup honesty, labelled settings, work status ===== */
+.backup-state{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .55rem;border:1px solid var(--line);border-radius:99px;font-size:.7rem;font-weight:700;letter-spacing:.04em;white-space:nowrap;cursor:help}
+.backup-state::before{content:"";width:.5rem;height:.5rem;border-radius:50%}
+.backup-state.dirty{border-color:var(--yellow);color:var(--yellow);background:color-mix(in srgb,var(--yellow) 10%,transparent)}
+.backup-state.dirty::before{background:var(--yellow)}
+.backup-state.clean{border-color:var(--green);color:var(--green);background:color-mix(in srgb,var(--green) 10%,transparent)}
+.backup-state.clean::before{background:var(--green)}
+
+.collection-actions{grid-template-columns:repeat(3,1fr)}
+.project-summary .ns{display:block;margin-top:.15rem;font-size:.68rem;color:var(--cyan);word-break:break-all;cursor:help}
+.attention{margin-left:.4rem;padding:.08rem .38rem;border-radius:99px;background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red);font-size:.62rem;font-weight:800;letter-spacing:.04em;text-transform:none}
+.attention[hidden]{display:none}
+
+.work-item{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.5rem}
+.work-line{display:grid;gap:.1rem;min-width:0}
+.work-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.work-by{color:var(--muted);font-weight:400;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.work-state{width:.5rem;height:.5rem;border-radius:50%;background:var(--muted);opacity:.5}
+.work-state.ok{background:var(--green);opacity:1}
+.work-state.warning{background:var(--yellow);opacity:1}
+.work-state.error{background:var(--red);opacity:1;box-shadow:0 0 7px var(--red)}
+
 </style>
 </head>
 <body>
@@ -128,6 +150,7 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
       </label>
       <button id="tutorialBtn" class="ghost">Tutorial</button>
       <button id="importBtn" class="ghost">Import project</button>
+      <span id="backupState" class="backup-state"></span>
       <button id="saveProjectBtn" class="ghost">Save project</button>
       <button id="buildBtn" class="primary">Validate &amp; build ZIP</button>
       <input id="importFile" type="file" accept=".json,.aoopack.json,application/json" hidden>
@@ -139,10 +162,10 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
   <main class="workspace">
     <aside class="rail" aria-label="Collection navigator">
       <section class="rail-section">
-        <div class="section-title"><h2>Collection</h2><button id="projectSettingsBtn" class="icon-button" title="Edit collection metadata">⚙</button></div>
+        <div class="section-title"><h2>Collection</h2></div>
         <select id="collectionSelect" class="collection-select" aria-label="Switch collection"></select>
         <div id="projectSummary" class="project-summary"></div>
-        <div class="collection-actions"><button id="newProjectBtn" class="ghost">New</button><button id="deleteCollectionBtn" class="danger">Delete</button></div>
+        <div class="collection-actions"><button id="projectSettingsBtn" class="ghost">Settings</button><button id="newProjectBtn" class="ghost">New</button><button id="deleteCollectionBtn" class="danger">Delete</button></div>
       </section>
 
       <section class="rail-section">
@@ -151,7 +174,7 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
       </section>
 
       <section class="rail-section grow">
-        <div class="section-title"><h2>Works</h2><button id="addWorkBtn" class="icon-button" title="Add work">＋</button></div>
+        <div class="section-title"><h2>Works <span id="worksAttention" class="attention"></span></h2><button id="addWorkBtn" class="icon-button" title="Add work">＋</button></div>
         <input id="workSearch" class="rail-search" type="search" placeholder="Find a title or author">
         <div id="workList" class="nav-list work-list"></div>
       </section>
@@ -490,19 +513,19 @@ function loadLibrary(){
     const raw=AOOStore.getItem(LIBRARY);
     if(raw){const lib=normalizeLibrary(JSON.parse(raw));if(Object.keys(lib.projects).length)return lib}
     const legacy=AOOStore.getItem(STORAGE);
-    if(legacy){const p=withId(normalizeProject(JSON.parse(legacy)));return{currentId:p.id,projects:{[p.id]:p}}}
+    if(legacy){const p=withId(normalizeProject(JSON.parse(legacy)));return{currentId:p.id,projects:{[p.id]:p},saved:{}}}
   }catch(error){console.warn(error)}
-  const p=makeProject();return{currentId:p.id,projects:{[p.id]:p}};
+  const p=makeProject();return{currentId:p.id,projects:{[p.id]:p},saved:{}};
 }
 function normalizeLibrary(lib){const projects={};
   Object.values(lib?.projects||{}).forEach(raw=>{try{const p=withId(normalizeProject(raw));projects[p.id]=p}catch(error){console.warn(error)}});
-  const ids=Object.keys(projects);return{currentId:projects[lib?.currentId]?lib.currentId:ids[0],projects};
+  const ids=Object.keys(projects);return{currentId:projects[lib?.currentId]?lib.currentId:ids[0],projects,saved:lib?.saved||{}};
 }
 function withId(p){if(!p.id)p.id=`project_${aooUUID().replaceAll("-","")}`;return p}
 function collections(){return Object.values(library.projects).sort((a,b)=>String(a.pack.name||"").localeCompare(String(b.pack.name||"")))}
 function adoptCollection(next,message){library.projects[next.id]=next;library.currentId=next.id;project=next;selectedWorkId=project.works[0]?.id||null;selectedChapterId=project.works[0]?.chapters[0]?.id||null;activeTab="write";pristine=false;save(message);render()}
 function snapshot(){pristine=false;undoStack.push(JSON.stringify(project));if(undoStack.length>40)undoStack.shift();redoStack=[]}
-function save(message="Autosaved locally."){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{
+function save(message="Autosaved in this browser."){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{
   project.updatedAt=new Date().toISOString();library.projects[project.id]=project;library.currentId=project.id;
   try{AOOStore.setItem(LIBRARY,JSON.stringify(library));status(message)}
   catch(error){status("Browser storage is full, so this change was not autosaved. Use Save project to write a file.","error")}
@@ -521,14 +544,22 @@ const list=v=>String(v||"").split(",").map(x=>x.trim()).filter(Boolean);
 const esc=v=>String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function mutate(fn,{full=false,message}={}){snapshot();fn();deriveWork(currentWork());save(message);if(full)render();else{renderSummary();renderPreview();renderValidationBadges();updateCounters();updateDerivedFields()}}
-function render(){renderCollections();renderSummary();renderAuthors();renderWorks();renderWorkForm();renderChapterStrip();renderChapterEditor();renderComments();renderPreview();renderValidation();showTab(activeTab)}
+function render(){renderCollections();renderBackupState();renderSummary();renderAuthors();renderWorks();renderWorkForm();renderChapterStrip();renderChapterEditor();renderComments();renderPreview();renderValidation();showTab(activeTab)}
+function perWorkIssues(){const map={},issues=validateProject(project);project.works.forEach((w,i)=>{const mine=issues.filter(x=>String(x.path).startsWith(`work ${i+1}:`));map[w.id]={errors:mine.filter(x=>x.kind==="error").length,warnings:mine.filter(x=>x.kind==="warning").length}});return map}
+function renderBackupState(){const el=$("#backupState");if(!el)return;const saved=library.saved?.[project.id],dirty=!saved||new Date(project.updatedAt)>new Date(saved);el.textContent=dirty?"Not saved to a file":"Saved to a file";el.className=`backup-state ${dirty?"dirty":"clean"}`;el.title=dirty?"Autosave lives only in this browser. Use Save project to write a .aoopack.json you keep — it is the only way to publish an update later.":`Written to a file ${new Date(saved).toLocaleString()}. Autosave since then lives only in this browser.`}
 function renderCollections(){const sel=$("#collectionSelect");if(!sel)return;const all=collections();
   sel.innerHTML=all.map(p=>`<option value="${p.id}"${p.id===project.id?" selected":""}>${esc(p.pack.name||"Untitled collection")}</option>`).join("");
   const del=$("#deleteCollectionBtn");if(del)del.disabled=all.length<=1}
-function renderSummary(){const p=project.pack;$("#projectSummary").innerHTML=`<span>${project.authors.length} ${project.authors.length===1?"author":"authors"} · ${project.works.length} ${project.works.length===1?"work":"works"} · v${esc(p.version)}</span>`}
-function renderAuthors(){const total=project.authors.length,active=project.authors.filter(a=>a.status==="Active").length;$("#authorSummary").innerHTML=`<strong>${total} ${total===1?"author":"authors"}</strong><span>${active} active · ${total-active} inactive · manage</span>`}
+function renderSummary(){const p=project.pack;$("#projectSummary").innerHTML=`<span>${project.authors.length} ${project.authors.length===1?"author":"authors"} · ${project.works.length} ${project.works.length===1?"work":"works"} · v${esc(p.version)}</span><code class="ns" title="Permanent after your first public release">${esc(p.namespace||"no namespace")}</code>`}
+function renderAuthors(){const total=project.authors.length,active=project.authors.filter(a=>a.status==="Active").length;renderBackupState();$("#authorSummary").innerHTML=`<strong>${total} ${total===1?"author":"authors"}</strong><span>${active} active · ${total-active} inactive · manage</span>`}
 function renderAuthorsPane(){const host=$("#authorRows");if(!host)return;const q=($("#authorSearch")?.value||"").toLowerCase();const rows=project.authors.filter(a=>!q||(a.pseud||"").toLowerCase().includes(q));host.innerHTML=rows.map(a=>{const uses=project.works.filter(w=>w.authorId===a.id).length;return `<article class="author-row" data-author-row="${a.id}"><label>Pseud <input data-author-field="pseud" maxlength="${LIMITS.author}" value="${esc(a.pseud)}"></label><label>Status <select data-author-field="status"><option value="Inactive"${a.status!=="Active"?" selected":""}>Inactive</option><option value="Active"${a.status==="Active"?" selected":""}>Active</option></select></label><div class="author-meta"><i class="author-dot ${a.status==="Active"?"active":""}"></i><small>${uses} ${uses===1?"work":"works"}</small></div><button class="danger" data-delete-author${uses?" disabled":""}>Delete</button></article>`}).join("")||`<p class="help-callout">No authors match that search.</p>`}
-function renderWorks(){const query=$("#workSearch").value.toLowerCase(),host=$("#workList");host.innerHTML=project.works.filter(w=>{const a=project.authors.find(x=>x.id===w.authorId);return !query||`${w.title} ${a?.pseud||""}`.toLowerCase().includes(query)}).map(w=>`<button class="nav-item ${w.id===selectedWorkId?"active":""}" data-work="${w.id}"><span>${esc(w.title||"Untitled")}</span><small>${w.chapters.length} ch</small></button>`).join("")||`<small>No matching works.</small>`}
+function renderWorks(){const query=$("#workSearch").value.toLowerCase(),host=$("#workList"),issues=pristine?{}:perWorkIssues();
+  let attention=0;project.works.forEach(w=>{if(issues[w.id]?.errors)attention++});
+  const badge=$("#worksAttention");if(badge){badge.textContent=attention?`${attention} need fixing`:"";badge.hidden=!attention}
+  host.innerHTML=project.works.filter(w=>{const a=project.authors.find(x=>x.id===w.authorId);return !query||`${w.title} ${a?.pseud||""}`.toLowerCase().includes(query)}).map(w=>{
+    const a=project.authors.find(x=>x.id===w.authorId),st=issues[w.id],state=st?.errors?"error":st?.warnings?"warning":"ok",
+      label=st?.errors?`${st.errors} error(s)`:st?.warnings?`${st.warnings} warning(s)`:"Ready";
+    return `<button class="nav-item work-item ${w.id===selectedWorkId?"active":""}" data-work="${w.id}" title="${esc(w.title||"Untitled")} — ${label}"><span class="work-line"><span class="work-title">${esc(w.title||"Untitled")}</span><small class="work-by">${esc(a?.pseud||"no author")} · ${w.chapters.length} ch</small></span><i class="work-state ${pristine?"":state}" aria-hidden="true"></i></button>`}).join("")||`<small>No matching works.</small>`}
 
 function renderWorkForm(){const w=currentWork();if(!w)return;deriveWork(w);const t=w.title||"Untitled work";$("#workHeading").textContent=t;$("#detailsHeading").textContent=t;$("#authorSelect").innerHTML=project.authors.map(a=>`<option value="${a.id}">${esc(a.pseud)}</option>`).join("");$$('[data-bind]').forEach(el=>{const key=el.dataset.bind,value=w[key];el.value=typeof value==='boolean'?String(value):(value??'')});$$('[data-bind-list]').forEach(el=>el.value=(w[el.dataset.bindList]||[]).join(', '));$$('[data-bind-stat]').forEach(el=>el.value=w.stats?.[el.dataset.bindStat]??0);$("#chapterCount").textContent=w.chapters.length;$("#commentCount").textContent=w.comments.length;toggleConditionalFields(w);updateDerivedFields();updateCounters()}
 function toggleConditionalFields(w){const wip=w.complete===false||String(w.complete)==="false";const m=$("#releaseModelField"),i=$("#releaseIntervalField");if(m)m.hidden=!wip;if(i)i.hidden=!wip}
@@ -539,7 +570,9 @@ function renderChapterEditor(){const w=currentWork(),host=$("#chapterEditor");if
 function renderComments(){const w=currentWork(),host=$("#commentList");if(!w){host.innerHTML="";return}host.innerHTML=w.comments.map((c,i)=>`<article class="edit-card" data-comment="${c.id}"><div class="edit-card-header"><strong>Comment ${i+1}</strong><button class="danger" data-delete-comment>Delete</button></div><div class="card-fields"><label>User <input data-comment-field="user" value="${esc(c.user)}"></label><label>Date <input data-comment-field="date" value="${esc(c.date)}"></label><label>Attached to <select data-comment-field="chapterIndex"><option value="0">Whole work / chapter 1</option>${w.chapters.map((ch,ci)=>ci?`<option value="${ci}" ${Number(c.chapterIndex)===ci?"selected":""}>Chapter ${ci+1}: ${esc(ch.title)}</option>`:"").join("")}</select></label><label class="body">Comment <textarea data-comment-field="body" rows="3">${esc(c.body)}</textarea></label></div></article>`).join("")||`<p class="help-callout">No comments added. This is valid; comments are optional.</p>`}
 
 function renderPreview(){const w=currentWork(),host=$("#aooPreview");if(!w){host.innerHTML="";return}const tags=[...w.fandoms,...w.relationships,...w.characters,...w.tags],shown=tags.slice(0,12),author=project.authors.find(a=>a.id===w.authorId);host.innerHTML=`<article class="preview-work"><h2>${esc(w.title||"Untitled")}</h2><div class="preview-byline">by ${esc(w.pseud||author?.pseud||"unknown")}</div><div class="preview-meta"><strong>RATING</strong><span>${esc(w.rating)}</span><strong>WARNINGS</strong><span>${esc(w.warning)}</span><strong>CATEGORY</strong><span>${esc(w.category)}</span><strong>FANDOM</strong><span>${esc(w.fandoms.join(", ")||"—")}</span></div><div class="preview-tag-row">${shown.map(t=>`<span class="preview-tag" title="${esc(t)}">${esc(t)}</span>`).join("")}${tags.length>shown.length?`<span class="preview-more">SHOW ALL · +${tags.length-shown.length} TAGS</span>`:""}</div><p class="preview-summary">${esc(w.summary||"No summary provided.")}</p><div class="preview-stats"><span><small>Props</small>${w.stats.props||0}</span><span><small>Reads</small>${w.stats.reads||0}</span><span><small>Comments</small>${w.stats.comments||0}</span><span><small>Stashes</small>${w.stats.stashes||0}</span><span><small>Words</small>${w.wordCount||0}</span><span><small>Chapters</small>${w.chapters.length} / ${w.complete?"Complete":"WIP"}</span></div></article>`}
-function renderValidationBadges(){const badge=$("#issueCount");if(pristine){badge.textContent="–";badge.title="Nothing to check yet";return}const issues=validateProject(project),errors=issues.filter(i=>i.kind==="error").length;badge.textContent=errors||issues.length;badge.title=`${errors} errors, ${issues.filter(i=>i.kind==="warning").length} warnings`}
+let worksTimer=null;
+function scheduleWorks(){clearTimeout(worksTimer);worksTimer=setTimeout(renderWorks,250)}
+function renderValidationBadges(){scheduleWorks();const badge=$("#issueCount");if(pristine){badge.textContent="–";badge.title="Nothing to check yet";return}const issues=validateProject(project),errors=issues.filter(i=>i.kind==="error").length;badge.textContent=errors||issues.length;badge.title=`${errors} errors, ${issues.filter(i=>i.kind==="warning").length} warnings`}
 function renderValidation(){const host=$("#validationList");if(pristine){$("#validationSummary").innerHTML=`<p class="help-callout">Nothing checked yet. Start writing and this report fills in automatically.</p>`;host.innerHTML="";renderValidationBadges();return}const issues=validateProject(project),errors=issues.filter(i=>i.kind==="error").length,warnings=issues.filter(i=>i.kind==="warning").length;$("#validationSummary").innerHTML=`<p class="help-callout"><strong>${errors}</strong> errors · <strong>${warnings}</strong> warnings. Errors block ZIP export; warnings are advisory.</p>`;host.innerHTML=issues.length?issues.map(i=>`<article class="issue ${i.kind}"><span class="issue-kind">${i.kind}</span><div><strong>${esc(i.path)}</strong><br>${esc(i.message)}</div></article>`).join(""):`<article class="issue ok"><span class="issue-kind">ready</span><div><strong>Framework contract passed.</strong><br>The collection is ready to build.</div></article>`;renderValidationBadges()}
 function renderProjectForm(){$$('[data-pack]').forEach(el=>el.value=project.pack[el.dataset.pack]??"")}
 function showTab(tab){activeTab=tab;$$('.editor-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));$$('.pane').forEach(p=>p.classList.remove('active'));const w=currentWork(),needsWork=tab!=="project"&&tab!=="authors";$("#emptyState").hidden=!(needsWork&&!w);if(needsWork&&!w)return;const pane=document.querySelector(`#${tab}Pane`);if(pane)pane.classList.add("active");if(tab==="authors")renderAuthorsPane();if(tab==="project")renderProjectForm();if(tab==="validate")renderValidation();if(tab==="preview")renderPreview();if(tab==="write"){renderChapterStrip();renderChapterEditor()}}
@@ -580,13 +613,13 @@ $("#previewWidth").addEventListener("change",event=>$("#aooPreview").classList.t
 $("#tutorialBtn").addEventListener("click",()=>$("#tutorialDialog").showModal());
 $("#themeSelect").addEventListener("change",event=>{document.documentElement.dataset.theme=event.target.value;AOOStore.setItem(THEME,event.target.value)});
 $("#exampleSelect").addEventListener("change",event=>{if(!event.target.value)return;snapshot();library.projects[project.id]=project;adoptCollection(withId(getExample(event.target.value)),"Example added as a new collection.");event.target.value=""});
-$("#saveProjectBtn").addEventListener("click",()=>download(new Blob([JSON.stringify(project,null,2)],{type:"application/json"}),`${project.pack.namespace||"aoo-project"}.aoopack.json`));
+$("#saveProjectBtn").addEventListener("click",()=>{download(new Blob([JSON.stringify(project,null,2)],{type:"application/json"}),`${project.pack.namespace||"aoo-project"}.aoopack.json`);library.saved=library.saved||{};library.saved[project.id]=new Date().toISOString();save("Project file written. Keep it — you need it to publish updates.");renderBackupState()});
 $("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=normalizeProject(JSON.parse(await file.text()));snapshot();library.projects[project.id]=project;adoptCollection(withId(next),`Imported ${file.name}.`);status(`Imported ${file.name}.`,`success`)}catch(error){status(error.message,"error")}event.target.value=""});
 $("#buildBtn").addEventListener("click",()=>{renderValidation();const issues=validateProject(project),errors=issues.filter(x=>x.kind==="error");if(errors.length){activeTab="validate";showTab("validate");status(`Build blocked: ${errors.length} validation error(s).`,"error");return}try{const files=generatePackFiles(project),zip=createZip(files),name=`${project.pack.namespace}-v${project.pack.version}.zip`;download(zip,name);status(`Built ${name} with ${project.works.length} works.`,`success`)}catch(error){status(error.message,"error")}});
 
 document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();if(!undoStack.length)return;redoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(undoStack.pop()));selectedWorkId=project.works.find(w=>w.id===selectedWorkId)?.id||project.works[0]?.id||null;save("Undo autosaved.");render()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){event.preventDefault();if(!redoStack.length)return;undoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(redoStack.pop()));selectedWorkId=project.works[0]?.id||null;save("Redo autosaved.");render()}});
 
-const theme=AOOStore.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();if(!AOOStore.getItem("aoo-creator-tutorial-seen")){setTimeout(()=>$("#tutorialDialog").showModal(),350);AOOStore.setItem("aoo-creator-tutorial-seen","1")}status(`AOO Creator v${CREATOR_VERSION} · local autosave active.`);
+const theme=AOOStore.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();if(!AOOStore.getItem("aoo-creator-tutorial-seen")){setTimeout(()=>$("#tutorialDialog").showModal(),350);AOOStore.setItem("aoo-creator-tutorial-seen","1")}status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);
 
 })();
 </script>

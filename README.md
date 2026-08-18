@@ -81,6 +81,20 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   Five genuinely destructive actions (delete work, chapter, comment, author, collection)
   use an in-page confirmation styled like the rest of the tool; the rest needed no
   confirmation once they stopped destroying anything.
+- **Autosave no longer lies.** The status bar used to say "local autosave active", which
+  reads as "your work is safe" — it isn't. A chip beside Save project now shows *Not saved
+  to a file* or *Saved to a file* per collection, and the wording says autosave lives only
+  in this browser. This is the highest-stakes misunderstanding in the tool: losing the
+  `.aoopack.json` means never publishing a compatible update.
+- **Collection settings has a label.** It held the permanent namespace behind an unlabelled
+  gear icon. It is now a **Settings** button beside New and Delete, and the namespace itself
+  is shown in the rail so the irreversible value is visible without opening anything.
+- **The works list carries state.** Each row now shows the author pseud and chapter count,
+  plus a dot: green ready, amber warnings, red errors. Previously it was title and chapter
+  count only, which is not enough to navigate twenty works.
+- **Where the problems are.** The Works heading shows how many works have errors, so a
+  writer finishing a large collection can see what is left without clicking through. The
+  list re-render is debounced so typing stays smooth.
 - **Pack layout fixed.** `pack.aoopack.json`, `manifest.json`, `README.txt` and `VERSION`
   used to land at the Cyberpunk root, where any two installed fic packs overwrote each
   other's copies — and the core mod's own `VERSION`. Everything now sits under
