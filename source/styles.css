@@ -413,3 +413,22 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
 [data-theme=gyaru] .nav-item.active,[data-theme=gyaru] .strip-item.active{
   background:linear-gradient(90deg,#ff4fa333,#ff4fa30d)}
 [data-theme=bios] .strip-item.active small,[data-theme=bios] .strip-item.active .strip-num{color:#000088;background:transparent}
+
+/* --- Gyaru: a pill needs horizontal padding of roughly half its height, or
+       the text runs into the curve at both ends --- */
+[data-theme=gyaru] button{padding-left:1.2rem;padding-right:1.2rem}
+[data-theme=gyaru] .collection-actions button,[data-theme=gyaru] .card-actions button,
+[data-theme=gyaru] .tour-card footer button{padding-left:.95rem;padding-right:.95rem}
+[data-theme=gyaru] .icon-button{padding:0;width:2rem}
+[data-theme=gyaru] input,[data-theme=gyaru] textarea{padding-left:1.05rem;padding-right:1.05rem}
+[data-theme=gyaru] select{padding-left:1.05rem;padding-right:2.3rem;background-position:right 1rem center}
+[data-theme=gyaru] .rail-search,[data-theme=gyaru] .author-search,
+[data-theme=gyaru] .collection-select{padding-left:1.1rem}
+[data-theme=gyaru] .manuscript{border-radius:14px;padding-left:2rem;padding-right:2rem}
+[data-theme=gyaru] .badge{padding:0 .55rem}
+[data-theme=gyaru] .backup-state{padding-left:.8rem;padding-right:.8rem}
+[data-theme=gyaru] .attention{padding:.08rem .6rem}
+/* tabs are underlined, not pills - the rounded corners fought the underline */
+[data-theme=gyaru] .editor-tabs button{border-radius:0;padding-left:.8rem;padding-right:.8rem}
+/* the rail entries are wide rows, not pills */
+[data-theme=gyaru] .nav-item,[data-theme=gyaru] .strip-item{border-radius:10px;padding-left:.8rem}
