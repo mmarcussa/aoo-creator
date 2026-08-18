@@ -87,6 +87,7 @@
     "importBtn",
     "importFile",
     "issueCount",
+    "livePreviewBtn",
     "manageAuthorsBtn",
     "mastheadName",
     "newProjectBtn",
@@ -94,6 +95,7 @@
     "projectForm",
     "projectSettingsBtn",
     "projectSummary",
+    "readyState",
     "releaseIntervalField",
     "releaseModelField",
     "runValidationBtn",
@@ -114,7 +116,9 @@
     "workHeading",
     "workList",
     "workSearch",
-    "worksAttention"
+    "worksAttention",
+    "writePane",
+    "writePreview"
   ],
   "idsMissing": []
 }

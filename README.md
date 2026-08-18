@@ -111,6 +111,13 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   transform and opacity animate, so nothing triggers layout. The manuscript, works list and
   chapter strip never shift position. All of it is disabled under
   `prefers-reduced-motion: reduce`, verified with the browser flag rather than assumed.
+- **Write beside the preview.** A toggle in the Write heading opens the AOO work card next to
+  the manuscript, updating as you type the body, the title, the tags. Seeing a fic render as an
+  in-game card was previously tab four of five; it is now the thing you write against. The
+  panel folds away below 1300px rather than squeezing the manuscript, and the choice persists.
+- **A standing answer to "can I ship this".** A chip beside the build button reads *Ready to
+  build* or *N to fix* and jumps to Validation when clicked. Publishability was previously
+  something you had to go and look up.
 - **The shell reads as a console.** The masthead leads with the collection you are building
   rather than the tool's own name, which is now a monospace footnote under it. A HUD frame
   brackets the working area. Tabs are numbered `01`–`05` so they read as a sequence rather

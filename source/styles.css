@@ -1082,3 +1082,40 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 [data-theme=win95] .chapter-strip::after,[data-theme=win95] .manuscript::after,
 [data-theme=bauhaus] .chapter-strip::after,[data-theme=bauhaus] .manuscript::after,
 [data-theme=brutal] .chapter-strip::after,[data-theme=brutal] .manuscript::after{display:none}
+
+/* ================= phase 3: the flow =================
+   Two things the tab structure could not answer: you could not watch your work
+   render while writing it, and you could not tell whether it was publishable
+   without going and looking.
+   ==================================================== */
+
+/* --- manuscript and work card, side by side --- */
+.write-preview{display:flex;flex-direction:column;min-height:0;min-width:0;gap:.5rem}
+.write-preview .strip-head{padding:.45rem .1rem;border-bottom:1px solid var(--line)}
+.write-preview .aoo-preview{overflow:auto;min-height:0;flex:1;--preview-width:100%;max-width:none}
+#writePane.with-preview .write-layout{grid-template-columns:190px minmax(0,1fr) minmax(300px,400px);
+  max-width:1620px}
+#writePane.with-preview .chapter-editor{max-width:none}
+#writePane:not(.with-preview) .write-preview{display:none}
+
+/* --- a standing answer to whether this can ship --- */
+.ready-state{flex:none;padding:.32rem .7rem;font-family:var(--font-mono);font-size:.66rem;
+  letter-spacing:.1em;text-transform:uppercase;font-weight:700;cursor:pointer;
+  border:1px solid var(--line);border-radius:2px;background:transparent}
+.ready-state[hidden]{display:none}
+.ready-state.ready{color:var(--green);border-color:color-mix(in srgb,var(--green) 55%,var(--line));
+  background:color-mix(in srgb,var(--green) 12%,transparent)}
+.ready-state.blocked{color:var(--red);border-color:color-mix(in srgb,var(--red) 55%,var(--line));
+  background:color-mix(in srgb,var(--red) 12%,transparent)}
+.ready-state:hover{filter:brightness(1.18)}
+
+/* below this width the third column would squeeze the manuscript, so it folds away */
+@media(max-width:1300px){
+  #writePane.with-preview .write-layout{grid-template-columns:190px minmax(0,1fr)}
+  #writePane.with-preview .write-preview{display:none}
+}
+/* the six-across stat row is built for the full-width preview; in the side
+   panel it collides, so it wraps to three */
+.write-preview .preview-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .5rem}
+.write-preview .preview-tag{max-width:100%}
+.write-preview .preview-meta{grid-template-columns:96px 1fr}

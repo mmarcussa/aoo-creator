@@ -1091,6 +1091,43 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 [data-theme=bauhaus] .chapter-strip::after,[data-theme=bauhaus] .manuscript::after,
 [data-theme=brutal] .chapter-strip::after,[data-theme=brutal] .manuscript::after{display:none}
 
+/* ================= phase 3: the flow =================
+   Two things the tab structure could not answer: you could not watch your work
+   render while writing it, and you could not tell whether it was publishable
+   without going and looking.
+   ==================================================== */
+
+/* --- manuscript and work card, side by side --- */
+.write-preview{display:flex;flex-direction:column;min-height:0;min-width:0;gap:.5rem}
+.write-preview .strip-head{padding:.45rem .1rem;border-bottom:1px solid var(--line)}
+.write-preview .aoo-preview{overflow:auto;min-height:0;flex:1;--preview-width:100%;max-width:none}
+#writePane.with-preview .write-layout{grid-template-columns:190px minmax(0,1fr) minmax(300px,400px);
+  max-width:1620px}
+#writePane.with-preview .chapter-editor{max-width:none}
+#writePane:not(.with-preview) .write-preview{display:none}
+
+/* --- a standing answer to whether this can ship --- */
+.ready-state{flex:none;padding:.32rem .7rem;font-family:var(--font-mono);font-size:.66rem;
+  letter-spacing:.1em;text-transform:uppercase;font-weight:700;cursor:pointer;
+  border:1px solid var(--line);border-radius:2px;background:transparent}
+.ready-state[hidden]{display:none}
+.ready-state.ready{color:var(--green);border-color:color-mix(in srgb,var(--green) 55%,var(--line));
+  background:color-mix(in srgb,var(--green) 12%,transparent)}
+.ready-state.blocked{color:var(--red);border-color:color-mix(in srgb,var(--red) 55%,var(--line));
+  background:color-mix(in srgb,var(--red) 12%,transparent)}
+.ready-state:hover{filter:brightness(1.18)}
+
+/* below this width the third column would squeeze the manuscript, so it folds away */
+@media(max-width:1300px){
+  #writePane.with-preview .write-layout{grid-template-columns:190px minmax(0,1fr)}
+  #writePane.with-preview .write-preview{display:none}
+}
+/* the six-across stat row is built for the full-width preview; in the side
+   panel it collides, so it wraps to three */
+.write-preview .preview-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .5rem}
+.write-preview .preview-tag{max-width:100%}
+.write-preview .preview-meta{grid-template-columns:96px 1fr}
+
 </style>
 </head>
 <body>
@@ -1133,6 +1170,7 @@ button{font-family:var(--font-display);letter-spacing:.02em}
       <button id="tutorialBtn" class="ghost">Tutorial</button>
       <button id="importBtn" class="ghost">Import project</button>
       <button id="saveProjectBtn" class="secondary">Save project</button>
+      <button id="readyState" class="ready-state" type="button" hidden></button>
       <button id="buildBtn" class="primary">Validate &amp; build ZIP</button>
       <input id="importFile" type="file" accept=".json,.aoopack.json,application/json" hidden>
     </div>
@@ -1195,6 +1233,7 @@ button{font-family:var(--font-display);letter-spacing:.02em}
       <div id="writePane" class="pane active">
         <div class="pane-heading">
           <div><span class="eyebrow">Manuscript</span><h1 id="workHeading">Untitled work</h1></div>
+          <div class="pane-actions"><button id="livePreviewBtn" class="ghost" aria-pressed="false">Show preview</button></div>
         </div>
         <div class="write-layout">
           <aside class="chapter-strip">
@@ -1202,6 +1241,10 @@ button{font-family:var(--font-display);letter-spacing:.02em}
             <div id="chapterStrip" class="strip-list"></div>
           </aside>
           <div id="chapterEditor" class="chapter-editor"></div>
+          <aside id="writePreview" class="write-preview" hidden>
+            <div class="strip-head">As readers see it</div>
+            <div id="aooPreviewLive" class="aoo-preview"></div>
+          </aside>
         </div>
       </div>
 
@@ -1646,10 +1689,16 @@ function renderChapterStrip(){const w=currentWork(),host=$("#chapterStrip");if(!
 function renderChapterEditor(){const w=currentWork(),host=$("#chapterEditor");if(!host)return;if(!w){host.innerHTML="";return}const c=currentChapter();if(!c){host.innerHTML=`<p class="help-callout">This work needs at least one chapter. Choose <strong>Add chapter</strong> to begin.</p>`;return}const i=w.chapters.indexOf(c);host.innerHTML=`<div class="editor-bar"><label class="grow">Chapter title<input data-chapter-field="title" maxlength="${LIMITS.chapterTitle}" value="${esc(c.title)}"></label><label class="tight">Price (€$)<input data-chapter-field="price" type="number" min="1" value="${c.price||300}"></label><div class="card-actions"><button data-move-chapter="up" ${i===0?"disabled":""} title="Move up">↑</button><button data-move-chapter="down" ${i===w.chapters.length-1?"disabled":""} title="Move down">↓</button><button class="danger" data-delete-chapter>Delete</button></div></div><textarea class="manuscript" data-chapter-field="body" placeholder="Write the chapter here. Leave a blank line between paragraphs.">${esc(c.body)}</textarea><div class="editor-foot"><span id="chapterWords">${countWords(c.body)} words</span><span>Chapter ${i+1} of ${w.chapters.length}</span></div><details class="notes"><summary>Author&rsquo;s notes (optional)</summary><label>Notes before<textarea data-chapter-field="notesBefore" rows="3">${esc(c.notesBefore)}</textarea></label><label>Notes after<textarea data-chapter-field="notesAfter" rows="3">${esc(c.notesAfter)}</textarea></label></details>`}
 function renderComments(){const w=currentWork(),host=$("#commentList");if(!w){host.innerHTML="";return}host.innerHTML=w.comments.map((c,i)=>`<article class="edit-card" data-comment="${c.id}"><div class="edit-card-header"><strong>Comment ${i+1}</strong><button class="danger" data-delete-comment>Delete</button></div><div class="card-fields"><label>User <input data-comment-field="user" value="${esc(c.user)}"></label><label>Date <input data-comment-field="date" value="${esc(c.date)}"></label><label>Attached to <select data-comment-field="chapterIndex"><option value="0">Whole work / chapter 1</option>${w.chapters.map((ch,ci)=>ci?`<option value="${ci}" ${Number(c.chapterIndex)===ci?"selected":""}>Chapter ${ci+1}: ${esc(ch.title)}</option>`:"").join("")}</select></label><label class="body">Comment <textarea data-comment-field="body" rows="3">${esc(c.body)}</textarea></label></div></article>`).join("")||`<p class="help-callout">No comments added. This is valid; comments are optional.</p>`}
 
-function renderPreview(){const w=currentWork(),host=$("#aooPreview");if(!w){host.innerHTML="";return}const tags=[...w.fandoms,...w.relationships,...w.characters,...w.tags],shown=tags.slice(0,12),author=project.authors.find(a=>a.id===w.authorId);host.innerHTML=`<article class="preview-work"><h2>${esc(w.title||"Untitled")}</h2><div class="preview-byline">by ${esc(w.pseud||author?.pseud||"unknown")}</div><div class="preview-meta"><strong>RATING</strong><span>${esc(w.rating)}</span><strong>WARNINGS</strong><span>${esc(w.warning)}</span><strong>CATEGORY</strong><span>${esc(w.category)}</span><strong>FANDOM</strong><span>${esc(w.fandoms.join(", ")||"—")}</span></div><div class="preview-tag-row">${shown.map(t=>`<span class="preview-tag" title="${esc(t)}">${esc(t)}</span>`).join("")}${tags.length>shown.length?`<span class="preview-more">SHOW ALL · +${tags.length-shown.length} TAGS</span>`:""}</div><p class="preview-summary">${esc(w.summary||"No summary provided.")}</p><div class="preview-stats"><span><small>Props</small>${w.stats.props||0}</span><span><small>Reads</small>${w.stats.reads||0}</span><span><small>Comments</small>${w.stats.comments||0}</span><span><small>Stashes</small>${w.stats.stashes||0}</span><span><small>Words</small>${w.wordCount||0}</span><span><small>Chapters</small>${w.chapters.length} / ${w.complete?"Complete":"WIP"}</span></div></article>`}
+function renderPreview(){const w=currentWork(),hosts=$$(".aoo-preview");if(!hosts.length)return;if(!w){hosts.forEach(h=>h.innerHTML="");return}const tags=[...w.fandoms,...w.relationships,...w.characters,...w.tags],shown=tags.slice(0,12),author=project.authors.find(a=>a.id===w.authorId);const html=`<article class="preview-work"><h2>${esc(w.title||"Untitled")}</h2><div class="preview-byline">by ${esc(w.pseud||author?.pseud||"unknown")}</div><div class="preview-meta"><strong>RATING</strong><span>${esc(w.rating)}</span><strong>WARNINGS</strong><span>${esc(w.warning)}</span><strong>CATEGORY</strong><span>${esc(w.category)}</span><strong>FANDOM</strong><span>${esc(w.fandoms.join(", ")||"—")}</span></div><div class="preview-tag-row">${shown.map(t=>`<span class="preview-tag" title="${esc(t)}">${esc(t)}</span>`).join("")}${tags.length>shown.length?`<span class="preview-more">SHOW ALL · +${tags.length-shown.length} TAGS</span>`:""}</div><p class="preview-summary">${esc(w.summary||"No summary provided.")}</p><div class="preview-stats"><span><small>Props</small>${w.stats.props||0}</span><span><small>Reads</small>${w.stats.reads||0}</span><span><small>Comments</small>${w.stats.comments||0}</span><span><small>Stashes</small>${w.stats.stashes||0}</span><span><small>Words</small>${w.wordCount||0}</span><span><small>Chapters</small>${w.chapters.length} / ${w.complete?"Complete":"WIP"}</span></div></article>`;hosts.forEach(h=>h.innerHTML=html)}
 let worksTimer=null;
 function scheduleWorks(){clearTimeout(worksTimer);worksTimer=setTimeout(renderWorks,250)}
-function renderValidationBadges(){scheduleWorks();const badge=$("#issueCount");if(pristine){badge.textContent="–";badge.title="Nothing to check yet";return}const issues=validateProject(project),errors=issues.filter(i=>i.kind==="error").length;badge.textContent=errors||issues.length;badge.title=`${errors} errors, ${issues.filter(i=>i.kind==="warning").length} warnings`}
+function renderReadyState(){const el=$("#readyState");if(!el)return;
+  if(pristine){el.hidden=true;return}
+  const errors=validateProject(project).filter(i=>i.kind==="error").length;
+  el.hidden=false;el.textContent=errors?`${errors} to fix`:"Ready to build";
+  el.className=`ready-state ${errors?"blocked":"ready"}`;
+  el.title=errors?"Validation errors block the export. Click to see them.":"Validation passes. This collection can be built."}
+function renderValidationBadges(){scheduleWorks();renderReadyState();const badge=$("#issueCount");if(pristine){badge.textContent="–";badge.title="Nothing to check yet";return}const issues=validateProject(project),errors=issues.filter(i=>i.kind==="error").length;badge.textContent=errors||issues.length;badge.title=`${errors} errors, ${issues.filter(i=>i.kind==="warning").length} warnings`}
 function renderValidation(){const host=$("#validationList");if(pristine){$("#validationSummary").innerHTML=`<p class="help-callout">Nothing checked yet. Start writing and this report fills in automatically.</p>`;host.innerHTML="";renderValidationBadges();return}const issues=validateProject(project),errors=issues.filter(i=>i.kind==="error").length,warnings=issues.filter(i=>i.kind==="warning").length;$("#validationSummary").innerHTML=`<p class="help-callout"><strong>${errors}</strong> errors · <strong>${warnings}</strong> warnings. Errors block ZIP export; warnings are advisory.</p>`;host.innerHTML=issues.length?issues.map(i=>`<article class="issue ${i.kind}"><span class="issue-kind">${i.kind}</span><div><strong>${esc(i.path)}</strong><br>${esc(i.message)}</div></article>`).join(""):`<article class="issue ok"><span class="issue-kind">ready</span><div><strong>Framework contract passed.</strong><br>The collection is ready to build.</div></article>`;renderValidationBadges()}
 function renderProjectForm(){$$('[data-pack]').forEach(el=>el.value=project.pack[el.dataset.pack]??"")}
 function showTab(tab){activeTab=tab;$$('.editor-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));$$('.pane').forEach(p=>p.classList.remove('active'));const w=currentWork(),needsWork=tab!=="project"&&tab!=="authors";$("#emptyState").hidden=!(needsWork&&!w);if(needsWork&&!w)return;const pane=document.querySelector(`#${tab}Pane`);if(pane)pane.classList.add("active");if(tab==="authors")renderAuthorsPane();if(tab==="project")renderProjectForm();if(tab==="validate")renderValidation();if(tab==="preview")renderPreview();if(tab==="write"){renderChapterStrip();renderChapterEditor()}}
@@ -1665,11 +1714,16 @@ document.addEventListener("click",event=>{const tab=event.target.closest("[data-
 
 $("#workForm").addEventListener("input",event=>{const w=currentWork();if(!w)return;const bind=event.target.dataset.bind,listKey=event.target.dataset.bindList,stat=event.target.dataset.bindStat;snapshot();if(bind){let value=event.target.value;if(["complete","active"].includes(bind))value=bool(value);if(["releaseIntervalDays","wordCount"].includes(bind))value=Number(value)||0;w[bind]=value;if(bind==="authorId"){const a=project.authors.find(x=>x.id===value);if(a){w.pseud=a.pseud;document.querySelector('[data-bind="pseud"]').value=a.pseud}}if(bind==="title"){$("#workHeading").textContent=value||"Untitled work";$("#detailsHeading").textContent=value||"Untitled work"}if(bind==="complete"){if(value===true)w.active=false;toggleConditionalFields(w);const a=document.querySelector('[data-bind="active"]');if(a)a.value=String(w.active)}}else if(listKey)w[listKey]=list(event.target.value);else if(stat)w.stats[stat]=Number(event.target.value)||0;save();renderSummary();renderPreview();renderValidationBadges();updateCounters()});
 $("#projectForm").addEventListener("input",event=>{const key=event.target.dataset.pack;if(!key)return;snapshot();project.pack[key]=event.target.value;save();renderSummary();if(key==="name")renderCollections();renderValidationBadges()});
-$("#chapterEditor").addEventListener("input",event=>{const field=event.target.dataset.chapterField;if(!field)return;const c=currentChapter();if(!c)return;snapshot();c[field]=field==="price"?Number(event.target.value)||0:event.target.value;if(field==="body"){deriveWork(currentWork());const wc=$("#chapterWords");if(wc)wc.textContent=`${countWords(c.body)} words`;renderChapterStrip();updateDerivedFields();renderPreview()}if(field==="title")renderChapterStrip();save();renderValidationBadges()});
+$("#chapterEditor").addEventListener("input",event=>{const field=event.target.dataset.chapterField;if(!field)return;const c=currentChapter();if(!c)return;snapshot();c[field]=field==="price"?Number(event.target.value)||0:event.target.value;if(field==="body"){deriveWork(currentWork());const wc=$("#chapterWords");if(wc)wc.textContent=`${countWords(c.body)} words`;renderChapterStrip();updateDerivedFields();renderPreview()}if(field==="title"){renderChapterStrip();renderPreview()}save();renderValidationBadges()});
 $("#commentList").addEventListener("input",event=>{const card=event.target.closest("[data-comment]"),field=event.target.dataset.commentField;if(!card||!field)return;const c=currentWork().comments.find(x=>x.id===card.dataset.comment);snapshot();c[field]=field==="chapterIndex"?Number(event.target.value):event.target.value;save();renderValidationBadges()});
 
 $("#addAuthorBtn").addEventListener("click",()=>{mutate(()=>project.authors.push(makeAuthor("newauthor",false)),{full:true,message:"Author added — give it a pseud."});showTab("authors");const rows=$$("[data-author-row]"),input=rows[rows.length-1]?.querySelector('[data-author-field="pseud"]');if(input){input.focus();input.select()}});
 $("#backupState").addEventListener("click",()=>$("#saveProjectBtn").click());
+$("#readyState").addEventListener("click",()=>showTab("validate"));
+$("#livePreviewBtn").addEventListener("click",()=>{const p=$("#writePreview"),b=$("#livePreviewBtn");
+  const on=p.hidden;p.hidden=!on;b.setAttribute("aria-pressed",String(on));
+  b.textContent=on?"Hide preview":"Show preview";$("#writePane").classList.toggle("with-preview",on);
+  AOOStore.setItem("aoo-creator-live-preview",on?"1":"");if(on)renderPreview()});
 $("#manageAuthorsBtn").addEventListener("click",()=>showTab("authors"));
 $("#authorSummary").addEventListener("click",()=>showTab("authors"));
 $("#authorSearch").addEventListener("input",renderAuthorsPane);
@@ -1719,6 +1773,7 @@ $("#buildBtn").addEventListener("click",()=>{renderValidation();const issues=val
 
 document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();if(!undoStack.length)return;redoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(undoStack.pop()));selectedWorkId=project.works.find(w=>w.id===selectedWorkId)?.id||project.works[0]?.id||null;save("Undo autosaved.");render()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){event.preventDefault();if(!redoStack.length)return;undoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(redoStack.pop()));selectedWorkId=project.works[0]?.id||null;save("Redo autosaved.");render()}});
 
+if(AOOStore.getItem("aoo-creator-live-preview")){$("#writePreview").hidden=false;$("#writePane").classList.add("with-preview");$("#livePreviewBtn").textContent="Hide preview";$("#livePreviewBtn").setAttribute("aria-pressed","true")}
 const theme=AOOStore.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();function afterBoot(){if(!AOOStore.getItem("aoo-creator-welcome-seen"))showWelcome()}
 function runBoot(){
   const el=$("#boot");
