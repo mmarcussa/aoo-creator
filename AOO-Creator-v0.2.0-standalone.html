@@ -180,6 +180,32 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
 .form-grid input,.form-grid select,.form-grid textarea,.editor-bar input,.author-row input,.author-row select,.card-fields input,.card-fields textarea,.card-fields select{background:color-mix(in srgb,var(--bg) 55%,var(--panel2));border-radius:4px}
 .form-grid input:focus,.form-grid textarea:focus,.editor-bar input:focus,.manuscript:focus{border-color:var(--cyan)}
 
+/* ================= status bar split + action hierarchy ================= */
+
+/* --- state lives at the right of the status bar, not among the actions --- */
+.status-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.2rem .8rem .2rem 1rem;height:32px}
+.status-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status-text.error{color:var(--red)}
+.status-text.success{color:var(--green)}
+.backup-state{flex:none;padding:.22rem .6rem;font-size:.68rem;cursor:pointer}
+.backup-state:hover{filter:brightness(1.25)}
+.backup-state.dirty:hover{border-color:var(--yellow);color:var(--yellow)}
+
+/* --- three action tiers, not two ---
+   primary   the build, the thing you came here to do
+   secondary Save project: not the goal, but the one that prevents loss
+   ghost     everything optional                                        */
+.secondary{border-color:color-mix(in srgb,var(--text) 34%,var(--line));color:var(--text);font-weight:700;background:var(--panel2)}
+.secondary:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* --- two destructive tiers: routine vs collection-wide --- */
+.danger-strong{background:color-mix(in srgb,var(--red) 16%,transparent);border-color:var(--red);font-weight:800}
+.danger-strong:hover:not([disabled]){background:color-mix(in srgb,var(--red) 26%,transparent)}
+
+/* --- navigation reads as navigation, not as buttons --- */
+.nav-item:hover,.strip-item:hover{border-color:transparent}
+.nav-item.active,.strip-item.active{border-color:transparent;box-shadow:inset 3px 0 0 var(--yellow)}
+
 </style>
 </head>
 <body>
@@ -197,14 +223,16 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
       </label>
       <button id="tutorialBtn" class="ghost">Tutorial</button>
       <button id="importBtn" class="ghost">Import project</button>
-      <span id="backupState" class="backup-state"></span>
-      <button id="saveProjectBtn" class="ghost">Save project</button>
+      <button id="saveProjectBtn" class="secondary">Save project</button>
       <button id="buildBtn" class="primary">Validate &amp; build ZIP</button>
       <input id="importFile" type="file" accept=".json,.aoopack.json,application/json" hidden>
     </div>
   </header>
 
-  <div id="statusBar" class="status-bar" role="status">Autosave ready.</div>
+  <div class="status-bar">
+    <span id="statusBar" class="status-text" role="status">Autosave ready.</span>
+    <button id="backupState" class="backup-state" type="button"></button>
+  </div>
 
   <main class="workspace">
     <aside class="rail" aria-label="Collection navigator">
@@ -212,7 +240,7 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
         <div class="section-title"><h2>Collection</h2></div>
         <select id="collectionSelect" class="collection-select" aria-label="Switch collection"></select>
         <div id="projectSummary" class="project-summary"></div>
-        <div class="collection-actions"><button id="projectSettingsBtn" class="ghost">Settings</button><button id="newProjectBtn" class="ghost">New</button><button id="deleteCollectionBtn" class="danger">Delete</button></div>
+        <div class="collection-actions"><button id="projectSettingsBtn" class="ghost">Settings</button><button id="newProjectBtn" class="ghost">New</button><button id="deleteCollectionBtn" class="danger danger-strong">Delete</button></div>
       </section>
 
       <section class="rail-section">
@@ -580,7 +608,7 @@ function save(message="Autosaved in this browser."){clearTimeout(saveTimer);save
   catch(error){status("Browser storage is full, so this change was not autosaved. Use Save project to write a file.","error")}
   renderBackupState();
 },180)}
-function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-bar ${kind}`}
+function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-text ${kind}`}
 function ask(body,{title="Are you sure?",eyebrow="Confirm",okLabel="Confirm",danger=false}={}){const d=$("#confirmDialog");$("#confirmEyebrow").textContent=eyebrow;$("#confirmTitle").textContent=title;$("#confirmBody").textContent=body;const ok=$("#confirmOk");ok.textContent=okLabel;ok.className=danger?"danger":"primary";d.showModal();return new Promise(resolve=>d.addEventListener("close",()=>resolve(d.returnValue==="ok"),{once:true}))}
 function currentWork(){return project.works.find(w=>w.id===selectedWorkId)||null}
 const countWords=t=>{const v=String(t||"").trim();return v?v.split(/\s+/).length:0};
@@ -642,6 +670,7 @@ $("#chapterEditor").addEventListener("input",event=>{const field=event.target.da
 $("#commentList").addEventListener("input",event=>{const card=event.target.closest("[data-comment]"),field=event.target.dataset.commentField;if(!card||!field)return;const c=currentWork().comments.find(x=>x.id===card.dataset.comment);snapshot();c[field]=field==="chapterIndex"?Number(event.target.value):event.target.value;save();renderValidationBadges()});
 
 $("#addAuthorBtn").addEventListener("click",()=>{mutate(()=>project.authors.push(makeAuthor("newauthor",false)),{full:true,message:"Author added — give it a pseud."});showTab("authors");const rows=$$("[data-author-row]"),input=rows[rows.length-1]?.querySelector('[data-author-field="pseud"]');if(input){input.focus();input.select()}});
+$("#backupState").addEventListener("click",()=>$("#saveProjectBtn").click());
 $("#manageAuthorsBtn").addEventListener("click",()=>showTab("authors"));
 $("#authorSummary").addEventListener("click",()=>showTab("authors"));
 $("#authorSearch").addEventListener("input",renderAuthorsPane);

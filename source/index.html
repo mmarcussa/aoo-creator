@@ -22,14 +22,16 @@
       </label>
       <button id="tutorialBtn" class="ghost">Tutorial</button>
       <button id="importBtn" class="ghost">Import project</button>
-      <span id="backupState" class="backup-state"></span>
-      <button id="saveProjectBtn" class="ghost">Save project</button>
+      <button id="saveProjectBtn" class="secondary">Save project</button>
       <button id="buildBtn" class="primary">Validate &amp; build ZIP</button>
       <input id="importFile" type="file" accept=".json,.aoopack.json,application/json" hidden>
     </div>
   </header>
 
-  <div id="statusBar" class="status-bar" role="status">Autosave ready.</div>
+  <div class="status-bar">
+    <span id="statusBar" class="status-text" role="status">Autosave ready.</span>
+    <button id="backupState" class="backup-state" type="button"></button>
+  </div>
 
   <main class="workspace">
     <aside class="rail" aria-label="Collection navigator">
@@ -37,7 +39,7 @@
         <div class="section-title"><h2>Collection</h2></div>
         <select id="collectionSelect" class="collection-select" aria-label="Switch collection"></select>
         <div id="projectSummary" class="project-summary"></div>
-        <div class="collection-actions"><button id="projectSettingsBtn" class="ghost">Settings</button><button id="newProjectBtn" class="ghost">New</button><button id="deleteCollectionBtn" class="danger">Delete</button></div>
+        <div class="collection-actions"><button id="projectSettingsBtn" class="ghost">Settings</button><button id="newProjectBtn" class="ghost">New</button><button id="deleteCollectionBtn" class="danger danger-strong">Delete</button></div>
       </section>
 
       <section class="rail-section">

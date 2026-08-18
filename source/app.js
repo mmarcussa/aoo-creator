@@ -29,7 +29,7 @@ function save(message="Autosaved in this browser."){clearTimeout(saveTimer);save
   catch(error){status("Browser storage is full, so this change was not autosaved. Use Save project to write a file.","error")}
   renderBackupState();
 },180)}
-function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-bar ${kind}`}
+function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-text ${kind}`}
 function ask(body,{title="Are you sure?",eyebrow="Confirm",okLabel="Confirm",danger=false}={}){const d=$("#confirmDialog");$("#confirmEyebrow").textContent=eyebrow;$("#confirmTitle").textContent=title;$("#confirmBody").textContent=body;const ok=$("#confirmOk");ok.textContent=okLabel;ok.className=danger?"danger":"primary";d.showModal();return new Promise(resolve=>d.addEventListener("close",()=>resolve(d.returnValue==="ok"),{once:true}))}
 function currentWork(){return project.works.find(w=>w.id===selectedWorkId)||null}
 const countWords=t=>{const v=String(t||"").trim();return v?v.split(/\s+/).length:0};
@@ -91,6 +91,7 @@ $("#chapterEditor").addEventListener("input",event=>{const field=event.target.da
 $("#commentList").addEventListener("input",event=>{const card=event.target.closest("[data-comment]"),field=event.target.dataset.commentField;if(!card||!field)return;const c=currentWork().comments.find(x=>x.id===card.dataset.comment);snapshot();c[field]=field==="chapterIndex"?Number(event.target.value):event.target.value;save();renderValidationBadges()});
 
 $("#addAuthorBtn").addEventListener("click",()=>{mutate(()=>project.authors.push(makeAuthor("newauthor",false)),{full:true,message:"Author added — give it a pseud."});showTab("authors");const rows=$$("[data-author-row]"),input=rows[rows.length-1]?.querySelector('[data-author-field="pseud"]');if(input){input.focus();input.select()}});
+$("#backupState").addEventListener("click",()=>$("#saveProjectBtn").click());
 $("#manageAuthorsBtn").addEventListener("click",()=>showTab("authors"));
 $("#authorSummary").addEventListener("click",()=>showTab("authors"));
 $("#authorSearch").addEventListener("input",renderAuthorsPane);

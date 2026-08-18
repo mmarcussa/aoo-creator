@@ -87,9 +87,14 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   Five genuinely destructive actions (delete work, chapter, comment, author, collection)
   use an in-page confirmation styled like the rest of the tool; the rest needed no
   confirmation once they stopped destroying anything.
+- **Action hierarchy.** Three action tiers rather than two: primary for the build, a new
+  secondary tier for Save project (not the goal, but the one that prevents permanent loss),
+  ghost for everything optional. Deleting a whole collection is now visually heavier than
+  deleting a chapter. Rail entries dropped their button-like borders for an inset accent
+  bar, so navigation no longer looks like actions.
 - **Autosave no longer lies.** The status bar used to say "local autosave active", which
-  reads as "your work is safe" — it isn't. A chip beside Save project now shows *Not saved
-  to a file* or *Saved to a file* per collection, and the wording says autosave lives only
+  reads as "your work is safe" — it isn't. A chip at the right of the status bar now shows *Not saved
+  to a file* or *Saved to a file* per collection, and clicking it saves, and the wording says autosave lives only
   in this browser. This is the highest-stakes misunderstanding in the tool: losing the
   `.aoopack.json` means never publishing a compatible update.
 - **Import is explicit about replacing.** A project file carries the collection's identity,
