@@ -294,3 +294,15 @@ button,input,select,textarea,.badge{border-radius:2px}
 .tour-card footer{display:flex;align-items:center;gap:.4rem;margin-top:1.1rem}
 .tour-card footer button{padding:.4rem .7rem;font-size:.8rem}
 .tour-count{margin-right:auto;font-size:.7rem;font-weight:800;letter-spacing:.1em;color:var(--cyan)}
+
+/* --- the scrolling container spans the full pane so its scrollbar sits at the
+       window edge; the content inside is what stays capped --- */
+.pane{max-width:none}
+.form-grid,.contract-card{max-width:1160px}
+.pane>.help-callout,#validationSummary{max-width:1160px}
+/* a quieter scrollbar that follows the theme */
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--line) 90%,transparent) transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--line) 90%,transparent);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--line)}
