@@ -67,6 +67,33 @@ function paintedBg(el){
   return base;
 }
 function fmt(p){ return "rgb("+[p.r,p.g,p.b].map(function(v){return Math.round(v*255);}).join(",")+")"; }
+function textInset(el, box){
+  // where the first real text actually starts, which is what the curve can cut into.
+  // measuring the element's own padding misses containers whose children hold it.
+  var w=document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n=w.nextNode();
+  while(n && !n.textContent.trim()) n=w.nextNode();
+  if(!n) return null;
+  var r=document.createRange(); r.selectNodeContents(n);
+  var tb=r.getBoundingClientRect();
+  if(!tb.width && !tb.height) return null;
+  return {left: tb.left - box.left, top: tb.top - box.top};
+}
+function geom(name,sel){
+  var el=document.querySelector(sel); if(!el) return null;
+  var cs=getComputedStyle(el), box=el.getBoundingClientRect();
+  if(!box.height || !box.width) return null;
+  // browsers clamp radius to half the shorter side, so compare the rendered curve
+  var eff=Math.min(parseFloat(cs.borderTopLeftRadius)||0, box.height/2, box.width/2);
+  var lh=parseFloat(cs.lineHeight)||parseFloat(cs.fontSize)*1.2||16;
+  var lines=box.height/lh;
+  var ins=textInset(el, box);
+  if(!ins) return null;
+  // a pill on a single-line control is correct. The failure is a curve reaching
+  // further in than the text does, while text also sits near the curved corner.
+  var ok = lines < 2 || eff <= ins.left + 2 || ins.top >= eff;
+  return {name:name, kind:"geometry", radius:+eff.toFixed(1), height:+box.height.toFixed(1),
+          inset:+ins.left.toFixed(1), top:+ins.top.toFixed(1), lines:+lines.toFixed(1), ok:ok};
+}
 function pair(name,sel,kind){
   var el=document.querySelector(sel); if(!el) return null;
   var fg=parse(getComputedStyle(el).color);
@@ -77,7 +104,7 @@ function pair(name,sel,kind){
 }
 window.addEventListener("load",function(){setTimeout(function(){
  try{
-  var w=document.getElementById("welcomeScreen"); if(w) w.hidden=true;
+  var w=document.getElementById("welcomeScreen"); if(w) w.hidden=false;
   var sel=document.getElementById("themeSelect");
   var themes=[].map.call(sel.querySelectorAll("option"),function(o){return o.value;});
   function set(s,v){var e=document.querySelector(s);if(e){e.value=v;e.dispatchEvent(new Event("input",{bubbles:true}));}}
@@ -102,7 +129,15 @@ window.addEventListener("load",function(){setTimeout(function(){
         pair("primary button","#buildBtn","text"),
         pair("status text","#statusBar","text"),
         pair("section label",".section-title h2","ui"),
-        pair("works attention","#worksAttention","ui")
+        pair("works attention","#worksAttention","ui"),
+        geom("welcome card",".welcome-card"),
+        geom("work row","#workList .nav-item"),
+        geom("chapter row",".strip-item"),
+        geom("author row",".author-row"),
+        geom("manuscript",".manuscript"),
+        geom("chapter strip",".chapter-strip"),
+        geom("tour card",".tour-card"),
+        geom("primary button","#buildBtn")
       ].filter(Boolean);
       step(i+1);
     },90);
@@ -135,13 +170,19 @@ def main():
 
         failures = 0
         for theme, checks in sorted(data.items()):
-            bad = [c for c in checks if c["r"] is not None and
+            bad = [c for c in checks if c.get("kind") != "geometry" and c.get("r") is not None and
                    c["r"] < (THRESHOLD_TEXT if c["kind"] == "text" else THRESHOLD_UI)]
+            shape = [c for c in checks if c.get("kind") == "geometry" and not c["ok"]]
             if bad:
                 failures += len(bad)
-                print("FAIL  %-9s %s" % (theme, ", ".join(
+                print("FAIL  %-9s contrast: %s" % (theme, ", ".join(
                     "%s %.2f (%s on %s)" % (c["name"], c["r"], c["fg"], c["bg"]) for c in bad)))
-        skipped = sum(1 for cs in data.values() for c in cs if c["r"] is None)
+            if shape:
+                failures += len(shape)
+                print("FAIL  %-9s shape: %s" % (theme, ", ".join(
+                    "%s radius %.0fpx vs text at %.0fpx on %.1f lines" % (c["name"], c["radius"], c["inset"], c["lines"])
+                    for c in shape)))
+        skipped = sum(1 for cs in data.values() for c in cs if c.get("kind") != "geometry" and c.get("r") is None)
         print("SUMMARY %d themes, %d failure(s), %d gradient pair(s) unmeasurable"
               % (len(data), failures, skipped))
         return 1 if failures else 0

@@ -72,7 +72,15 @@ they call `core.js` directly. This compares the markup against a recorded baseli
 - **Twenty-four themes**, grouped in the picker (Core / Archive / Old hardware / Aesthetic /
   Uneasy / Design). Three of them are structural rather than palettes: Frutiger Aero is
   gloss and depth, Bauhaus flat is the deliberate absence of both, and Acid neo-brutalism
-  is thick rules with unblurred offsets. Every one is audited rather than eyeballed: `check-themes.py` walks all of them
+  is thick rules with unblurred offsets. Ten more carry a shape language rather than only a
+  palette: The Matrix and Liminal space are square because a terminal and an empty institution
+  both are, Emo is angular, DreamCore and TraumaCore are soft, Vaporwave and McBling are
+  glossy and rounded, 80s workout is chunky, MTV is broadcast-rounded, and WeirdCore's corners
+  deliberately disagree with each other. AOO, Paper and High contrast stay neutral so the
+  others have something to be characterful against.
+- **Shape is guarded, not eyeballed.** `check-themes.py` also measures geometry: it flags any
+  element whose rendered corner curve reaches further in than its text does while text sits in
+  the corner. That is the exact failure that shipped twice in Gyaru. Every one is audited rather than eyeballed: `check-themes.py` walks all of them
   and computes WCAG contrast for thirteen pairs that have actually broken before.
 - **Base themes reworked.** Light became **Paper** — warm ground and dark ink, better for
   reading prose for hours than clinical grey. Neutral dark became **Midnight** — dim and
