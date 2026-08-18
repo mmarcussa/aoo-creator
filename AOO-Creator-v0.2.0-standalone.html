@@ -315,6 +315,42 @@ button,input,select,textarea,.badge{border-radius:2px}
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--line) 90%,transparent);border-radius:2px}
 ::-webkit-scrollbar-thumb:hover{background:var(--line)}
 
+/* ================= motion =================
+   Restrained on purpose. Only colour, shadow, transform and opacity move, so
+   nothing animates layout. Surfaces you touch repeatedly never shift position:
+   the manuscript, works list and chapter strip get colour transitions on focus
+   and hover but no entrance animation, because movement there reads as latency.
+   ========================================== */
+
+/* --- hover and focus settle rather than snap --- */
+button,.nav-item,.strip-item,.backup-state,.tab,
+input,select,textarea,.editor-tabs button{
+  transition:background-color 120ms ease,border-color 120ms ease,color 120ms ease,box-shadow 120ms ease}
+
+/* --- a pane arrives rather than blinks into place --- */
+@keyframes pane-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.pane.active{animation:pane-in 130ms ease-out}
+
+/* --- dialogs scale in slightly; the scrim fades --- */
+@keyframes dialog-in{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes scrim-in{from{opacity:0}to{opacity:1}}
+dialog[open]{animation:dialog-in 150ms ease-out}
+dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
+
+/* --- the tour card re-renders each step, so it gets an entrance --- */
+@keyframes tour-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tour-card{animation:tour-in 160ms ease-out}
+
+/* --- a new status message registers as a change --- */
+@keyframes status-flash{from{opacity:.35}to{opacity:1}}
+.status-text.flash{animation:status-flash 220ms ease-out}
+
+/* --- honour the system setting; this is not decoration for everyone --- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
+
 </style>
 </head>
 <body>
@@ -718,7 +754,7 @@ function save(message="Autosaved in this browser."){clearTimeout(saveTimer);save
   catch(error){status("Browser storage is full, so this change was not autosaved. Use Save project to write a file.","error")}
   renderBackupState();
 },180)}
-function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-text ${kind}`}
+function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-text ${kind}`;void el.offsetWidth;el.classList.add("flash")}
 const tourSteps=[
  {tab:"write",sel:"#collectionSelect",title:"Your collections",text:"Every collection you build lives here. Switching keeps each one\u2019s works, authors and settings separate. New starts another; nothing is lost when you do."},
  {tab:"write",sel:"#projectSettingsBtn",title:"Name it carefully",text:"Settings holds the collection name and its namespace. The namespace is permanent once you publish \u2014 changing it later turns an update into a separate, competing mod."},

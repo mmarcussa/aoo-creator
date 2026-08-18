@@ -68,6 +68,11 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   capped at a 74-character measure so prose is comfortable to read while typing. All of it
   is token-based, so the AOO, neutral dark, light and high-contrast themes follow without
   separate rules.
+- **Motion, restrained.** Panes rise slightly on switch, dialogs and the tour card scale in,
+  status messages flash on change, and hover states settle over 120ms. Only colour, shadow,
+  transform and opacity animate, so nothing triggers layout. The manuscript, works list and
+  chapter strip never shift position. All of it is disabled under
+  `prefers-reduced-motion: reduce`, verified with the browser flag rather than assumed.
 - **Guided tour.** The tutorial is now interactive, following the pattern from Eddyline
   Foundry: a dimmed backdrop, a highlight box around the element being described, and a
   positioned card with Back, Next, Skip and a step counter. Ten steps, switching tabs as it

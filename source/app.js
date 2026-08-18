@@ -29,7 +29,7 @@ function save(message="Autosaved in this browser."){clearTimeout(saveTimer);save
   catch(error){status("Browser storage is full, so this change was not autosaved. Use Save project to write a file.","error")}
   renderBackupState();
 },180)}
-function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-text ${kind}`}
+function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-text ${kind}`;void el.offsetWidth;el.classList.add("flash")}
 const tourSteps=[
  {tab:"write",sel:"#collectionSelect",title:"Your collections",text:"Every collection you build lives here. Switching keeps each one\u2019s works, authors and settings separate. New starts another; nothing is lost when you do."},
  {tab:"write",sel:"#projectSettingsBtn",title:"Name it carefully",text:"Settings holds the collection name and its namespace. The namespace is permanent once you publish \u2014 changing it later turns an update into a separate, competing mod."},
