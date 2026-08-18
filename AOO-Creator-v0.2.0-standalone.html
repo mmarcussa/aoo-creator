@@ -577,6 +577,102 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
 [data-theme=nokia] .strip-item.active .strip-num{background:transparent;color:#b3c169}
 [data-theme=nokia] .nav-item.active .work-state{box-shadow:none}
 
+/* ================= batch 2: palette-led ================= */
+
+/* --- 80s workout: aerobics. Yellow leads so pink can stay decorative --- */
+[data-theme=workout]{color-scheme:light;
+  --bg:#fdeff7;--panel:#fff;--panel2:#ffe2f0;--line:#ff9ecb;--line2:#ffc0dd;
+  --text:#2a1030;--muted:#8a5a78;--cyan:#00c2c7;--yellow:#ffb800;--red:#ff2d55;--green:#3fbf6b;
+  --on-accent:#2a1030;--shadow:0 12px 30px #ff2d5522}
+[data-theme=workout] .app-header{background:linear-gradient(90deg,#ffd9ec,#d9fbfb)}
+
+/* --- Y2K / vaporwave: pink leads, plain red keeps danger separate --- */
+[data-theme=vapor]{color-scheme:dark;
+  --bg:#170a2b;--panel:#22103f;--panel2:#2d1752;--line:#6b3fa0;--line2:#7a3f8f;
+  --text:#e9dcff;--muted:#a288cc;--cyan:#01cdfe;--yellow:#ff71ce;--red:#ff4444;--green:#05ffa1;
+  --on-accent:#170a2b;--shadow:0 16px 40px #00000066}
+[data-theme=vapor] .app-header{background:linear-gradient(120deg,#2d1752,#3a1a5e 60%,#4a1f52)}
+
+/* --- McBling: gold on black with hot pink as the system accent --- */
+[data-theme=mcbling]{color-scheme:dark;
+  --bg:#100710;--panel:#1d0f1a;--panel2:#2a1626;--line:#6b2f52;--line2:#6b2f52;
+  --text:#ffe9f6;--muted:#c78fb0;--cyan:#ff4fbf;--yellow:#ffd35c;--red:#e02020;--green:#6fe3a8;
+  --on-accent:#100710;--shadow:0 14px 34px #ff4fbf1f}
+[data-theme=mcbling] .primary{background:linear-gradient(180deg,#ffe89a,#e0a72e)}
+
+/* --- Emo: purple leads so the pink can sit beside a true red --- */
+[data-theme=emo]{color-scheme:dark;
+  --bg:#0b0b0e;--panel:#141419;--panel2:#1c1c24;--line:#35353f;--line2:#4a2b3a;
+  --text:#e8e8ee;--muted:#8a8a99;--cyan:#ff2e63;--yellow:#b06cff;--red:#e01e37;--green:#4ecb71;
+  --on-accent:#0b0b0e;--shadow:0 14px 34px #00000077}
+[data-theme=emo] .app-header{background:
+  repeating-linear-gradient(45deg,#141419 0 10px,#17171d 10px 20px)}
+
+/* --- MTV green sky: broadcast saturation on a green field --- */
+[data-theme=mtv]{color-scheme:dark;
+  --bg:#14512f;--panel:#1b6339;--panel2:#227244;--line:#48a86f;--line2:#48a86f;
+  --text:#eafff2;--muted:#9fd9b8;--cyan:#00e5ff;--yellow:#ffd400;--red:#ff5722;--green:#b2ff59;
+  --on-accent:#0f3d24;--shadow:0 14px 34px #00000044}
+[data-theme=mtv] .app-header{background:linear-gradient(180deg,#2a8a52,#14512f)}
+
+/* --- Liminal space: fluorescent light on damp wallpaper --- */
+[data-theme=liminal]{color-scheme:light;
+  --bg:#cfc389;--panel:#d9ce98;--panel2:#c3b77b;--line:#94894f;--line2:#94894f;
+  --text:#2e2a16;--muted:#5f5834;--cyan:#3f6b5c;--yellow:#6b6330;--red:#8a3a2a;--green:#4f6b3a;
+  --on-accent:#e4dbaa;--shadow:none}
+[data-theme=liminal] .manuscript{background:#ded4a4}
+
+/* --- DreamCore: hazy pastel, lavender leads --- */
+[data-theme=dream]{color-scheme:light;
+  --bg:#efe4f7;--panel:#fdf6ff;--panel2:#e7d9f3;--line:#c9aede;--line2:#d9b9d0;
+  --text:#3a2b47;--muted:#7d6b90;--cyan:#5fb8e0;--yellow:#a55fd6;--red:#d64550;--green:#5fae87;
+  --on-accent:#fff;--shadow:0 18px 44px #a55fd626}
+[data-theme=dream] .app-header{background:linear-gradient(120deg,#f7e6ff,#dff1ff)}
+
+/* --- WeirdCore: deliberately clashing, acid on deep purple --- */
+[data-theme=weird]{color-scheme:dark;
+  --bg:#1b0033;--panel:#2b0a4f;--panel2:#3a1268;--line:#7b2fbe;--line2:#7b2fbe;
+  --text:#f2ff5c;--muted:#c39cec;--cyan:#00fff2;--yellow:#ffe600;--red:#ff0055;--green:#39ff14;
+  --on-accent:#1b0033;--shadow:0 0 40px #ffe6001f}
+
+/* --- TraumaCore: the palette only. Washed, faded, low saturation --- */
+[data-theme=trauma]{color-scheme:light;
+  --bg:#f2e8e5;--panel:#fbf5f3;--panel2:#ead9d5;--line:#d3b7b1;--line2:#d3b7b1;
+  --text:#4a3a38;--muted:#8a7472;--cyan:#6f8a99;--yellow:#a8785a;--red:#a04a44;--green:#6f8a6a;
+  --on-accent:#fbf5f3;--shadow:0 10px 28px #4a3a3814}
+
+/* --- Bastard core: highlighter on newsprint black --- */
+[data-theme=bastard]{color-scheme:dark;
+  --bg:#0d0d0d;--panel:#151515;--panel2:#1e1e1e;--line:#4a4a4a;--line2:#5a3a3a;
+  --text:#e8e4dc;--muted:#8a857c;--cyan:#00d4ff;--yellow:#d9ff00;--red:#ff2200;--green:#66ff33;
+  --on-accent:#0d0d0d;--shadow:none}
+[data-theme=bastard] *{border-radius:0 !important}
+
+/* ================= contrast corrections =================
+   Every value here was measured by check-themes.py, not judged by eye. Muted
+   tones that looked fine against one background failed WCAG against another.
+   ======================================================== */
+[data-theme=night]{--muted:#828b9d}
+[data-theme=nokia]{--muted:#3a4619}
+[data-theme=bastard]{--muted:#9c978d}
+[data-theme=doom]{--muted:#b3a07a;--cyan:#93c25e;--red:#cc4034}
+[data-theme=mtv]{--muted:#bce9d0;--red:#ff7d52}
+[data-theme=liminal]{--muted:#4d4826;--on-accent:#f3eed4}
+[data-theme=dream]{--muted:#68577b;--yellow:#8b45c2}
+[data-theme=trauma]{--muted:#6d5957;--yellow:#8a5f42}
+[data-theme=gyaru]{--yellow:#c98a00;--on-accent:#2a0a20}
+[data-theme=workout]{--yellow:#c98c00;--red:#e0173f}
+/* second measured pass */
+[data-theme=doom]{--red:#e35044}
+[data-theme=mtv]{--red:#ffa183}
+[data-theme=gyaru]{--yellow:#a06a00}
+[data-theme=workout]{--yellow:#a57200}
+/* third pass: darkening the gold for badge legibility made the primary fill
+   too dark for dark text, so those two themes take light text on the fill */
+[data-theme=gyaru]{--yellow:#9a6600;--on-accent:#fff}
+[data-theme=workout]{--yellow:#8f6200;--on-accent:#fff}
+[data-theme=mtv]{--red:#ffb098}
+
 </style>
 </head>
 <body>
@@ -601,7 +697,14 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
             <option value="doom">Doom 1993</option>
           </optgroup>
           <optgroup label="Aesthetic">
-            <option value="gyaru">Gyaru</option>
+            <option value="gyaru">Gyaru</option><option value="workout">80s workout</option>
+            <option value="vapor">Y2K / Vaporwave</option><option value="mcbling">McBling</option>
+            <option value="emo">Emo</option><option value="mtv">MTV green sky</option>
+          </optgroup>
+          <optgroup label="Uneasy">
+            <option value="liminal">Liminal space</option><option value="dream">DreamCore</option>
+            <option value="weird">WeirdCore</option><option value="trauma">TraumaCore</option>
+            <option value="bastard">Bastard core</option>
           </optgroup>
         </select>
       </label>

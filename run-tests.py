@@ -51,7 +51,7 @@ def main():
             [browser, "--headless=new", "--disable-gpu", "--no-first-run",
              "--virtual-time-budget=10000", f"--user-data-dir={tmp / 'profile'}",
              "--dump-dom", page.as_uri()],
-            capture_output=True, text=True, timeout=180,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
         ).stdout
         m = re.search(r"\[\[(.*?)\]\]", out, re.S)
         if not m:

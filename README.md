@@ -13,6 +13,7 @@ was reverted to v0.1.0 and is untouched by this work.
 | `build-standalone.py` | Regenerates the standalone file from `source/`. |
 | `run-tests.py` | Runs the test suite in a real browser. No Node needed. |
 | `check-ui-contract.py` | Verifies the markup still exposes every field the exporter reads. |
+| `check-themes.py` | Measures WCAG contrast across every theme. No theme ships unread. |
 | `PackAuthorGuide.md` | The guide to hand to anyone publishing a collection. |
 
 ## Editing
@@ -68,6 +69,9 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   capped at a 74-character measure so prose is comfortable to read while typing. All of it
   is token-based, so the AOO, neutral dark, light and high-contrast themes follow without
   separate rules.
+- **Twenty-one themes**, grouped in the picker (Core / Archive / Old hardware / Aesthetic /
+  Uneasy). Every one is audited rather than eyeballed: `check-themes.py` walks all of them
+  and computes WCAG contrast for thirteen pairs that have actually broken before.
 - **Base themes reworked.** Light became **Paper** — warm ground and dark ink, better for
   reading prose for hours than clinical grey. Neutral dark became **Midnight** — dim and
   desaturated for late writing. High contrast is deliberately untouched: it exists to be
