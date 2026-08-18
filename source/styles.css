@@ -1015,7 +1015,20 @@ button{font-family:var(--font-display);letter-spacing:.02em}
   box-shadow:0 0 12px var(--yellow);animation:boot-fill 900ms cubic-bezier(.5,0,.3,1) 820ms both}
 @keyframes boot-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 
-.boot-skip{margin-top:.9rem;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--muted);opacity:0;animation:boot-line 400ms ease-out 1500ms both}
+/* the prompt only appears once the POST lines and bar have finished, and the
+   sequence then waits for input rather than moving on by itself */
+.boot-skip{margin-top:1.5rem;font-family:var(--font-mono);font-size:.82rem;letter-spacing:.24em;
+  text-transform:uppercase;font-weight:700;color:var(--yellow);opacity:0;
+  display:flex;align-items:center;gap:.6rem;
+  text-shadow:0 0 18px color-mix(in srgb,var(--yellow) 55%,transparent)}
+/* the prompt arrives on a pure CSS delay, the same mechanism as the POST lines,
+   rather than waiting on a class the script adds. One less thing to go wrong. */
+.boot-skip{animation:prompt-in 420ms ease-out 1850ms both,
+  prompt-pulse 1700ms ease-in-out 2270ms infinite}
+.boot-skip::before{content:"";width:.62rem;height:1.05em;background:var(--yellow);
+  box-shadow:0 0 12px var(--yellow);animation:caret 900ms steps(1,end) infinite}
+@keyframes prompt-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes prompt-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
 
 @media (prefers-reduced-motion:reduce){.boot{display:none !important}}

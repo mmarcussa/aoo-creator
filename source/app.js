@@ -178,6 +178,7 @@ function runBoot(){
     removeEventListener("keydown",finish,true);removeEventListener("pointerdown",finish,true);
     el.classList.add("out");setTimeout(()=>{el.hidden=true;el.classList.remove("out");afterBoot()},380)};
   addEventListener("keydown",finish,true);addEventListener("pointerdown",finish,true);
-  setTimeout(finish,2150);
+  // no timeout: the boot holds until the reader acknowledges it
+  setTimeout(()=>el.classList.add("ready"),1850);  // marks the wait, styling is CSS-driven
 }
 runBoot();status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);

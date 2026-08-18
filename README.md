@@ -116,7 +116,9 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   lines report the framework contract, schema, library and *network — not required*, and a
   fill bar wipes the screen away. Purely cosmetic, follows the theme tokens so a Windows 95
   boot looks like one, skippable with any key or click, and skipped entirely under reduced
-  motion. About 2.1 seconds.
+  motion. It then **waits**: once the bar completes, a pulsing prompt with a blinking caret
+  appears and the sequence holds until a key or click, rather than moving on by itself, so the
+  POST lines are actually readable.
 - **Welcome screen.** Clicking the logo reopens it at any time; Escape closes it. First run opens a full screen offering four real paths rather than a
   list of steps: start blank, take the tour, open one of the four worked examples, or import
   a saved `.aoopack.json`. It also states the thing a writer most needs to know up front —
