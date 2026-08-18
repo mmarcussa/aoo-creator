@@ -908,10 +908,12 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 .welcome-examples{animation-delay:120ms}
 .welcome-note{animation-delay:470ms}
 .welcome-close{animation-delay:540ms}
-.welcome-head::after{content:"";position:absolute;left:0;right:0;height:1px;margin-top:.9rem;
+/* the rule belongs under the heading block, not across it. Without an explicit
+   top it resolved to the static position and crossed the logo. */
+.welcome-head::after{content:"";position:absolute;left:0;right:0;top:100%;height:1px;margin-top:.9rem;
   background:linear-gradient(90deg,var(--yellow),transparent);transform-origin:left;
-  animation:sweep 700ms cubic-bezier(.22,.9,.3,1) 300ms both;opacity:.55}
-.welcome-head{position:relative}
+  animation:sweep 700ms cubic-bezier(.22,.9,.3,1) 300ms both;opacity:.5}
+.welcome-head{position:relative;padding-bottom:.4rem}
 
 /* ================= atmosphere =================
    Depth in the chrome only. Nothing textured sits behind prose, and nothing
