@@ -206,6 +206,55 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
 .nav-item:hover,.strip-item:hover{border-color:transparent}
 .nav-item.active,.strip-item.active{border-color:transparent;box-shadow:inset 3px 0 0 var(--yellow)}
 
+/* ================= Quiet treatment =================
+   Borders only where they carry meaning. One unmistakable primary action,
+   everything optional recedes. Uses var(--bg) for text on solid accents so
+   contrast inverts correctly in the light theme.
+   ==================================================== */
+
+/* --- default: a button is text until you reach for it --- */
+button{border-color:transparent;background:transparent;color:var(--muted);font-weight:600}
+button:hover{background:var(--panel2);border-color:transparent;color:var(--text)}
+button[disabled]{opacity:.35;cursor:not-allowed}
+button[disabled]:hover{background:transparent;color:var(--muted)}
+
+/* --- the one action you came here for --- */
+.primary{background:var(--yellow);border-color:var(--yellow);color:var(--bg);font-weight:700}
+.primary:hover{background:var(--yellow);color:var(--bg);filter:brightness(1.08)}
+
+/* --- kept bordered on purpose: this is the one that prevents data loss --- */
+.secondary{background:var(--panel2);border-color:var(--line);color:var(--text);font-weight:700}
+.secondary:hover{background:var(--panel2);border-color:var(--cyan);color:var(--cyan)}
+
+.ghost{color:var(--muted)}
+.icon-button{color:var(--muted)}
+.icon-button:hover{color:var(--text)}
+
+/* --- routine destructive recedes; collection-wide stays loud --- */
+.danger{background:transparent;border-color:transparent;color:var(--red)}
+.danger:hover{background:color-mix(in srgb,var(--red) 14%,transparent);border-color:transparent;color:var(--red)}
+.danger-strong{background:var(--red);border-color:var(--red);color:var(--bg);font-weight:700}
+.danger-strong:hover:not([disabled]){background:var(--red);color:var(--bg);filter:brightness(1.08)}
+
+/* --- tabs are underlined, not boxed --- */
+.editor-tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;box-shadow:none;padding:.55rem .8rem;color:var(--muted)}
+.editor-tabs button:hover{background:transparent;color:var(--text)}
+.editor-tabs button.active{background:transparent;box-shadow:none;border-bottom-color:var(--yellow);color:var(--yellow)}
+.badge{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.editor-tabs button.active .badge{border-color:color-mix(in srgb,var(--yellow) 55%,var(--line));color:var(--yellow)}
+
+/* --- fewer boxes: surfaces read by tone, not outline --- */
+.rail-section{border-bottom-color:color-mix(in srgb,var(--line) 50%,transparent)}
+.chapter-strip{border-color:transparent;background:color-mix(in srgb,var(--panel) 62%,transparent);box-shadow:none}
+.notes{border-color:color-mix(in srgb,var(--line) 45%,transparent);background:transparent}
+.manuscript{border-color:color-mix(in srgb,var(--line) 60%,transparent)}
+.author-row,.edit-card{border-color:color-mix(in srgb,var(--line) 55%,transparent)}
+
+/* --- inputs keep their outlines: affordance matters more than tidiness --- */
+.form-grid input,.form-grid select,.form-grid textarea,.editor-bar input,.rail-search,
+.author-search,.collection-select,.card-fields input,.card-fields select,.card-fields textarea,
+.author-row input,.author-row select{border-color:var(--line)}
+
 </style>
 </head>
 <body>

@@ -87,6 +87,12 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   Five genuinely destructive actions (delete work, chapter, comment, author, collection)
   use an in-page confirmation styled like the rest of the tool; the rest needed no
   confirmation once they stopped destroying anything.
+- **Quiet control treatment.** Buttons were flat outlined rectangles differing only by
+  colour — the default result of deciding nothing. Optional actions are now plain text that
+  gain a background on hover, the primary action is a solid fill so it is unmistakable, tabs
+  are underlined rather than boxed, and several nested outlines were removed so surfaces read
+  by tone. Save project deliberately keeps its border: it is the one that prevents permanent
+  loss. Text on solid accents uses `var(--bg)`, which inverts correctly in the light theme.
 - **Action hierarchy.** Three action tiers rather than two: primary for the build, a new
   secondary tier for Save project (not the goal, but the one that prevents permanent loss),
   ghost for everything optional. Deleting a whole collection is now visually heavier than
