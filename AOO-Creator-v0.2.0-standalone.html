@@ -1306,7 +1306,14 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 
 /* Themes that deliberately re-face the manuscript (matrix, bios, gyaru, ...)
    set .manuscript's font-family later in the cascade and still win. These
-   rules only touch the furniture around it, so no theme is overridden. */
+   rules only touch the furniture around it, so no theme is overridden.
+
+   But `ch` is the width of "0" in the CURRENT font, so a 68ch cap is a
+   different pixel width per theme. Measured across all 24: ao3 (Georgia)
+   reached 76 chars, dream and trauma (Sitka Text) 76-77. A ceiling in px
+   holds the measure regardless of which face a theme installs; the 68ch
+   cap still governs wherever it lands first, so narrow faces are unaffected. */
+.manuscript{max-width:min(68ch,660px)}
 
 /* Narrow: the measure cap must not fight the single-column fallback. */
 @media(max-width:900px){
