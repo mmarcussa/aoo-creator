@@ -1374,9 +1374,30 @@ button{font-family:var(--font-display);letter-spacing:.02em}
    (608px in the UI face) constrained the manuscript; with it open that cap
    became `none`, so the manuscript hit its own 68ch cap (621px) instead.
    Video confirms it: 609px <-> 622px, thirteen times in fourteen seconds.
-   The editor no longer caps its own width; .manuscript's cap is the only rule,
-   so the box is identical in both states. */
-.chapter-editor{max-width:none}
+
+   The fix is ONE cap for the whole column, not zero. Removing
+   .chapter-editor's cap outright (as this rule first did) stopped the
+   manuscript resizing but left its siblings unconstrained: the chapter title
+   swung 694 -> 299px and the notes bar 954 -> 559px on every toggle, because
+   .chapter-editor was the only thing holding them. Screenshots caught it.
+   The column now carries the same ceiling as the box it contains, in both
+   states, so every child measures identically whichever way the preview sits. */
+.chapter-editor,
+#writePane.with-preview .chapter-editor{max-width:calc(660px + 2rem + 2px)}
+
+/* Phase 6 gave the editor bar, foot and notes a 68ch cap that applied ONLY
+   with the preview open (line ~1257). With the column cap unified above, that
+   leftover rule was the last state-dependent width in the tree: it still swung
+   the chapter title 434 -> 299px and the notes bar 694 -> 559px per toggle.
+   They now inherit the column's width in both states, like the manuscript. */
+#writePane.with-preview .editor-bar,
+#writePane.with-preview .editor-foot,
+#writePane.with-preview .notes{max-width:none}
+/* Same fault mirrored: .chapter-editor .editor-foot (line ~1292) carries its
+   own 68ch cap, which only bound when the preview was CLOSED -- so the foot
+   went the other way, 457 -> 694px. The column is the single source of width
+   for everything in it. */
+.chapter-editor .editor-foot{max-width:none}
 
 /* The pane gains a scrollbar when Author's notes open. Reserving the gutter
    up front stops that 10px from reflowing the manuscript underneath it. */
