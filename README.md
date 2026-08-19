@@ -111,6 +111,14 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   transform and opacity animate, so nothing triggers layout. The manuscript, works list and
   chapter strip never shift position. All of it is disabled under
   `prefers-reduced-motion: reduce`, verified with the browser flag rather than assumed.
+- **Publishing is a moment, not a download.** Build used to validate and quietly drop a file.
+  It now opens a sheet stating what is about to exist: namespace and that it is permanent,
+  version, authors, works, chapters, words, the AOO version required, and the exact six paths
+  the ZIP will contain. It also checks whether the `.aoopack.json` is current and says so
+  plainly if it is not, because that is the last moment anyone will care.
+- **The preview tab became the proof sheet.** Once the card rendered beside the manuscript, a
+  whole tab showing the same card was redundant. It is now both widths the game renders at,
+  side by side, where long titles and tag walls fail first.
 - **Details became a work record.** It was three columns of form fields — the surface that
   most read as a mod utility, on the screen where a writer describes their work for an
   archive. It is now numbered rubrics: byline, rating and warnings, summary, tags, and *how

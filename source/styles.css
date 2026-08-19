@@ -1189,3 +1189,52 @@ button{font-family:var(--font-display);letter-spacing:.02em}
   .tag-fields{grid-template-columns:1fr}
   .reception{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+/* ================= proof sheet =================
+   The live panel took the preview tab's job, so this became what only it can
+   do: both widths the game renders at, side by side, where long titles and
+   tag walls fail first.
+   =============================================== */
+.proof-sheet{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,420px);gap:1.4rem;
+  align-items:start;max-width:1240px;margin-top:1rem}
+.proof-sheet figure{margin:0;display:grid;gap:.5rem}
+.proof-sheet figcaption{font-family:var(--font-display);font-size:.68rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  padding-bottom:.4rem;border-bottom:1px solid var(--line)}
+.proof-sheet .aoo-preview{--preview-width:100%;max-width:none}
+.proof-sheet .preview-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .5rem}
+@media(max-width:1100px){.proof-sheet{grid-template-columns:1fr}}
+
+/* ================= the publish moment =================
+   Building the ZIP is the end of the whole journey and used to be a button
+   that quietly downloaded a file. It now states what is about to exist.
+   ====================================================== */
+.publish{position:fixed;inset:0;z-index:210;display:grid;place-items:center;overflow:auto;
+  padding:2rem 1.5rem;background:color-mix(in srgb,var(--bg) 96%,transparent);
+  animation:welcome-in 200ms ease-out}
+.publish[hidden]{display:none}
+.publish-inner{width:min(760px,100%);display:grid;gap:1.2rem;
+  animation:rise 420ms cubic-bezier(.22,.9,.3,1) both}
+.publish-head{display:grid;gap:.3rem}
+.publish-head h1{margin:.1rem 0;font-size:1.8rem;color:var(--text)}
+.publish-sub{margin:0;color:var(--muted)}
+.publish-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin:0}
+.publish-facts>div{display:grid;gap:.15rem;padding:.6rem .75rem;border:1px solid var(--line);
+  border-radius:3px;background:color-mix(in srgb,var(--panel) 60%,transparent)}
+.publish-facts dt{font-family:var(--font-display);font-size:.64rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.publish-facts dd{margin:0;font-family:var(--font-mono);font-size:.9rem;color:var(--text);
+  overflow-wrap:anywhere}
+.publish-facts>div:last-child{grid-column:span 3}
+.publish-files{display:grid;gap:.4rem;padding:.8rem .9rem;border:1px solid var(--line);
+  border-left:3px solid var(--cyan);border-radius:3px;background:color-mix(in srgb,var(--panel) 60%,transparent)}
+.publish-files ol{margin:0;padding-left:1.3rem;display:grid;gap:.18rem;
+  font-family:var(--font-mono);font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
+.publish-note{margin:0;padding:.8rem 1rem;border-left:3px solid var(--yellow);
+  background:color-mix(in srgb,var(--yellow) 8%,transparent);color:var(--muted);line-height:1.6;font-size:.9rem}
+.publish-note.ok{border-left-color:var(--green);background:color-mix(in srgb,var(--green) 8%,transparent)}
+.publish-note code{padding:.05rem .3rem;border-radius:2px;
+  background:color-mix(in srgb,var(--cyan) 14%,transparent);color:var(--cyan)}
+.publish-actions{display:flex;justify-content:flex-end;gap:.5rem}
+@media(max-width:720px){.publish-facts{grid-template-columns:1fr}
+  .publish-facts>div:last-child{grid-column:span 1}}

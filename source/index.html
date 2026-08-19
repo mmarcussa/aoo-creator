@@ -98,7 +98,7 @@
         <button data-tab="write" class="active">Write <span id="chapterCount" class="badge">0</span></button>
         <button data-tab="details">Details</button>
         <button data-tab="comments">Comments <span id="commentCount" class="badge">0</span></button>
-        <button data-tab="preview">AOO preview</button>
+        <button data-tab="preview">Proof</button>
         <button data-tab="validate">Validation <span id="issueCount" class="badge">0</span></button>
       </nav>
 
@@ -251,8 +251,12 @@
       </div>
 
       <div id="previewPane" class="pane">
-        <div class="pane-heading"><div><span class="eyebrow">Runtime stress preview</span><h1>AOO work card</h1></div><label class="compact">Width <select id="previewWidth"><option value="wide">Wide</option><option value="narrow">Narrow</option></select></label></div>
-        <div id="aooPreview" class="aoo-preview"></div>
+        <div class="pane-heading"><div><span class="eyebrow">Before you publish</span><h1>Proof the work card</h1></div></div>
+        <p class="help-callout">Both widths the game renders at, side by side. Long titles and large tag walls fail here first &mdash; if it survives the narrow column it survives the Shard Market.</p>
+        <div class="proof-sheet">
+          <figure><figcaption>Wide &mdash; work page</figcaption><div id="aooPreview" class="aoo-preview"></div></figure>
+          <figure><figcaption>Narrow &mdash; market card</figcaption><div id="aooPreviewNarrow" class="aoo-preview narrow"></div></figure>
+        </div>
       </div>
 
       <div id="validatePane" class="pane">
@@ -303,6 +307,26 @@
       </ol>
       <div class="boot-bar"><i></i></div>
       <div class="boot-skip" role="status">press any key to continue</div>
+    </div>
+  </div>
+
+  <div id="publishScreen" class="publish" hidden>
+    <div class="publish-inner">
+      <div class="publish-head">
+        <span class="eyebrow">Ready to publish</span>
+        <h1 id="publishTitle">Untitled collection</h1>
+        <p class="publish-sub">This builds the mod file you upload. Nothing leaves your machine.</p>
+      </div>
+      <dl class="publish-facts" id="publishFacts"></dl>
+      <div class="publish-files">
+        <span class="tag-kind">What the ZIP contains</span>
+        <ol id="publishFileList"></ol>
+      </div>
+      <p class="publish-note" id="publishNote"></p>
+      <div class="publish-actions">
+        <button id="publishCancel" class="ghost">Not yet</button>
+        <button id="publishGo" class="primary">Build the ZIP</button>
+      </div>
     </div>
   </div>
 

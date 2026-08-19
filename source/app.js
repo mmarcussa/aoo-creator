@@ -168,7 +168,6 @@ $("#addCommentBtn").addEventListener("click",()=>mutate(()=>currentWork().commen
 $("#duplicateWorkBtn").addEventListener("click",()=>{const source=currentWork();if(!source)return;mutate(()=>{const copy=structuredClone(source);copy.id=`work_${crypto.randomUUID().replaceAll("-","")}`;copy.title=`${copy.title} (Copy)`;copy.chapters.forEach(c=>c.id=`chapter_${crypto.randomUUID().replaceAll("-","")}`);copy.comments.forEach(c=>c.id=`comment_${crypto.randomUUID().replaceAll("-","")}`);project.works.push(copy);selectedWorkId=copy.id},{full:true,message:"Work duplicated with new stable IDs."})});
 $("#deleteWorkBtn").addEventListener("click",async()=>{const w=currentWork();if(!w)return;const yes=await ask(`\u201c${w.title||"Untitled work"}\u201d and all of its chapters will be removed.`,{title:"Delete work?",okLabel:"Delete",danger:true});if(!yes)return;mutate(()=>{project.works=project.works.filter(x=>x.id!==w.id);selectedWorkId=project.works[0]?.id||null;selectedChapterId=currentWork()?.chapters[0]?.id||null},{full:true,message:"Work deleted."})});
 $("#projectSettingsBtn").addEventListener("click",()=>showTab("project"));$("#workSearch").addEventListener("input",renderWorks);$("#runValidationBtn").addEventListener("click",renderValidation);
-$("#previewWidth").addEventListener("change",event=>$("#aooPreview").classList.toggle("narrow",event.target.value==="narrow"));
 function showWelcome(){$("#welcomeScreen").hidden=false;$("#welcomeExamples").hidden=true;$("#welcomeClose").textContent=localStorage.getItem("aoo-creator-welcome-seen")?"Close":"Skip"}
 function closeWelcome(){$("#welcomeScreen").hidden=true;localStorage.setItem("aoo-creator-welcome-seen","1")}
 $("#tutorialBtn").addEventListener("click",()=>{closeWelcome();startTour()});
@@ -196,7 +195,41 @@ root.style.display="none";void root.offsetHeight;root.style.display=""});
 $("#exampleSelect").addEventListener("change",event=>{if(!event.target.value)return;snapshot();library.projects[project.id]=project;adoptCollection(withId(getExample(event.target.value)),"Example added as a new collection.");event.target.value=""});
 $("#saveProjectBtn").addEventListener("click",()=>{download(new Blob([JSON.stringify(project,null,2)],{type:"application/json"}),`${project.pack.namespace||"aoo-project"}.aoopack.json`);pendingFileSave=true;save("Project file written. Keep it — you need it to publish updates.")});
 $("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;pendingFileSave=true;adoptCollection(next,`Imported ${file.name}.`);status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
-$("#buildBtn").addEventListener("click",()=>{renderValidation();const issues=validateProject(project),errors=issues.filter(x=>x.kind==="error");if(errors.length){activeTab="validate";showTab("validate");status(`Build blocked: ${errors.length} validation error(s).`,"error");return}try{const files=generatePackFiles(project),zip=createZip(files),name=`${project.pack.namespace}-v${project.pack.version}.zip`;download(zip,name);status(`Built ${name} with ${project.works.length} works.`,`success`)}catch(error){status(error.message,"error")}});
+function openPublish(){
+  const p=project.pack,works=project.works,chapters=works.reduce((t,w)=>t+w.chapters.length,0);
+  const words=works.reduce((t,w)=>t+(Number(w.wordCount)||0),0);
+  const ns=p.namespace||"UnnamedPack";
+  $("#publishTitle").textContent=p.name||"Untitled collection";
+  $("#publishFacts").innerHTML=[
+    ["Namespace",ns+" · permanent"],["Version",p.version||"1.0.0"],
+    ["Authors",project.authors.length],["Works",works.length],
+    ["Chapters",chapters],["Words",words.toLocaleString()],
+    ["Requires","Archive of Our Overwrites "+AOO_MIN_VERSION+" or newer"]
+  ].map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(String(v))}</dd></div>`).join("");
+  $("#publishFileList").innerHTML=Object.keys(generatePackFiles(project))
+    .map(f=>`<li>${esc(f)}</li>`).join("");
+  const saved=library.saved?.[project.id];
+  $("#publishNote").innerHTML=saved===project.updatedAt
+    ? "Your <code>.aoopack.json</code> is up to date. Keep it — re-importing it is how you publish a compatible update."
+    : "<strong>You have not saved this collection to a file since your last edit.</strong> Do that before you publish: re-importing the <code>.aoopack.json</code> is the only way to ship an update your readers keep their library through.";
+  $("#publishNote").className="publish-note "+(saved===project.updatedAt?"ok":"warn");
+  $("#publishScreen").hidden=false;
+}
+function closePublish(){$("#publishScreen").hidden=true}
+$("#publishCancel").addEventListener("click",closePublish);
+addEventListener("keydown",event=>{if(event.key==="Escape"&&!$("#publishScreen").hidden)closePublish()});
+$("#publishGo").addEventListener("click",()=>{
+  try{const files=generatePackFiles(project),zip=createZip(files),
+    name=`${project.pack.namespace}-v${project.pack.version}.zip`;
+    download(zip,name);closePublish();
+    status(`Built ${name}. Upload it to Nexus and list AOO as a requirement.`,"success");
+  }catch(error){closePublish();status(error.message,"error")}
+});
+$("#buildBtn").addEventListener("click",()=>{renderValidation();
+  const errors=validateProject(project).filter(x=>x.kind==="error");
+  if(errors.length){activeTab="validate";showTab("validate");
+    status(`Build blocked: ${errors.length} validation error(s).`,"error");return}
+  openPublish()});
 
 document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();if(!undoStack.length)return;redoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(undoStack.pop()));selectedWorkId=project.works.find(w=>w.id===selectedWorkId)?.id||project.works[0]?.id||null;save("Undo autosaved.");render()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){event.preventDefault();if(!redoStack.length)return;undoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(redoStack.pop()));selectedWorkId=project.works[0]?.id||null;save("Redo autosaved.");render()}});
 
