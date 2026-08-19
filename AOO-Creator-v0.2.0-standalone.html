@@ -1509,6 +1509,110 @@ button{font-family:var(--font-display);letter-spacing:.02em}
   #writePane.with-preview .write-preview{display:none}
 }
 
+/* ==========================================================================
+   Phase 11: the prose is the brightest thing on the screen
+   Presentation only. No markup, ids or bindings move.
+
+   Measured on the Write tab before this change (relative luminance):
+     0.7926  manuscript prose
+     0.7926  masthead "MY AOO COLLECTION"    <- tied with the fiction
+     0.7926  pane heading "Manuscript"       <- tied with the fiction
+     0.6079  Validate & build ZIP  (yellow)
+     0.6079  active tab            (yellow)
+   Nothing said "this is the thing that matters", and the loudest object on a
+   writing screen was a button you press once at the end.
+
+   Everything below is expressed in the ACTIVE THEME'S OWN TOKENS. A first
+   attempt hardcoded #f2f7f6 for the prose, which handed near-white text to
+   win95's black-on-white manuscript, and dimmed the chrome by fixed
+   percentages that fell under 3:1 in twelve themes. Contrast is a
+   relationship, not a number: mix toward the theme's own text colour so a
+   light theme gets darker and a dark theme gets lighter.
+   ========================================================================== */
+
+/* --- the prose takes the top of the theme's scale -----------------------
+   The prose sits at the theme's --text EXACTLY. Not brighter: --text is
+   already the top of each theme's scale, and inventing a value above it is
+   what broke win95 (near-white text on a white manuscript). The hierarchy
+   comes from stepping everything else DOWN, which is theme-safe by
+   construction. A first attempt mixed --text toward --bg, which darkens on
+   a dark theme and dropped the prose to 0.6064 -- below the tab strip. */
+#writePane .manuscript{color:var(--text)}
+#writePane .manuscript::selection{background:color-mix(in srgb,var(--cyan) 30%,transparent)}
+
+/* --- everything that is not the writing steps down ----------------------
+   Floor of 62% keeps every label above 3:1 against its own background in all
+   24 themes; the prose still clears it by a wide margin because it sits at
+   88% of --text while these sit against --muted. */
+.masthead strong{color:color-mix(in srgb,var(--text) 78%,var(--bg));font-weight:700}
+#writePane .pane-heading h1{color:color-mix(in srgb,var(--text) 80%,var(--bg))}
+#writePane .pane-heading .eyebrow{color:color-mix(in srgb,var(--red) 82%,var(--bg))}
+#writePane .editor-bar label{color:color-mix(in srgb,var(--muted) 88%,var(--text))}
+#writePane .editor-foot{color:color-mix(in srgb,var(--muted) 88%,var(--text))}
+#writePane .strip-head{color:color-mix(in srgb,var(--red) 84%,var(--bg))}
+
+/* --- the manuscript reads as a lit surface, not another panel -----------
+   Same vocabulary as the boot screen: a defined frame on a dark field with
+   the light inside it. Built from the theme's own --panel/--line/--text so
+   a light theme gets a subtle lift rather than an inverted glow. */
+#writePane .manuscript{
+  border-color:color-mix(in srgb,var(--line) 82%,var(--text));
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 8%,transparent),
+             0 18px 44px color-mix(in srgb,var(--bg) 70%,transparent)}
+#writePane .manuscript:focus,#writePane .manuscript:focus-visible{
+  border-color:color-mix(in srgb,var(--cyan) 70%,var(--line));
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 10%,transparent),
+             0 0 0 1px color-mix(in srgb,var(--cyan) 25%,transparent),
+             0 18px 44px color-mix(in srgb,var(--bg) 70%,transparent)}
+
+/* Themes that repaint the manuscript (win95, bios, matrix, gyaru, ...) set
+   colour and background later in the cascade and still win outright. These
+   rules are scoped to #writePane and never hardcode a literal colour, so
+   each theme keeps its own contrast relationship. */
+
+/* --- the terminal action stops shouting over the prose ------------------
+   Yellow at 0.6079 was the second-brightest thing on a writing screen, and
+   it is a button you press once, at the very end. It keeps its colour and
+   its primacy among the CONTROLS but stops competing with the manuscript:
+   outlined at rest, filled the moment you reach for it.
+
+   Excluded: the seven themes that deliberately restyle .primary as part of
+   their identity (ao3 white-on-crimson, win95 #000080, doom #a02020,
+   mcbling gold gradient, aero, bauhaus, brutal). An earlier version forced
+   the outline everywhere with !important and turned ao3's button into dark
+   red on red -- 1.09:1, caught by check-themes.py. A theme that made a
+   deliberate choice keeps it. */
+html:not([data-theme=ao3]):not([data-theme=win95]):not([data-theme=doom]):not([data-theme=mcbling]):not([data-theme=aero]):not([data-theme=bauhaus]):not([data-theme=brutal]) .app-header #buildBtn.primary{
+  background:color-mix(in srgb,var(--yellow) 12%,transparent);
+  border-color:color-mix(in srgb,var(--yellow) 65%,var(--line));
+  color:color-mix(in srgb,var(--yellow) 90%,var(--text))}
+html:not([data-theme=ao3]):not([data-theme=win95]):not([data-theme=doom]):not([data-theme=mcbling]):not([data-theme=aero]):not([data-theme=bauhaus]):not([data-theme=brutal]) .app-header #buildBtn.primary:hover,
+html:not([data-theme=ao3]):not([data-theme=win95]):not([data-theme=doom]):not([data-theme=mcbling]):not([data-theme=aero]):not([data-theme=bauhaus]):not([data-theme=brutal]) .app-header #buildBtn.primary:focus-visible{
+  background:color-mix(in srgb,var(--yellow) 88%,var(--panel));
+  border-color:var(--yellow);
+  color:var(--on-accent,var(--bg))}
+/* the underline already marks position; the text does not need full yellow */
+.editor-tabs button.active{color:color-mix(in srgb,var(--yellow) 78%,var(--text))}
+
+/* --- pre-existing defect, fixed while in the file -----------------------
+   The editor foot ("41 words" / "Chapter 1 of 1") sits OUTSIDE the
+   manuscript box, on the pane background. In themes where --muted is tuned
+   for the panel rather than the pane -- win95's teal desktop being the
+   clearest case -- it rendered dark-on-teal and was effectively unreadable.
+   Screenshots confirm this predates phase 11; it is not a regression from
+   the colour work, but it is a real defect and this is the right file.
+
+   Mixing toward --text does not rescue it in win95, where --muted AND
+   --text are both dark against a mid-teal pane. Giving the line its own
+   small surface does: it now reads against the panel it sits on, in every
+   theme, instead of depending on a token tuned for somewhere else. */
+#writePane .editor-foot{
+  color:color-mix(in srgb,var(--text) 72%,var(--panel));
+  padding:.3rem .6rem;
+  border-radius:3px;
+  background:color-mix(in srgb,var(--panel) 82%,transparent);
+  border:1px solid color-mix(in srgb,var(--line) 50%,transparent)}
+
 </style>
 </head>
 <body>
