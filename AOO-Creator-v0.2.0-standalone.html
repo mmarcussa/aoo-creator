@@ -1247,6 +1247,78 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 @media(max-width:720px){.publish-facts{grid-template-columns:1fr}
   .publish-facts>div:last-child{grid-column:span 1}}
 
+/* ==========================================================================
+   Phase 6: the writing surface
+   Presentation only. No markup moves, no ids change, no data-bind attribute
+   is added or removed — the exporter reads exactly the DOM it read before.
+   ========================================================================== */
+
+/* --- 1+2. one measure rule, both preview states ---------------------------
+   .chapter-editor caps at 74ch, but .with-preview overrode it to `none`, so
+   the manuscript ran to 898px (~98 chars) on a 1900px screen while the same
+   surface capped at 608px with the preview closed. Same surface, two rules.
+   The cap now lives on the manuscript itself and holds in both states. */
+.manuscript{max-width:68ch;margin-inline:auto}
+#writePane.with-preview .chapter-editor{max-width:none}
+#writePane.with-preview .editor-bar,
+#writePane.with-preview .editor-foot,
+#writePane.with-preview .notes{max-width:68ch;margin-inline:auto;width:100%}
+
+/* --- 3. the chapter rail stops being a hole -------------------------------
+   355x384px, 94% empty with one chapter. It now sizes to its content and
+   grows only as chapters are added. The strip column also stops reserving
+   full-height space it never fills. */
+.chapter-strip{align-self:start;max-height:100%}
+.strip-list{min-height:0}
+.chapter-strip:has(.strip-item:only-child) .strip-list{padding-bottom:.4rem}
+.strip-list:empty::after{content:"No chapters yet";display:block;padding:.5rem .45rem;
+  font-family:var(--font-ui);font-size:.72rem;letter-spacing:.02em;color:var(--muted);opacity:.75}
+/* the strip is start-aligned, so the grid row must not stretch to the tallest
+   sibling — otherwise the vacated height becomes a visible hole in the column */
+.write-layout{align-items:start}
+.chapter-editor{align-self:stretch}
+
+/* --- 4. price stops outranking the chapter title --------------------------
+   Both sat in one row at equal size and weight, directly above the prose.
+   Price is a commerce field; it keeps its place in the bar (it is per-chapter
+   data, so moving it to Details would be wrong) but reads as secondary. */
+.editor-bar{align-items:end}
+.editor-bar label.grow{font-size:.74rem;color:var(--text)}
+.editor-bar label.grow input{font-family:var(--font-prose);font-size:1.02rem;
+  padding-block:.46rem;letter-spacing:.01em}
+.editor-bar label.tight{width:7rem;opacity:.72;transition:opacity .18s ease}
+.editor-bar label.tight:focus-within,
+.editor-bar label.tight:hover{opacity:1}
+.editor-bar label.tight input{font-family:var(--font-mono);font-size:.82rem;
+  padding-block:.4rem;text-align:right}
+
+/* --- 5. the prose face owns the writing column ----------------------------
+   Constantia appeared 3 times against 102 uses of the condensed UI face, so
+   the screen a writer lives on read as a control panel with a text box in it.
+   The manuscript's own furniture now speaks prose. */
+.manuscript{font-size:1.06rem;line-height:1.9}
+.chapter-editor .editor-foot{font-family:var(--font-prose);font-size:.78rem;
+  letter-spacing:.01em;max-width:68ch;margin-inline:auto;width:100%}
+.chapter-editor .notes>summary{font-family:var(--font-prose);font-size:.84rem;
+  letter-spacing:.01em;text-transform:none}
+.chapter-editor .notes textarea{font-family:var(--font-prose);font-size:.95rem;line-height:1.7}
+#writePane .pane-heading h1{font-family:var(--font-prose);letter-spacing:0}
+
+/* Themes that deliberately re-face the manuscript (matrix, bios, gyaru, ...)
+   set .manuscript's font-family later in the cascade and still win. These
+   rules only touch the furniture around it, so no theme is overridden. */
+
+/* Narrow: the measure cap must not fight the single-column fallback. */
+@media(max-width:900px){
+  .manuscript,
+  #writePane.with-preview .editor-bar,
+  #writePane.with-preview .editor-foot,
+  #writePane.with-preview .notes,
+  .chapter-editor .editor-foot{max-width:none}
+  .chapter-strip{max-height:230px}
+}
+
+
 </style>
 </head>
 <body>
