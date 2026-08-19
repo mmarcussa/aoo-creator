@@ -1375,6 +1375,56 @@ button{font-family:var(--font-display);letter-spacing:.02em}
   #writePane.with-preview .write-preview{position:static;max-height:none}
 }
 
+/* --- C. one cap, not two ---------------------------------------------------
+   Phase 7A stopped the box moving sideways but it still CHANGED WIDTH by 13px
+   on every toggle, which reads as the same jump. Cause: two different rules
+   governed the same box. With the preview closed, .chapter-editor's 74ch cap
+   (608px in the UI face) constrained the manuscript; with it open that cap
+   became `none`, so the manuscript hit its own 68ch cap (621px) instead.
+   Video confirms it: 609px <-> 622px, thirteen times in fourteen seconds.
+   The editor no longer caps its own width; .manuscript's cap is the only rule,
+   so the box is identical in both states. */
+.chapter-editor{max-width:none}
+
+/* The pane gains a scrollbar when Author's notes open. Reserving the gutter
+   up front stops that 10px from reflowing the manuscript underneath it. */
+#writePane.pane.active{scrollbar-gutter:stable}
+
+/* --- D. the manuscript column keeps its width, the preview takes the rest ---
+   Even with one cap the box still resized 621 -> 549 at 1600px: the middle
+   column was minmax(0,1fr) and the preview column minmax(300px,400px), so the
+   two fought over the same pixels and the manuscript lost 72px.
+   The manuscript column is now sized to the text and the preview absorbs
+   whatever is left.
+
+   The column ceiling must match the BOX ceiling exactly, and .manuscript is
+   capped at min(68ch,660px) -- 660px being the px ceiling that holds the
+   measure in wide-serif themes. Sizing this column in `ch` instead let ao3,
+   dream and trauma (Georgia / Sitka Text) overflow it, and below ~1500px no
+   theme could fit. Same expression, same units, one source of truth:
+   660px + the manuscript's own 2rem horizontal padding and 2px of border. */
+#writePane.with-preview .write-layout{
+  grid-template-columns:210px minmax(0,calc(660px + 2rem + 2px)) minmax(300px,1fr)}
+
+/* The preview column now absorbs all leftover width, which on a 2560px screen
+   is 1214px -- far wider than the card wants to be. Cap the card itself so it
+   stays a card and its heading stays with it; the column can be as wide as it
+   likes. */
+#writePane.with-preview .write-preview{max-width:430px}
+
+/* Below the width where a full manuscript and a usable preview both fit, the
+   preview folds away rather than squeezing the prose -- the existing 1300px
+   rule was too generous once the manuscript stopped yielding. Measured: at
+   1416px the preview forced the box down to 499px, at 1342px to 430px.
+   The threshold is arithmetic, not taste: 280 (rail) + 96 (pane padding)
+   + 210 (strip) + 16 + 694 (manuscript column) + 16 + 300 (minimum preview)
+   = 1612px. Set at 1660 so a 1600px window folds cleanly instead of landing
+   11px short and squeezing the wide-serif themes. */
+@media(max-width:1660px){
+  #writePane.with-preview .write-layout{grid-template-columns:210px minmax(0,1fr)}
+  #writePane.with-preview .write-preview{display:none}
+}
+
 </style>
 </head>
 <body>
