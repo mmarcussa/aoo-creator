@@ -1326,6 +1326,55 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 }
 
 
+/* ==========================================================================
+   Phase 7: the manuscript holds still
+   Two faults found on video, both in how the Write pane handles height and
+   horizontal position. Presentation only - no markup, ids or bindings move.
+   ========================================================================== */
+
+/* --- A. the manuscript stops jumping when the preview opens ---------------
+   Measured at 1896px: toggling the preview moved the writing box +119px to
+   the RIGHT even though its column got narrower. Three separate causes:
+     - the rail changed width (210px -> 190px) between the two states
+     - .with-preview capped the grid at max-width:1620px, so the whole layout
+       re-centred and shunted the manuscript sideways
+     - the manuscript was centred in its column, so any resize moved it by
+       half the difference
+   Rail width is now constant, the cap is gone, and the manuscript is pinned
+   to the start of its column. Same x in both states. */
+#writePane.with-preview .write-layout{grid-template-columns:210px minmax(0,1fr) minmax(300px,400px);
+  max-width:none}
+.manuscript{margin-inline:0}
+.chapter-editor .editor-foot,
+#writePane.with-preview .editor-bar,
+#writePane.with-preview .editor-foot,
+#writePane.with-preview .notes{margin-inline:0}
+
+/* --- B. the writing box keeps its size, and the pane scrolls --------------
+   .manuscript was flex:1 inside a height-capped column, so opening Author's
+   notes stole 190px from the manuscript (490 -> 300) instead of extending
+   the page. #writePane also carried overflow:hidden while every other pane
+   uses auto, so the notes ran 53px past the viewport with no way to reach
+   them. The manuscript now has its own height; the pane scrolls like the
+   rest of the tool. */
+#writePane.pane.active{overflow-y:auto;overflow-x:hidden}
+.write-layout{min-height:0}
+.chapter-editor{min-height:0}
+.manuscript{flex:none;height:clamp(300px,52vh,620px);min-height:300px}
+
+/* With the pane scrolling, the reader card would otherwise scroll away from
+   the prose it mirrors. It stays put while the manuscript moves under it.
+   Sticky offset matches .pane's own top padding so the card aligns with the
+   editor bar rather than riding above it. */
+#writePane.with-preview .write-preview{position:sticky;top:.25rem;align-self:start;
+  max-height:calc(100vh - 220px)}
+
+@media(max-width:980px){
+  /* the single-column fallback already scrolls; don't cap the box there */
+  .manuscript{height:auto;min-height:420px}
+  #writePane.with-preview .write-preview{position:static;max-height:none}
+}
+
 </style>
 </head>
 <body>
