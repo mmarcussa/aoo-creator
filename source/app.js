@@ -168,8 +168,8 @@ $("#addCommentBtn").addEventListener("click",()=>mutate(()=>currentWork().commen
 $("#duplicateWorkBtn").addEventListener("click",()=>{const source=currentWork();if(!source)return;mutate(()=>{const copy=structuredClone(source);copy.id=`work_${crypto.randomUUID().replaceAll("-","")}`;copy.title=`${copy.title} (Copy)`;copy.chapters.forEach(c=>c.id=`chapter_${crypto.randomUUID().replaceAll("-","")}`);copy.comments.forEach(c=>c.id=`comment_${crypto.randomUUID().replaceAll("-","")}`);project.works.push(copy);selectedWorkId=copy.id},{full:true,message:"Work duplicated with new stable IDs."})});
 $("#deleteWorkBtn").addEventListener("click",async()=>{const w=currentWork();if(!w)return;const yes=await ask(`\u201c${w.title||"Untitled work"}\u201d and all of its chapters will be removed.`,{title:"Delete work?",okLabel:"Delete",danger:true});if(!yes)return;mutate(()=>{project.works=project.works.filter(x=>x.id!==w.id);selectedWorkId=project.works[0]?.id||null;selectedChapterId=currentWork()?.chapters[0]?.id||null},{full:true,message:"Work deleted."})});
 $("#projectSettingsBtn").addEventListener("click",()=>showTab("project"));$("#workSearch").addEventListener("input",renderWorks);$("#runValidationBtn").addEventListener("click",renderValidation);
-function showWelcome(){$("#welcomeScreen").hidden=false;$("#welcomeExamples").hidden=true;$("#welcomeClose").textContent=localStorage.getItem("aoo-creator-welcome-seen")?"Close":"Skip"}
-function closeWelcome(){$("#welcomeScreen").hidden=true;localStorage.setItem("aoo-creator-welcome-seen","1")}
+function showWelcome(){$("#welcomeScreen").hidden=false;$("#welcomeExamples").hidden=true;$("#welcomeClose").textContent=localStorage.getItem("aoo-creator-welcome-seen")?"Close":"Skip";const s=$("#welcomeSuppress");if(s)s.checked=!!localStorage.getItem("aoo-creator-welcome-off")}
+function closeWelcome(){$("#welcomeScreen").hidden=true;localStorage.setItem("aoo-creator-welcome-seen","1");const s=$("#welcomeSuppress");if(s){if(s.checked)localStorage.setItem("aoo-creator-welcome-off","1");else localStorage.removeItem("aoo-creator-welcome-off")}}
 $("#tutorialBtn").addEventListener("click",()=>{closeWelcome();startTour()});
 $("#welcomeClose").addEventListener("click",closeWelcome);
 $("#welcomeBtn").addEventListener("click",showWelcome);
@@ -234,7 +234,7 @@ $("#buildBtn").addEventListener("click",()=>{renderValidation();
 document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();if(!undoStack.length)return;redoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(undoStack.pop()));selectedWorkId=project.works.find(w=>w.id===selectedWorkId)?.id||project.works[0]?.id||null;save("Undo autosaved.");render()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){event.preventDefault();if(!redoStack.length)return;undoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(redoStack.pop()));selectedWorkId=project.works[0]?.id||null;save("Redo autosaved.");render()}});
 
 if(localStorage.getItem("aoo-creator-live-preview")){$("#writePreview").hidden=false;$("#writePane").classList.add("with-preview");$("#livePreviewBtn").textContent="Hide preview";$("#livePreviewBtn").setAttribute("aria-pressed","true")}
-const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();function afterBoot(){if(!localStorage.getItem("aoo-creator-welcome-seen"))showWelcome()}
+const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();function afterBoot(){if(!localStorage.getItem("aoo-creator-welcome-off"))showWelcome()}
 function runBoot(){
   const el=$("#boot");
   const skip=matchMedia("(prefers-reduced-motion: reduce)").matches;

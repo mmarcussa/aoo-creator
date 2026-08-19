@@ -1395,9 +1395,72 @@ button{font-family:var(--font-display);letter-spacing:.02em}
 #writePane.with-preview .notes{max-width:none}
 /* Same fault mirrored: .chapter-editor .editor-foot (line ~1292) carries its
    own 68ch cap, which only bound when the preview was CLOSED -- so the foot
-   went the other way, 457 -> 694px. The column is the single source of width
+   went the other way, 457 -> 694. The column is the single source of width
    for everything in it. */
 .chapter-editor .editor-foot{max-width:none}
+
+/* ==========================================================================
+   Phase 10: two layout faults and two requests
+   ========================================================================== */
+
+/* --- 1. the notes stop sitting on the window edge --------------------------
+   Scrolled to the bottom of the Write pane, NOTES AFTER cleared the pane by
+   12px -- the pane's 48px bottom padding was being eaten by the notes block's
+   own border and padding, so the field read as flush against the screen.
+   The editor column now carries its own tail space measured from the last
+   field, and the last field gets a full line of air beneath it. */
+.chapter-editor{padding-bottom:2.5rem}
+.chapter-editor .notes[open]{padding-bottom:1.1rem}
+.chapter-editor .notes[open] > label:last-of-type{margin-bottom:.25rem}
+
+/* --- 2. BYLINE: Author no longer floats above Title ------------------------
+   Both labels are grids. Title's has a character counter as a second child
+   (26 / 120) and Author's does not, so Title stacked three rows against
+   Author's two and the select sat 21px higher than the input it pairs with.
+   Rows are now explicit: the counter occupies a reserved row in every label
+   in the record, whether or not that field has one. */
+.record-grid>label{grid-template-rows:auto auto 1fr;align-items:start}
+.record-grid>label>.counter{grid-row:2;justify-self:end;float:none;margin:0}
+.record-grid>label>:is(input,select,textarea){grid-row:3;align-self:start}
+/* labels with no counter still reserve the row, so every control lines up.
+   The spacer must match the counter's LINE BOX (16.69px), not its font-size --
+   `height:1em` gave 11.52px and left the select 5px high. */
+.record-grid>label:not(:has(>.counter))::before{content:"\200b";grid-row:2;
+  font-size:.72rem;line-height:1.45}
+
+/* --- 3. the pointer belongs to the theme -----------------------------------
+   Requested: the cursor should read as part of each theme. Kept to real
+   system cursors rather than image files -- a self-contained HTML file
+   should not carry cursor art, and system cursors respect the user's own
+   pointer size and accessibility settings. */
+[data-theme=win95],[data-theme=bios],[data-theme=nokia]{cursor:default}
+[data-theme=win95] button,[data-theme=win95] .nav-item,
+[data-theme=bios] button,[data-theme=nokia] button{cursor:default}
+[data-theme=matrix],[data-theme=matrix] button{cursor:cell}
+[data-theme=matrix] .manuscript,[data-theme=matrix] input,
+[data-theme=matrix] textarea{cursor:text}
+[data-theme=doom],[data-theme=brutal],[data-theme=bastard]{cursor:crosshair}
+[data-theme=doom] input,[data-theme=doom] textarea,
+[data-theme=brutal] input,[data-theme=brutal] textarea,
+[data-theme=bastard] input,[data-theme=bastard] textarea{cursor:text}
+[data-theme=gyaru] button,[data-theme=mcbling] button,
+[data-theme=vapor] button,[data-theme=y2k] button{cursor:pointer}
+[data-theme=dream],[data-theme=liminal],[data-theme=weird],
+[data-theme=trauma]{cursor:default}
+[data-theme=dream] button,[data-theme=liminal] button,
+[data-theme=weird] button,[data-theme=trauma] button{cursor:help}
+/* a text cursor everywhere prose is actually written, in every theme */
+.manuscript,.record-summary,[data-chapter-field="body"]{cursor:text}
+
+/* --- 4. the welcome screen's opt-out --------------------------------------
+   It now shows on every load; the checkbox is how a writer turns that off. */
+.welcome-foot{display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;flex-wrap:wrap;margin-top:.25rem}
+.welcome-skip{display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--font-ui);font-size:.82rem;color:var(--muted);cursor:pointer}
+.welcome-skip input{width:1rem;height:1rem;accent-color:var(--cyan);cursor:pointer}
+.welcome-skip:hover{color:var(--text)}
+.welcome-foot .welcome-close{margin:0}
 
 /* The pane gains a scrollbar when Author's notes open. Reserving the gutter
    up front stops that 10px from reflowing the manuscript underneath it. */
