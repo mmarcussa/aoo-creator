@@ -23,6 +23,7 @@ STEPS = [
     ("theme audit",      ["check-themes.py"]),
     ("cursor audit",     ["check-cursors.py"]),
     ("readability",      ["check-readability.py"]),
+    ("landing images",   ["check-shots.py"]),
 ]
 
 for label, cmd in STEPS:

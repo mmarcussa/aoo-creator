@@ -17,6 +17,8 @@ upload, no server.
 | `run-tests.py` | Runs the test suite in a real browser. No Node needed. |
 | `check-ui-contract.py` | Verifies the markup still exposes every field the exporter reads. |
 | `check-themes.py` | Measures WCAG contrast across every theme. No theme ships unread. |
+| `check-shots.py` | Fails the build when the landing page's screenshots show an older UI. |
+| `prepare-tool-shots.py` | Re-shoots those screenshots and re-stamps the fingerprint. |
 | `PackAuthorGuide.md` | The guide to hand to anyone publishing a collection. |
 
 ## Editing

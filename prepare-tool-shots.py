@@ -11,7 +11,7 @@ the sequence container never resizes between steps.
 Animations are frozen for the capture: virtual time can strand a re-render's
 fade at its opacity:0 start frame, which reads as a blank pane.
 """
-import os, pathlib, shutil, subprocess, sys, tempfile
+import hashlib, os, pathlib, shutil, subprocess, sys, tempfile
 from PIL import Image
 
 ROOT = pathlib.Path(__file__).resolve().parent
@@ -84,12 +84,21 @@ addEventListener("load", function () {
 
 FRAMES = [
     ("tool-write", "", "You write the fic here"),
-    ("tool-build", 'var b=document.getElementById("buildBtn"); if(b) b.click();',
-     "Validation passes, and it builds the mod"),
+    # open the Nexus block and bring it into frame: a 573px-tall crop cannot
+    # hold both it and the diff panel, and the generated mod page is the more
+    # visual of the two for someone deciding whether to use this
+    ("tool-build",
+     'var b=document.getElementById("buildBtn"); if(b) b.click();'
+     'setTimeout(function(){var d=document.getElementById("nexusBlock");'
+     'if(d){d.open=true;setTimeout(function(){d.scrollIntoView({block:"center"});},250);}},400);',
+     "Validation passes, and your Nexus page is written for you"),
 ]
 
+# the landing page's hero shot, wider and taller than a sequence frame
+HERO = ("screenshot-app", "", 1600, 1000)
 
-def shoot(step_js, dest):
+
+def shoot(step_js, dest, width=None, height=None, fmt='WEBP'):
     probe = (BASE.replace("__CH1__", CH1).replace("__CH2__", CH2)
                  .replace("__SUMMARY__", SUMMARY).replace("__STEP__", step_js))
     stage = pathlib.Path(tempfile.mkdtemp(prefix="toolshot-"))
@@ -100,17 +109,33 @@ def shoot(step_js, dest):
         raw = stage / "raw.png"
         subprocess.run([CHROME, "--headless", "--disable-gpu", "--no-first-run",
                         "--hide-scrollbars", f"--user-data-dir={stage / 'p'}",
-                        f"--screenshot={raw}", f"--window-size={W},{H}",
+                        f"--screenshot={raw}",
+                        "--window-size=%d,%d" % (width or W, height or H),
                         "--virtual-time-budget=22000", page.as_uri()],
                        capture_output=True, timeout=300)
         if not raw.exists():
             sys.exit("FAIL: chrome produced no screenshot for %s" % dest.name)
         im = Image.open(raw).convert("RGB")
-        im = im.resize((FINAL_W, round(im.height * FINAL_W / im.width)), Image.LANCZOS)
-        im.save(dest, "WEBP", quality=82, method=6)
+        if fmt == "WEBP":
+            im = im.resize((FINAL_W, round(im.height * FINAL_W / im.width)), Image.LANCZOS)
+            im.save(dest, "WEBP", quality=82, method=6)
+        else:
+            im.save(dest, fmt, optimize=True)
         return im.size, dest.stat().st_size
     finally:
         shutil.rmtree(stage, ignore_errors=True)
+
+
+def ui_fingerprint():
+    """Hash of everything that decides what the tool looks like.
+
+    check-shots.py compares this against the stamp written here, so a UI change
+    that leaves the landing page showing an older tool fails the build instead
+    of shipping quietly."""
+    h = hashlib.sha256()
+    for name in ("index.html", "styles.css", "app.js"):
+        h.update((ROOT / "source" / name).read_bytes())
+    return h.hexdigest()
 
 
 def main():
@@ -118,7 +143,18 @@ def main():
     for name, step, caption in FRAMES:
         dest = OUT / ("%s.webp" % name)
         (w, h), size = shoot(step, dest)
-        print("  %-12s %4dx%-4d %6.1f KB   %s" % (name, w, h, size / 1024, caption))
+        print("  %-14s %4dx%-4d %6.1f KB   %s" % (name, w, h, size / 1024, caption))
+
+    # the hero image on the landing page comes from the same run, so it can
+    # never disagree with the sequence about what the tool looks like
+    name, step, hw, hh = HERO
+    dest = ROOT / "source" / "assets" / (name + ".png")
+    (w, h), size = shoot(step, dest, width=hw, height=hh, fmt="PNG")
+    print("  %-14s %4dx%-4d %6.1f KB   landing hero" % (name, w, h, size / 1024))
+
+    stamp = ROOT / "source" / "assets" / "shots.stamp"
+    stamp.write_text(ui_fingerprint() + "\n", encoding="utf-8")
+    print("\n  UI fingerprint stamped: %s" % ui_fingerprint()[:16])
     return 0
 
 
