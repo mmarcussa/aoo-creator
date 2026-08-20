@@ -1,4 +1,4 @@
-import {CREATOR_VERSION,LIMITS,makeProject,makeAuthor,makeWork,makeChapter,makeComment,getExample,normalizeProject,validateProject,generatePackFiles,generateNexusPage,workWordCount,diffProjects,createZip} from "./core.js";
+import {CREATOR_VERSION,AOO_MIN_VERSION,LIMITS,makeProject,makeAuthor,makeWork,makeChapter,makeComment,getExample,normalizeProject,validateProject,generatePackFiles,generateNexusPage,workWordCount,diffProjects,createZip} from "./core.js";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const STORAGE="aoo-creator-project-v1", LIBRARY="aoo-creator-library-v1", THEME="aoo-creator-theme";

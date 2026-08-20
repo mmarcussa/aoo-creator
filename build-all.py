@@ -24,6 +24,7 @@ STEPS = [
     ("cursor audit",     ["check-cursors.py"]),
     ("readability",      ["check-readability.py"]),
     ("landing images",   ["check-shots.py"]),
+    ("hosted build",     ["check-hosted.py"]),
 ]
 
 for label, cmd in STEPS:
