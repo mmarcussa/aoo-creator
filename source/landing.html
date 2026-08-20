@@ -61,8 +61,15 @@ header.hero::after{
   text-decoration:none;border:1px solid var(--edge);border-radius:2px;
   transition:transform 140ms ease,box-shadow 140ms ease,border-color 140ms ease}
 .btn.go{background:var(--gold);border-color:var(--gold);color:#141007;
-  box-shadow:0 0 0 0 #f0c94a55}
-.btn.go:hover{transform:translateY(-2px);box-shadow:0 10px 30px -8px #f0c94a77}
+  animation:ctaGlow 2.8s ease-in-out infinite}
+/* the primary action pulses so it reads as the thing to click; it settles the
+   moment a pointer arrives, and stands down for reduced motion */
+@keyframes ctaGlow{
+  0%,100%{box-shadow:0 0 14px -6px #f0c94a66}
+  50%{box-shadow:0 0 30px -2px #f0c94aaa}}
+.btn.go:hover{animation:none}
+@media (prefers-reduced-motion:reduce){.btn.go{animation:none}}
+.btn.go:hover{transform:translateY(-2px);box-shadow:0 10px 30px -8px #f0c94acc}
 .btn.alt{color:var(--cyan);background:#31d5d60d}
 .btn.alt:hover{border-color:var(--cyan);transform:translateY(-2px)}
 .btn small{font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;
@@ -170,6 +177,26 @@ footer{padding:3rem 0 4rem;color:var(--muted);font-size:.86rem}
 </style>
 </head>
 <body>
+<!--
+     _   ___  ___
+    /_\ / _ \/ _ \    ARCHIVE OF OUR OVERWRITES
+   / _ \ (_) | (_) |   creator
+  /_/ \_\___/ \___/
+
+  NETDIR://AOO.PUB
+
+  You read the source. Good instinct.
+
+  There is no tracker on this page, no analytics, no beacon. Open the Network
+  tab and reload: this page and its own assets, nothing else. That is the whole
+  promise, and it is checkable in about ten seconds - which is how a promise
+  ought to work.
+
+  Every fic in the screenshots is placeholder text. The real ones get written
+  by people like you, in the tool one click away.
+
+  "The archive remembers what the city would rather overwrite."
+-->
 
 <header class="hero">
   <div class="wrap">

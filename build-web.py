@@ -93,12 +93,14 @@ OFFLINE_CSS = """
 # a quiet way back for someone who lands straight on the tool and wants to know
 # what it is
 HOMELINK_CSS = """
-/* hosted build only */
-.site-home{position:fixed;left:.6rem;bottom:.5rem;z-index:40;padding:.3rem .6rem;
-  border:1px solid var(--line);border-radius:2px;background:var(--panel);
-  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);text-decoration:none;opacity:.5;transition:opacity 140ms ease}
-.site-home:hover{opacity:1;color:var(--cyan)}
+/* hosted build only. It lives in the header, not floating: fixed to the bottom
+   left it covered the rail's "Load example" dropdown, which is a control, and a
+   decorative back-link must never sit on top of one. */
+.site-home{display:inline-flex;align-items:center;padding:.34rem .6rem;
+  border:1px solid var(--line);border-radius:2px;background:transparent;
+  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;
+  color:var(--muted);text-decoration:none;opacity:.75;transition:opacity 140ms ease}
+.site-home:hover{opacity:1;color:var(--cyan);border-color:var(--cyan)}
 """
 
 HEADERS = """/*
@@ -190,8 +192,9 @@ def main():
                '  <link rel="stylesheet" href="styles.css">', "app favicon")
     app = once(app, '      <div class="welcome-foot">',
                OFFLINE + '\n      <div class="welcome-foot">', "offline link")
-    app = once(app, "</body>",
-               '  <a class="site-home" href="index.html">&larr; What is this?</a>\n</body>',
+    app = once(app, '<div class="header-actions">',
+               '<div class="header-actions">'
+               '<a class="site-home" href="index.html">&larr; What is this?</a>',
                "home link")
     (OUT / "app.html").write_text(app, encoding="utf-8")
 

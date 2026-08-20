@@ -1688,6 +1688,51 @@ input[type=text],input[type=number],input:not([type]),textarea,[contenteditable]
 .manuscript,.record-summary,.tag-entry{cursor:text}
 button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allowed}
 
+
+/* ---- welcome: point the eye at the two ways in ----
+   Nothing else on this screen moves, so a slow pulse is enough. Both cues stop
+   for anyone who has asked for less motion. */
+.welcome-card[data-welcome="tour"],.welcome-card[data-welcome="example"]{
+  position:relative;animation:cardBeckon 3.6s ease-in-out infinite}
+.welcome-card[data-welcome="example"]{animation-delay:1.8s}
+@keyframes cardBeckon{
+  0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--yellow) 0%,transparent);
+          border-color:var(--line)}
+  50%{box-shadow:0 0 22px -4px color-mix(in srgb,var(--yellow) 55%,transparent);
+      border-color:var(--yellow)}}
+.welcome-card[data-welcome="tour"]:hover,
+.welcome-card[data-welcome="example"]:hover{animation-play-state:paused}
+
+.welcome-card[data-welcome="tour"] .welcome-card-title::after{
+  content:"start here";margin-left:.55rem;padding:.12rem .42rem;
+  border:1px solid var(--yellow);border-radius:2px;
+  font:700 .58rem/1.5 var(--font-mono);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--yellow-ink);vertical-align:middle}
+
+.welcome-examples-note{margin:0 0 .7rem;grid-column:1/-1;
+  font-size:.82rem;line-height:1.55;color:var(--muted)}
+.welcome-examples-note strong{color:var(--text)}
+
+@media (prefers-reduced-motion:reduce){
+  .welcome-card[data-welcome="tour"],.welcome-card[data-welcome="example"]{
+    animation:none;border-color:var(--yellow)}}
+
+/* Palette-matched cursors for the themes that were sharing the default
+   pair. Fill comes from each theme's own tokens; the outline is picked by
+   luminance so it reads on that theme's ground. */
+:root[data-theme=aoo]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2331d5d6' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23f0c94a' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23ef5867' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=night]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%236fc5ff' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23f1c86b' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23ff7987' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=light]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23007d86' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%238a6500' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23b3293c' stroke='%23f2f6f5' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=contrast]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2300ffff' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ffea00' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23ff4c61' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=ao3]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%231e6bb8' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23900' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23d84315' stroke='%23f2f6f5' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=gyaru]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ff4fa3' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23e0a200' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23d81b60' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=vapor]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2301cdfe' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ff71ce' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23ff4444' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=mcbling]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ff4fbf' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ffd35c' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23e02020' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=emo]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ff2e63' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23b06cff' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23e01e37' stroke='%23f2f6f5' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=mtv]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2300e5ff' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ffd400' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23ff5722' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=aero]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2300a3b8' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%231a7fc4' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23cf3b2b' stroke='%23f2f6f5' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=bauhaus]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%230b5fa5' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23f0c000' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23d1301f' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+
 </style>
 </head>
 <body>
@@ -2056,8 +2101,8 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
           <span class="welcome-card-text">Ten steps through the real interface, from naming a collection to building the mod.</span>
         </button>
         <button class="welcome-card" data-welcome="example">
-          <span class="welcome-card-title">Open an example</span>
-          <span class="welcome-card-text">Four finished collections to read and pull apart. The fastest way to see what a pack looks like.</span>
+          <span class="welcome-card-title">Learn from an example</span>
+          <span class="welcome-card-text">Four finished collections, built to be read and taken apart. Open one, poke at every field, then start your own.</span>
         </button>
         <button class="welcome-card" data-welcome="import">
           <span class="welcome-card-title">Import a project</span>
@@ -2066,6 +2111,7 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
       </div>
 
       <div id="welcomeExamples" class="welcome-examples" hidden>
+          <p class="welcome-examples-note">These are <strong>worked examples, not your project</strong> &mdash; each one opens as a separate collection you can edit, break and delete freely. Nothing you do to them touches anything else.</p>
         <button data-example="oneshot"><strong>Inactive one-shot</strong><small>One chapter, archived comments</small></button>
         <button data-example="complete"><strong>Complete multi-chapter</strong><small>Finished, immediately readable</small></button>
         <button data-example="active"><strong>Active timed WIP</strong><small>Chapters unlock on a schedule</small></button>
@@ -2477,6 +2523,41 @@ function runBoot(){
   setTimeout(()=>el.classList.add("ready"),1850);  // marks the wait, styling is CSS-driven
 }
 runBoot();status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);
+
+
+/* ---------------------------------------------------------------------------
+   For whoever opened DevTools. The tool claims nothing leaves your machine;
+   the console is where a sceptic goes to check, so point them at the proof.
+   --------------------------------------------------------------------------- */
+(function () {
+  try {
+    if (!window.console || !console.log) return;
+    var NL = String.fromCharCode(10);
+    var gold = "color:#f0c94a;font-weight:700;font-size:12px";
+    var cyan = "color:#31d5d6";
+    var dim  = "color:#88a09e";
+    var red  = "color:#ef5867;font-style:italic";
+
+    console.log(
+      "%c" +
+      "  ______________________________________________" + NL +
+      "     _   ___  ___" + NL +
+      "    /_\\ / _ \\/ _ \\   ARCHIVE OF OUR OVERWRITES" + NL +
+      "   / _ \\ (_) | (_) |  creator" + NL +
+      "  /_/ \\_\\___/ \\___/" + NL +
+      "  ______________________________________________",
+      gold);
+
+    console.log("%cNETDIR://AOO.PUB%c  link established \u00b7 no relay in the path", cyan, dim);
+    console.log(
+      "%cEverything here runs in this tab. No account, no telemetry, no beacon." + NL +
+      "Do not take our word for it - open the Network tab and reload. You should" + NL +
+      "see this page and its own assets, and nothing else. Ever.",
+      dim);
+    console.log("%c\u201cThe archive remembers what the city would rather overwrite.\u201d", red);
+    console.log("%cWriting a collection? The guide is PackAuthorGuide.md in the repo.", dim);
+  } catch (e) { /* a console that dislikes styling is not worth an error */ }
+})();
 
 })();
 </script>

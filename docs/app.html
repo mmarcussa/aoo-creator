@@ -14,7 +14,7 @@
       <button id="welcomeBtn" class="brand-button" type="button" title="Show the welcome screen"><span class="brand-logo" role="img" aria-label="Archive of Our Overwrites"></span></button>
       <div class="masthead"><strong id="mastheadName">Untitled collection</strong><span class="masthead-sub">AOO Creator <i>v0.2.0</i></span></div>
     </div>
-    <div class="header-actions">
+    <div class="header-actions"><a class="site-home" href="index.html">&larr; What is this?</a>
       <label class="compact">Theme
         <select id="themeSelect">
           <optgroup label="Core">
@@ -374,8 +374,8 @@
           <span class="welcome-card-text">Ten steps through the real interface, from naming a collection to building the mod.</span>
         </button>
         <button class="welcome-card" data-welcome="example">
-          <span class="welcome-card-title">Open an example</span>
-          <span class="welcome-card-text">Four finished collections to read and pull apart. The fastest way to see what a pack looks like.</span>
+          <span class="welcome-card-title">Learn from an example</span>
+          <span class="welcome-card-text">Four finished collections, built to be read and taken apart. Open one, poke at every field, then start your own.</span>
         </button>
         <button class="welcome-card" data-welcome="import">
           <span class="welcome-card-title">Import a project</span>
@@ -384,6 +384,7 @@
       </div>
 
       <div id="welcomeExamples" class="welcome-examples" hidden>
+          <p class="welcome-examples-note">These are <strong>worked examples, not your project</strong> &mdash; each one opens as a separate collection you can edit, break and delete freely. Nothing you do to them touches anything else.</p>
         <button data-example="oneshot"><strong>Inactive one-shot</strong><small>One chapter, archived comments</small></button>
         <button data-example="complete"><strong>Complete multi-chapter</strong><small>Finished, immediately readable</small></button>
         <button data-example="active"><strong>Active timed WIP</strong><small>Chapters unlock on a schedule</small></button>
@@ -406,6 +407,5 @@
     </div>
   </div>
   <script type="module" src="app.js"></script>
-  <a class="site-home" href="index.html">&larr; What is this?</a>
 </body>
 </html>

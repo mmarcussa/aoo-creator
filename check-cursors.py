@@ -38,8 +38,9 @@ addEventListener("load", function () {
     setTimeout(function () {
       var w = document.getElementById("welcomeScreen");
       if (w && !w.hidden) { var c = document.getElementById("welcomeClose"); if (c) c.click(); }
-      var themes = ["aoo","workout","win95","matrix","doom","bios","nokia","brutal","gyaru"];
-      var i = 0, sel = document.getElementById("themeSelect");
+      // every theme in the picker, not a hand-picked sample: all 24 declare a cursor now
+      var sel = document.getElementById("themeSelect"), i = 0;
+      var themes = Array.prototype.map.call(sel.options, function (o) { return o.value; });
       (function next() {
         if (i >= themes.length) return sample();
         var th = themes[i++];

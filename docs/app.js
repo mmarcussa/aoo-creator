@@ -249,3 +249,38 @@ function runBoot(){
   setTimeout(()=>el.classList.add("ready"),1850);  // marks the wait, styling is CSS-driven
 }
 runBoot();status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);
+
+
+/* ---------------------------------------------------------------------------
+   For whoever opened DevTools. The tool claims nothing leaves your machine;
+   the console is where a sceptic goes to check, so point them at the proof.
+   --------------------------------------------------------------------------- */
+(function () {
+  try {
+    if (!window.console || !console.log) return;
+    var NL = String.fromCharCode(10);
+    var gold = "color:#f0c94a;font-weight:700;font-size:12px";
+    var cyan = "color:#31d5d6";
+    var dim  = "color:#88a09e";
+    var red  = "color:#ef5867;font-style:italic";
+
+    console.log(
+      "%c" +
+      "  ______________________________________________" + NL +
+      "     _   ___  ___" + NL +
+      "    /_\\ / _ \\/ _ \\   ARCHIVE OF OUR OVERWRITES" + NL +
+      "   / _ \\ (_) | (_) |  creator" + NL +
+      "  /_/ \\_\\___/ \\___/" + NL +
+      "  ______________________________________________",
+      gold);
+
+    console.log("%cNETDIR://AOO.PUB%c  link established \u00b7 no relay in the path", cyan, dim);
+    console.log(
+      "%cEverything here runs in this tab. No account, no telemetry, no beacon." + NL +
+      "Do not take our word for it - open the Network tab and reload. You should" + NL +
+      "see this page and its own assets, and nothing else. Ever.",
+      dim);
+    console.log("%c\u201cThe archive remembers what the city would rather overwrite.\u201d", red);
+    console.log("%cWriting a collection? The guide is PackAuthorGuide.md in the repo.", dim);
+  } catch (e) { /* a console that dislikes styling is not worth an error */ }
+})();
