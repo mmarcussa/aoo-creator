@@ -56,6 +56,18 @@ ever dropped, that constraint lifts — but not before.
 **No analytics, ever.** The boot screen tells the reader `network — not required` and the
 welcome screen says nothing is uploaded. A tracker would make both of those a lie.
 
+### What `docs/` contains
+
+| File | What it is |
+|---|---|
+| `index.html` | The landing page. Built from `source/landing.html`. |
+| `app.html` | The tool. Built from `source/index.html`. |
+| `AOO-Creator-v0.2.0-standalone.html` | The download the landing page offers. |
+
+The landing page is the one place the two versions diverge, and it can, because
+it is not the tool: no bindings, no themes, no export path, no contract. Nothing
+a guard tracks can drift there. The tool itself stays identical in both.
+
 ### Deploying `docs/`
 
 The name is not arbitrary: GitHub Pages' *deploy from a branch* option only offers the

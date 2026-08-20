@@ -2,19 +2,29 @@
 
 Two artifacts come out of one source tree:
 
-  build-standalone.py  ->  AOO-Creator-v0.2.0-standalone.html   (download / offline / Nexus)
-  build-web.py         ->  docs/                                 (GitHub Pages, later Cloudflare)
+  build-standalone.py  ->  AOO-Creator-v<VERSION>-standalone.html  (download / offline / Nexus)
+  build-web.py         ->  docs/                                   (GitHub Pages, later Cloudflare)
 
-They are deliberately the same tool. The hosted copy is not a different product with
-web fonts and analytics bolted on; a writer who downloads the offline file after using
-the site should get exactly what they just used. So this script only adds what a URL
-needs and a file:// page cannot use: link-preview metadata, a favicon, cache headers,
-and a link to fetch the offline copy.
+The tool itself is deliberately identical in both. A writer who downloads the
+offline file after using the site should get exactly what they just used, so the
+hosted copy is not a different product with web fonts and analytics bolted on.
+What the hosted build adds is what a URL needs and a file:// page cannot use: a
+landing page, link-preview metadata, a favicon, cache headers, and a link to
+fetch the offline copy.
 
-    python build-web.py                          # relative og:image, fine for testing
+The landing page is the one place the two versions diverge, and it can, because
+it is not the tool: no bindings, no themes, no export path, no contract. Nothing
+a guard tracks can drift there.
+
+    python build-web.py                                  # relative og:image, fine for testing
     python build-web.py --base-url https://your.domain   # absolute, needed for real previews
 
-Exits non-zero if any reference in the built page does not resolve to a shipped file.
+Layout produced:
+    docs/index.html   the landing page
+    docs/app.html     the tool
+    docs/AOO-Creator-v<VERSION>-standalone.html   the download the landing page offers
+
+Exits non-zero if any reference in either built page does not resolve.
 """
 import argparse, html, pathlib, re, shutil, sys
 
@@ -27,49 +37,69 @@ OUT = ROOT / "docs"
 VERSION = (SRC / "VERSION").read_text(encoding="utf-8").strip()
 STANDALONE = f"AOO-Creator-v{VERSION}-standalone.html"
 
-# Copied verbatim. schema.json rides along because it is the published contract a
-# pack author may want to read; everything else here is the running application.
-COPY = ["index.html", "styles.css", "app.js", "core.js", "404.html", "schema.json"]
-ASSETS = ["aoo-logo.png", "share-card.png"]
+# source name -> name in docs/. The tool moves to app.html so the landing page
+# can own the root URL. schema.json rides along because it is the published
+# contract a pack author may want to read.
+COPY_AS = {
+    "landing.html": "index.html",
+    "index.html": "app.html",
+    "styles.css": "styles.css",
+    "app.js": "app.js",
+    "core.js": "core.js",
+    "schema.json": "schema.json",
+}
+ASSETS = ["aoo-logo.png", "share-card.png", "screenshot-app.png"]
 
 TITLE = "AOO Creator"
 DESC = ("Write fic collections for Cyberpunk 2077's Archive of Our Overwrites and export a "
-        "Nexus-ready mod. Runs entirely in your browser \u2014 no account, nothing uploaded.")
+        "Nexus-ready mod. Runs entirely in your browser — no account, nothing uploaded.")
 
 
 def meta(base):
     img = f"{base}/assets/share-card.png" if base else "assets/share-card.png"
-    canonical = f'\n  <link rel="canonical" href="{base}/">' if base else ""
-    return f"""  <link rel="icon" href="assets/aoo-logo.png" type="image/png">
-  <link rel="apple-touch-icon" href="assets/aoo-logo.png">
-  <meta name="theme-color" content="#0b1114">
-  <meta name="color-scheme" content="dark light">{canonical}
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="{TITLE}">
-  <meta property="og:title" content="{TITLE} \u2014 build fic collection mods">
-  <meta property="og:description" content="{html.escape(DESC, quote=True)}">
-  <meta property="og:image" content="{img}">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Archive of Our Overwrites Creator">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{TITLE} \u2014 build fic collection mods">
-  <meta name="twitter:description" content="{html.escape(DESC, quote=True)}">
-  <meta name="twitter:image" content="{img}">
+    canonical = f'\n<link rel="canonical" href="{base}/">' if base else ""
+    return f"""<meta name="description" content="{html.escape(DESC, quote=True)}">
+<link rel="icon" href="assets/aoo-logo.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/aoo-logo.png">
+<meta name="theme-color" content="#070b0d">
+<meta name="color-scheme" content="dark">{canonical}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{TITLE}">
+<meta property="og:title" content="{TITLE} — build fic collection mods">
+<meta property="og:description" content="{html.escape(DESC, quote=True)}">
+<meta property="og:image" content="{img}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Archive of Our Overwrites Creator">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{TITLE} — build fic collection mods">
+<meta name="twitter:description" content="{html.escape(DESC, quote=True)}">
+<meta name="twitter:image" content="{img}">
 """
 
 
 OFFLINE = f"""
       <p class="welcome-offline">Working without a connection, or want to keep a copy?
-      <a href="{STANDALONE}" download>Download the single-file version</a> \u2014 one HTML file,
+      <a href="{STANDALONE}" download>Download the single-file version</a> — one HTML file,
       identical to this page, opens straight from your desktop.</p>
 """
 
 OFFLINE_CSS = """
 /* hosted build only: pointer to the downloadable single-file copy */
 .welcome-offline{margin:.35rem 0 0;font-size:.86rem;line-height:1.55;color:var(--muted)}
-.welcome-offline a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
-.welcome-offline a:hover{color:var(--fg)}
+.welcome-offline a{color:var(--cyan);text-decoration:underline;text-underline-offset:3px}
+.welcome-offline a:hover{color:var(--text)}
+"""
+
+# a quiet way back for someone who lands straight on the tool and wants to know
+# what it is
+HOMELINK_CSS = """
+/* hosted build only */
+.site-home{position:fixed;left:.6rem;bottom:.5rem;z-index:40;padding:.3rem .6rem;
+  border:1px solid var(--line);border-radius:2px;background:var(--panel);
+  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;opacity:.5;transition:opacity 140ms ease}
+.site-home:hover{opacity:1;color:var(--cyan)}
 """
 
 HEADERS = """/*
@@ -88,6 +118,9 @@ HEADERS = """/*
 
 /index.html
   Cache-Control: public, max-age=0, must-revalidate
+
+/app.html
+  Cache-Control: public, max-age=0, must-revalidate
 """
 
 
@@ -95,6 +128,10 @@ def once(text, old, new, what):
     if text.count(old) != 1:
         sys.exit(f"FAIL: {what}: {text.count(old)} matches for {old[:70]!r}")
     return text.replace(old, new)
+
+
+def refs_of(page):
+    return set(re.findall(r'(?:href|src)="([^"#:]+?)"', page))
 
 
 def main():
@@ -110,21 +147,42 @@ def main():
         shutil.rmtree(OUT)
     (OUT / "assets").mkdir(parents=True)
 
-    for name in COPY:
-        shutil.copy2(SRC / name, OUT / name)
+    for src_name, out_name in COPY_AS.items():
+        shutil.copy2(SRC / src_name, OUT / out_name)
     for name in ASSETS:
         shutil.copy2(SRC / "assets" / name, OUT / "assets" / name)
     shutil.copy2(src_standalone, OUT / STANDALONE)
 
-    page = (OUT / "index.html").read_text(encoding="utf-8")
-    page = once(page, '  <link rel="stylesheet" href="styles.css">',
-                meta(base) + '  <link rel="stylesheet" href="styles.css">', "head metadata")
-    page = once(page, "      <div class=\"welcome-foot\">", OFFLINE + "\n      <div class=\"welcome-foot\">",
-                "offline link")
-    (OUT / "index.html").write_text(page, encoding="utf-8")
+    # ---- landing page ---------------------------------------------------
+    land = (OUT / "index.html").read_text(encoding="utf-8")
+    land = once(land, "<title>AOO Creator</title>",
+                "<title>AOO Creator</title>\n" + meta(base), "landing metadata")
+    land = land.replace("AOO-Creator-STANDALONE.html", STANDALONE)
+    land = land.replace("vVERSION_TOKEN", f"v{VERSION}")
+    if "VERSION_TOKEN" in land or "AOO-Creator-STANDALONE" in land:
+        sys.exit("FAIL: a landing-page placeholder was not substituted")
+    (OUT / "index.html").write_text(land, encoding="utf-8")
+
+    # ---- the tool -------------------------------------------------------
+    app = (OUT / "app.html").read_text(encoding="utf-8")
+    app = once(app, '  <link rel="stylesheet" href="styles.css">',
+               '  <link rel="icon" href="assets/aoo-logo.png" type="image/png">\n'
+               '  <link rel="stylesheet" href="styles.css">', "app favicon")
+    app = once(app, '      <div class="welcome-foot">',
+               OFFLINE + '\n      <div class="welcome-foot">', "offline link")
+    app = once(app, "</body>",
+               '  <a class="site-home" href="index.html">&larr; What is this?</a>\n</body>',
+               "home link")
+    (OUT / "app.html").write_text(app, encoding="utf-8")
 
     css = (OUT / "styles.css").read_text(encoding="utf-8")
-    (OUT / "styles.css").write_text(css + OFFLINE_CSS, encoding="utf-8")
+    (OUT / "styles.css").write_text(css + OFFLINE_CSS + HOMELINK_CSS, encoding="utf-8")
+
+    # a stray URL should reach the page that explains the tool, not a relative guess
+    (OUT / "404.html").write_text(
+        '<!doctype html><meta charset="utf-8"><title>AOO Creator</title>'
+        '<meta http-equiv="refresh" content="0;url=./">'
+        '<p>Not found. <a href="./">Go to AOO Creator</a>.</p>\n', encoding="utf-8")
 
     (OUT / "robots.txt").write_text(
         "User-agent: *\nAllow: /\n" + (f"\nSitemap: {base}/sitemap.xml\n" if base else ""),
@@ -133,18 +191,23 @@ def main():
     # Pages runs Jekyll otherwise, which silently drops files beginning with _
     (OUT / ".nojekyll").write_text("", encoding="utf-8")
 
-    # Guard, mirroring the standalone's "no external reference survived": here every
-    # reference must resolve to a file we actually shipped.
-    refs = set(re.findall(r'(?:href|src)="([^"#:]+?)"', page))
-    missing = sorted(r for r in refs if not (OUT / r).exists())
-    if missing:
-        sys.exit("FAIL: unresolved reference(s) in docs/index.html: " + ", ".join(missing))
-    if 'href="app.js"' in page or "<script" not in page:
-        sys.exit("FAIL: index.html lost its script tag")
+    # ---- guard ----------------------------------------------------------
+    # the mirror of the standalone's "no external reference survived inlining":
+    # here every reference must resolve to a file we actually shipped
+    checked = 0
+    for page_name in ("index.html", "app.html"):
+        page = (OUT / page_name).read_text(encoding="utf-8")
+        refs = refs_of(page)
+        missing = sorted(r for r in refs if not (OUT / r).exists())
+        if missing:
+            sys.exit(f"FAIL: unresolved reference(s) in docs/{page_name}: " + ", ".join(missing))
+        checked += len(refs)
+    if "<script" not in (OUT / "app.html").read_text(encoding="utf-8"):
+        sys.exit("FAIL: app.html lost its script tag")
 
     total = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
     print(f"  docs/ built: {len(list(OUT.rglob('*')))} entries, {total // 1024} KB total")
-    print(f"  references checked: {len(refs)} all resolve")
+    print(f"  index.html = landing, app.html = the tool, {checked} references all resolve")
     if base:
         print(f"  canonical + share image absolute at {base}")
     else:

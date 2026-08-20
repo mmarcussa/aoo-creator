@@ -1664,5 +1664,12 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
 
 /* hosted build only: pointer to the downloadable single-file copy */
 .welcome-offline{margin:.35rem 0 0;font-size:.86rem;line-height:1.55;color:var(--muted)}
-.welcome-offline a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
-.welcome-offline a:hover{color:var(--fg)}
+.welcome-offline a{color:var(--cyan);text-decoration:underline;text-underline-offset:3px}
+.welcome-offline a:hover{color:var(--text)}
+
+/* hosted build only */
+.site-home{position:fixed;left:.6rem;bottom:.5rem;z-index:40;padding:.3rem .6rem;
+  border:1px solid var(--line);border-radius:2px;background:var(--panel);
+  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;opacity:.5;transition:opacity 140ms ease}
+.site-home:hover{opacity:1;color:var(--cyan)}
