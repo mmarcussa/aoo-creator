@@ -101,6 +101,77 @@ function runTests() {
      brPage.notes.join(" ").toLowerCase().indexOf("square bracket") >= 0,
      brPage.notes.join(" | "));
 
+  /* ---- update diff --------------------------------------------------------
+     The dangerous edits are the invisible ones. A renamed title is cosmetic; a
+     removed work or a changed namespace silently empties a reader's shelf. So
+     these check that the reader-breaking cases land in `breaking`, and that the
+     cosmetic ones do not. */
+  {
+    const clone = (o) => JSON.parse(JSON.stringify(o));
+    const base = getExample("collection");
+    const kinds = (d, list) => d[list].map(x => x.kind);
+
+    // republishing untouched still warns: the version has not moved
+    const same = diffProjects(base, clone(base));
+    ok("diff: unchanged pack flags the version",
+       kinds(same, "breaking").indexOf("version") >= 0, kinds(same, "breaking").join(","));
+
+    // a bumped version alone is a clean update
+    const bumped = clone(base);
+    bumped.pack.version = "1.1.0";
+    const okDiff = diffProjects(base, bumped);
+    ok("diff: bumped version is clean", okDiff.ok === true, kinds(okDiff, "breaking").join(","));
+    ok("diff: bump is reported as a change",
+       kinds(okDiff, "changes").indexOf("version") >= 0);
+
+    // dropping a work costs readers what they recovered
+    const dropped = clone(bumped);
+    const goneTitle = dropped.works[0].title;
+    dropped.works.splice(0, 1);
+    const dropDiff = diffProjects(base, dropped);
+    ok("diff: removed work is breaking",
+       kinds(dropDiff, "breaking").indexOf("work-removed") >= 0, kinds(dropDiff, "breaking").join(","));
+    ok("diff: removed work is named",
+       dropDiff.breaking.some(b => b.what.indexOf(goneTitle) >= 0));
+    ok("diff: removed work makes it not ok", dropDiff.ok === false);
+
+    // the namespace is the pack's identity
+    const renamed = clone(bumped);
+    renamed.pack.namespace = "SomethingElse";
+    ok("diff: namespace change is breaking",
+       kinds(diffProjects(base, renamed), "breaking").indexOf("namespace") >= 0);
+
+    // losing a chapter costs eddies as well as prose
+    const lostCh = clone(bumped);
+    lostCh.works[0].chapters.splice(0, 1);
+    ok("diff: removed chapter is breaking",
+       kinds(diffProjects(base, lostCh), "breaking").indexOf("chapter-removed") >= 0);
+
+    // adding is safe
+    const added = clone(bumped);
+    added.works[0].chapters.push(makeChapter("A new chapter"));
+    const addDiff = diffProjects(base, added);
+    ok("diff: added chapter is a change, not breaking",
+       addDiff.ok === true && kinds(addDiff, "changes").indexOf("chapter-added") >= 0,
+       kinds(addDiff, "breaking").join(","));
+
+    // a retitled work is cosmetic: readers keep it
+    const retitled = clone(bumped);
+    retitled.works[0].title = "A Completely Different Name";
+    const retDiff = diffProjects(base, retitled);
+    ok("diff: retitle is cosmetic", retDiff.ok === true,
+       kinds(retDiff, "breaking").join(","));
+    ok("diff: retitle is still reported",
+       kinds(retDiff, "changes").indexOf("work-retitled") >= 0);
+
+    // going backwards is as wrong as standing still
+    const back = clone(base);
+    back.pack.version = "0.9.0";
+    ok("diff: version going backwards is breaking",
+       kinds(diffProjects(base, back), "breaking").indexOf("version") >= 0);
+  }
+
+
 
   return results;
 }

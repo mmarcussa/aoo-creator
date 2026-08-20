@@ -263,3 +263,142 @@ export function generateNexusPage(project) {
   }
   return { text: text, notes: notes };
 }
+
+/* ---------------------------------------------------------------------------
+   Update diff.
+
+   Updates matter more here than in most mods, because readers keep their
+   library through them: what they recovered, propped and stashed is keyed to
+   the ids in the pack. So the dangerous edits are not the visible ones. A
+   renamed title is cosmetic; a changed id silently empties somebody's shelf.
+
+   Pure, like the rest of this module: two projects in, a structured report out.
+   The caller decides how to show it.
+
+   `breaking` is the list that costs a reader something. `changes` is everything
+   else worth seeing before you upload.
+   --------------------------------------------------------------------------- */
+export function diffProjects(before, after) {
+  const a = normalizeProject(before);
+  const b = normalizeProject(after);
+  const breaking = [];
+  const changes = [];
+
+  const byId = (xs) => {
+    const m = {};
+    (xs || []).forEach(x => { m[x.id] = x; });
+    return m;
+  };
+
+  // ---- the namespace is the pack's identity ------------------------------
+  if (a.pack.namespace !== b.pack.namespace) {
+    breaking.push({
+      kind: "namespace",
+      what: "The namespace changed from " + a.pack.namespace + " to " + b.pack.namespace + ".",
+      why: "The game treats this as a different mod. Readers keep the old one and " +
+           "gain a second copy; nothing carries over."
+    });
+  }
+
+  // ---- version must move forward, or the update may not be taken ---------
+  const parts = (v) => String(v || "0").split(/[.\-+]/).map(x => parseInt(x, 10) || 0);
+  const cmp = (x, y) => {
+    const p = parts(x), q = parts(y);
+    for (let i = 0; i < Math.max(p.length, q.length); i++) {
+      if ((p[i] || 0) !== (q[i] || 0)) return (p[i] || 0) < (q[i] || 0) ? -1 : 1;
+    }
+    return 0;
+  };
+  const vc = cmp(a.pack.version, b.pack.version);
+  if (vc === 0) {
+    breaking.push({
+      kind: "version",
+      what: "The version is still " + b.pack.version + ".",
+      why: "Bump it before you upload, or readers and mod managers cannot tell " +
+           "this apart from what they already have."
+    });
+  } else if (vc > 0) {
+    breaking.push({
+      kind: "version",
+      what: "The version went backwards, " + a.pack.version + " to " + b.pack.version + ".",
+      why: "An update should move forward."
+    });
+  } else {
+    changes.push({ kind: "version", what: "Version " + a.pack.version + " to " + b.pack.version + "." });
+  }
+
+  // ---- authors -----------------------------------------------------------
+  const aAuth = byId(a.authors), bAuth = byId(b.authors);
+  Object.keys(aAuth).forEach(function (id) {
+    if (!bAuth[id]) {
+      breaking.push({
+        kind: "author-removed",
+        what: "Author " + aAuth[id].pseud + " is gone.",
+        why: "Their works lose their byline for anyone who already has this pack."
+      });
+    }
+  });
+  Object.keys(bAuth).forEach(function (id) {
+    if (!aAuth[id]) changes.push({ kind: "author-added", what: "New author: " + bAuth[id].pseud + "." });
+    else if (aAuth[id].pseud !== bAuth[id].pseud) {
+      changes.push({ kind: "author-renamed",
+                     what: "Pseud " + aAuth[id].pseud + " is now " + bAuth[id].pseud + "." });
+    }
+  });
+
+  // ---- works and chapters ------------------------------------------------
+  const aWork = byId(a.works), bWork = byId(b.works);
+  Object.keys(aWork).forEach(function (id) {
+    if (!bWork[id]) {
+      breaking.push({
+        kind: "work-removed",
+        what: "“" + aWork[id].title + "” is gone.",
+        why: "It disappears from the archive for everyone who recovered it."
+      });
+    }
+  });
+
+  Object.keys(bWork).forEach(function (id) {
+    const w = bWork[id], was = aWork[id];
+    if (!was) {
+      changes.push({ kind: "work-added", what: "New work: “" + w.title + "”." });
+      return;
+    }
+    if (was.title !== w.title) {
+      changes.push({ kind: "work-retitled",
+                     what: "“" + was.title + "” is now “" + w.title + "”." });
+    }
+    if (was.rating !== w.rating) {
+      changes.push({ kind: "work-rating",
+                     what: "“" + w.title + "” changed rating: " + was.rating + " to " + w.rating + "." });
+    }
+    const aCh = byId(was.chapters), bCh = byId(w.chapters);
+    const lost = Object.keys(aCh).filter(cid => !bCh[cid]);
+    if (lost.length) {
+      breaking.push({
+        kind: "chapter-removed",
+        what: lost.length + (lost.length === 1 ? " chapter removed from " : " chapters removed from ") + "“" + w.title + "”: " +
+              lost.map(cid => aCh[cid].title).join(", ") + ".",
+        why: "A reader who recovered them loses them, and their eddies with them."
+      });
+    }
+    const gained = Object.keys(bCh).filter(cid => !aCh[cid]);
+    if (gained.length) {
+      changes.push({
+        kind: "chapter-added",
+        what: gained.length + (gained.length === 1 ? " new chapter in " : " new chapters in ") + "“" + w.title + "”: " +
+              gained.map(cid => bCh[cid].title).join(", ") + "."
+      });
+    }
+  });
+
+  return {
+    ok: breaking.length === 0,
+    breaking: breaking,
+    changes: changes,
+    counts: {
+      works: b.works.length - a.works.length,
+      authors: b.authors.length - a.authors.length
+    }
+  };
+}

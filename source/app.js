@@ -1,4 +1,4 @@
-import {CREATOR_VERSION,LIMITS,makeProject,makeAuthor,makeWork,makeChapter,makeComment,getExample,normalizeProject,validateProject,generatePackFiles,generateNexusPage,workWordCount,createZip} from "./core.js";
+import {CREATOR_VERSION,LIMITS,makeProject,makeAuthor,makeWork,makeChapter,makeComment,getExample,normalizeProject,validateProject,generatePackFiles,generateNexusPage,workWordCount,diffProjects,createZip} from "./core.js";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const STORAGE="aoo-creator-project-v1", LIBRARY="aoo-creator-library-v1", THEME="aoo-creator-theme";
@@ -40,7 +40,7 @@ const tourSteps=[
  {tab:"preview",sel:"#aooPreview",title:"How it looks in game",text:"The work card as Archive of Our Overwrites will render it, including long titles and large tag walls."},
  {tab:"validate",sel:"#validationList",title:"Errors block the build",text:"Every problem names the work and what to fix. Errors stop the export on purpose; warnings are only advice."},
  {tab:"write",sel:"#backupState",title:"This is the one that matters",text:"Autosave lives only in this browser. Save project writes a .aoopack.json \u2014 keep it. Re-importing that file is the only way to publish an update your readers keep their library through."},
- {tab:"write",sel:"#buildBtn",title:"Build the mod, and get your Nexus page",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
+ {tab:"write",sel:"#buildBtn",title:"Build it, and see what the update changes",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
 ];
 let tourOn=false,tourAt=0;
 function startTour(){tourOn=true;tourAt=0;renderTourStep()}
@@ -194,7 +194,7 @@ $("#themeSelect").addEventListener("change",event=>{const root=document.document
 root.style.display="none";void root.offsetHeight;root.style.display=""});
 $("#exampleSelect").addEventListener("change",event=>{if(!event.target.value)return;snapshot();library.projects[project.id]=project;adoptCollection(withId(getExample(event.target.value)),"Example added as a new collection.");event.target.value=""});
 $("#saveProjectBtn").addEventListener("click",()=>{download(new Blob([JSON.stringify(project,null,2)],{type:"application/json"}),`${project.pack.namespace||"aoo-project"}.aoopack.json`);pendingFileSave=true;save("Project file written. Keep it — you need it to publish updates.")});
-$("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;pendingFileSave=true;adoptCollection(next,`Imported ${file.name}.`);status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
+$("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;pendingFileSave=true;library.baselines=library.baselines||{};library.baselines[next.id]={at:new Date().toISOString(),file:file.name,project:JSON.parse(JSON.stringify(next))};adoptCollection(next,`Imported ${file.name}.`);status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
 function openPublish(){
   const p=project.pack,works=project.works,chapters=works.reduce((t,w)=>t+w.chapters.length,0);
   const words=works.reduce((t,w)=>t+workWordCount(w),0);
@@ -213,8 +213,37 @@ function openPublish(){
     ? "Your <code>.aoopack.json</code> is up to date. Keep it — re-importing it is how you publish a compatible update."
     : "<strong>You have not saved this collection to a file since your last edit.</strong> Do that before you publish: re-importing the <code>.aoopack.json</code> is the only way to ship an update your readers keep their library through.";
   $("#publishNote").className="publish-note "+(saved===project.updatedAt?"ok":"warn");
+  renderUpdateDiff();
   renderNexusPage();
   $("#publishScreen").hidden=false;
+}
+function renderUpdateDiff(){
+  const lede=$("#diffLede"),bad=$("#diffBreaking"),good=$("#diffChanges");
+  const base=library.baselines?.[project.id];
+  $("#diffHeading").textContent=base?"Since the file you imported":"First release";
+  if(!base){
+    lede.innerHTML="<strong>This looks like a first release.</strong> There is no imported "
+      +"file to compare against, so nothing here can break a reader\u2019s library yet. "
+      +"Keep the <code>.aoopack.json</code> you save \u2014 importing it next time is what "
+      +"makes this comparison possible.";
+    bad.hidden=true; good.hidden=true; return;
+  }
+  let d;
+  try{ d=diffProjects(base.project,project); }
+  catch(err){
+    lede.textContent="The comparison could not be made: "+err.message;
+    bad.hidden=true; good.hidden=true; return;
+  }
+  const when=base.file?` (${esc(base.file)})`:"";
+  lede.innerHTML=(d.ok
+    ? "<strong>Nothing here costs a reader anything.</strong> "
+    : `<strong>${d.breaking.length} ${d.breaking.length===1?"change":"changes"} below ${d.breaking.length===1?"will":"will"} cost readers something.</strong> `)
+    +`Compared against the file you imported${when}, version `
+    +`<code>${esc(base.project.pack.version)}</code>.`;
+  bad.innerHTML=d.breaking.map(b=>`<li>${esc(b.what)}<small>${esc(b.why)}</small></li>`).join("");
+  bad.hidden=d.breaking.length===0;
+  good.innerHTML=d.changes.map(c=>`<li>${esc(c.what)}</li>`).join("");
+  good.hidden=d.changes.length===0;
 }
 function renderNexusPage(){
     // Regenerated every time the publish screen opens, so it always reflects

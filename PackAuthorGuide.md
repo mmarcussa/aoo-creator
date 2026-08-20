@@ -166,6 +166,33 @@ stored number, so they stay honest even in a collection you just imported.
 
 ## Publishing an update
 
+### The Creator checks the update for you
+
+Import the `.aoopack.json` from your last release, make your changes, then press
+**Validate & build ZIP**. Above the Nexus page you will see what changed since
+that file, split into two lists.
+
+The red list is the one to read. Those changes cost your readers something:
+
+| What | What it costs a reader |
+|---|---|
+| A work removed | It disappears from the archive for anyone who recovered it. |
+| A chapter removed | They lose it, and the eddies they spent on it. |
+| The namespace changed | The game sees a different mod. Nothing carries over, and they end up with two. |
+| The version unchanged | Mod managers cannot tell the new file from the old one. |
+| An author removed | Their works lose their byline. |
+
+The quiet list underneath is everything else: new works, new chapters, retitles,
+rating changes. Those are safe. Readers keep what they had.
+
+If you did not import a file, the panel says so. That is a first release, and
+there is nothing yet that could break.
+
+This is why the guide keeps insisting you save a `.aoopack.json` for every
+release. Without it there is no way to know what an update is about to do.
+
+### Doing it by hand
+
 1. **Import project**: load your saved `.aoopack.json`.
 2. Make your changes. Add chapters, fix typos, add works.
 3. Bump the **version** in Collection settings.

@@ -53,6 +53,17 @@ for name in ("core", "app"):
     pass
 core_n = core_n.replace("crypto.randomUUID()", "aooUUID()")
 app_n  = app_n.replace("crypto.randomUUID()", "aooUUID()")
+# Top-level names from core.js and app.js share one scope once concatenated.
+# Two ES modules tolerate a duplicate; this file does not - it is a fatal
+# redeclaration that stops the app booting, and it only appears here. That
+# happened once with countWords, so it is checked rather than remembered.
+core_names = set(re.findall(r'(?m)^(?:export\s+)?(?:function|const|let|var)\s+([A-Za-z_$][\w$]*)', core_n))
+app_names = set(re.findall(r'(?m)^(?:function|const|let|var)\s+([A-Za-z_$][\w$]*)', app_n))
+clash = sorted(core_names & app_names)
+if clash:
+    sys.exit('FAIL: core.js and app.js both declare %s at top level; one scope '
+             'in the standalone means this will not boot' % ', '.join(clash))
+
 n_ls = len(re.findall(r'\blocalStorage\.', app_n))
 app_n = re.sub(r'\blocalStorage\.', 'AOOStore.', app_n)
 if n_ls < 6:

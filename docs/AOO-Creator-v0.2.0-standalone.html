@@ -1760,6 +1760,23 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
 .nexus-copied{font-size:.78rem;color:var(--green);letter-spacing:.06em;
   text-transform:uppercase}
 
+
+/* ---- update diff on the publish screen ----
+   Reader-breaking changes are red and first; ordinary ones are quiet. Both use
+   theme tokens, so the panel holds up in all 24 themes. */
+.diff-block{margin-top:1.1rem;padding:.9rem 1rem 1rem;border:1px solid var(--line);
+  border-radius:var(--radius);background:var(--panel2)}
+.diff-lede{margin:.35rem 0 0;color:var(--muted);font-size:.86rem;line-height:1.6;max-width:74ch}
+.diff-lede strong{color:var(--text)}
+.diff-list{display:grid;gap:.5rem;margin:.8rem 0 0;padding:0;list-style:none}
+.diff-list[hidden]{display:none}
+.diff-list li{padding:.6rem .8rem;border-left:3px solid var(--red);
+  background:color-mix(in srgb,var(--red) 9%,transparent);border-radius:0 2px 2px 0;
+  font-size:.86rem;line-height:1.55;color:var(--text)}
+.diff-list li small{display:block;margin-top:.2rem;color:var(--muted)}
+.diff-list.ok li{border-left-color:var(--cyan);
+  background:color-mix(in srgb,var(--cyan) 7%,transparent);color:var(--muted)}
+
 </style>
 </head>
 <body>
@@ -2077,6 +2094,13 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
         <span class="tag-kind">What the ZIP contains</span>
         <ol id="publishFileList"></ol>
       </div>
+
+      <section class="diff-block" id="diffBlock">
+        <span class="tag-kind" id="diffHeading">Since the file you imported</span>
+        <p class="diff-lede" id="diffLede"></p>
+        <ul class="diff-list" id="diffBreaking" hidden></ul>
+        <ul class="diff-list ok" id="diffChanges" hidden></ul>
+      </section>
 
       <details class="nexus-block" id="nexusBlock">
         <summary><span class="tag-kind">Your Nexus page</span>
@@ -2465,6 +2489,145 @@ function generateNexusPage(project) {
   return { text: text, notes: notes };
 }
 
+/* ---------------------------------------------------------------------------
+   Update diff.
+
+   Updates matter more here than in most mods, because readers keep their
+   library through them: what they recovered, propped and stashed is keyed to
+   the ids in the pack. So the dangerous edits are not the visible ones. A
+   renamed title is cosmetic; a changed id silently empties somebody's shelf.
+
+   Pure, like the rest of this module: two projects in, a structured report out.
+   The caller decides how to show it.
+
+   `breaking` is the list that costs a reader something. `changes` is everything
+   else worth seeing before you upload.
+   --------------------------------------------------------------------------- */
+function diffProjects(before, after) {
+  const a = normalizeProject(before);
+  const b = normalizeProject(after);
+  const breaking = [];
+  const changes = [];
+
+  const byId = (xs) => {
+    const m = {};
+    (xs || []).forEach(x => { m[x.id] = x; });
+    return m;
+  };
+
+  // ---- the namespace is the pack's identity ------------------------------
+  if (a.pack.namespace !== b.pack.namespace) {
+    breaking.push({
+      kind: "namespace",
+      what: "The namespace changed from " + a.pack.namespace + " to " + b.pack.namespace + ".",
+      why: "The game treats this as a different mod. Readers keep the old one and " +
+           "gain a second copy; nothing carries over."
+    });
+  }
+
+  // ---- version must move forward, or the update may not be taken ---------
+  const parts = (v) => String(v || "0").split(/[.\-+]/).map(x => parseInt(x, 10) || 0);
+  const cmp = (x, y) => {
+    const p = parts(x), q = parts(y);
+    for (let i = 0; i < Math.max(p.length, q.length); i++) {
+      if ((p[i] || 0) !== (q[i] || 0)) return (p[i] || 0) < (q[i] || 0) ? -1 : 1;
+    }
+    return 0;
+  };
+  const vc = cmp(a.pack.version, b.pack.version);
+  if (vc === 0) {
+    breaking.push({
+      kind: "version",
+      what: "The version is still " + b.pack.version + ".",
+      why: "Bump it before you upload, or readers and mod managers cannot tell " +
+           "this apart from what they already have."
+    });
+  } else if (vc > 0) {
+    breaking.push({
+      kind: "version",
+      what: "The version went backwards, " + a.pack.version + " to " + b.pack.version + ".",
+      why: "An update should move forward."
+    });
+  } else {
+    changes.push({ kind: "version", what: "Version " + a.pack.version + " to " + b.pack.version + "." });
+  }
+
+  // ---- authors -----------------------------------------------------------
+  const aAuth = byId(a.authors), bAuth = byId(b.authors);
+  Object.keys(aAuth).forEach(function (id) {
+    if (!bAuth[id]) {
+      breaking.push({
+        kind: "author-removed",
+        what: "Author " + aAuth[id].pseud + " is gone.",
+        why: "Their works lose their byline for anyone who already has this pack."
+      });
+    }
+  });
+  Object.keys(bAuth).forEach(function (id) {
+    if (!aAuth[id]) changes.push({ kind: "author-added", what: "New author: " + bAuth[id].pseud + "." });
+    else if (aAuth[id].pseud !== bAuth[id].pseud) {
+      changes.push({ kind: "author-renamed",
+                     what: "Pseud " + aAuth[id].pseud + " is now " + bAuth[id].pseud + "." });
+    }
+  });
+
+  // ---- works and chapters ------------------------------------------------
+  const aWork = byId(a.works), bWork = byId(b.works);
+  Object.keys(aWork).forEach(function (id) {
+    if (!bWork[id]) {
+      breaking.push({
+        kind: "work-removed",
+        what: "“" + aWork[id].title + "” is gone.",
+        why: "It disappears from the archive for everyone who recovered it."
+      });
+    }
+  });
+
+  Object.keys(bWork).forEach(function (id) {
+    const w = bWork[id], was = aWork[id];
+    if (!was) {
+      changes.push({ kind: "work-added", what: "New work: “" + w.title + "”." });
+      return;
+    }
+    if (was.title !== w.title) {
+      changes.push({ kind: "work-retitled",
+                     what: "“" + was.title + "” is now “" + w.title + "”." });
+    }
+    if (was.rating !== w.rating) {
+      changes.push({ kind: "work-rating",
+                     what: "“" + w.title + "” changed rating: " + was.rating + " to " + w.rating + "." });
+    }
+    const aCh = byId(was.chapters), bCh = byId(w.chapters);
+    const lost = Object.keys(aCh).filter(cid => !bCh[cid]);
+    if (lost.length) {
+      breaking.push({
+        kind: "chapter-removed",
+        what: lost.length + (lost.length === 1 ? " chapter removed from " : " chapters removed from ") + "“" + w.title + "”: " +
+              lost.map(cid => aCh[cid].title).join(", ") + ".",
+        why: "A reader who recovered them loses them, and their eddies with them."
+      });
+    }
+    const gained = Object.keys(bCh).filter(cid => !aCh[cid]);
+    if (gained.length) {
+      changes.push({
+        kind: "chapter-added",
+        what: gained.length + (gained.length === 1 ? " new chapter in " : " new chapters in ") + "“" + w.title + "”: " +
+              gained.map(cid => bCh[cid].title).join(", ") + "."
+      });
+    }
+  });
+
+  return {
+    ok: breaking.length === 0,
+    breaking: breaking,
+    changes: changes,
+    counts: {
+      works: b.works.length - a.works.length,
+      authors: b.authors.length - a.authors.length
+    }
+  };
+}
+
 /* ===== app.js ===== */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const STORAGE="aoo-creator-project-v1", LIBRARY="aoo-creator-library-v1", THEME="aoo-creator-theme";
@@ -2506,7 +2669,7 @@ const tourSteps=[
  {tab:"preview",sel:"#aooPreview",title:"How it looks in game",text:"The work card as Archive of Our Overwrites will render it, including long titles and large tag walls."},
  {tab:"validate",sel:"#validationList",title:"Errors block the build",text:"Every problem names the work and what to fix. Errors stop the export on purpose; warnings are only advice."},
  {tab:"write",sel:"#backupState",title:"This is the one that matters",text:"Autosave lives only in this browser. Save project writes a .aoopack.json \u2014 keep it. Re-importing that file is the only way to publish an update your readers keep their library through."},
- {tab:"write",sel:"#buildBtn",title:"Build the mod, and get your Nexus page",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
+ {tab:"write",sel:"#buildBtn",title:"Build it, and see what the update changes",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
 ];
 let tourOn=false,tourAt=0;
 function startTour(){tourOn=true;tourAt=0;renderTourStep()}
@@ -2660,7 +2823,7 @@ $("#themeSelect").addEventListener("change",event=>{const root=document.document
 root.style.display="none";void root.offsetHeight;root.style.display=""});
 $("#exampleSelect").addEventListener("change",event=>{if(!event.target.value)return;snapshot();library.projects[project.id]=project;adoptCollection(withId(getExample(event.target.value)),"Example added as a new collection.");event.target.value=""});
 $("#saveProjectBtn").addEventListener("click",()=>{download(new Blob([JSON.stringify(project,null,2)],{type:"application/json"}),`${project.pack.namespace||"aoo-project"}.aoopack.json`);pendingFileSave=true;save("Project file written. Keep it — you need it to publish updates.")});
-$("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;pendingFileSave=true;adoptCollection(next,`Imported ${file.name}.`);status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
+$("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;pendingFileSave=true;library.baselines=library.baselines||{};library.baselines[next.id]={at:new Date().toISOString(),file:file.name,project:JSON.parse(JSON.stringify(next))};adoptCollection(next,`Imported ${file.name}.`);status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
 function openPublish(){
   const p=project.pack,works=project.works,chapters=works.reduce((t,w)=>t+w.chapters.length,0);
   const words=works.reduce((t,w)=>t+workWordCount(w),0);
@@ -2679,8 +2842,37 @@ function openPublish(){
     ? "Your <code>.aoopack.json</code> is up to date. Keep it — re-importing it is how you publish a compatible update."
     : "<strong>You have not saved this collection to a file since your last edit.</strong> Do that before you publish: re-importing the <code>.aoopack.json</code> is the only way to ship an update your readers keep their library through.";
   $("#publishNote").className="publish-note "+(saved===project.updatedAt?"ok":"warn");
+  renderUpdateDiff();
   renderNexusPage();
   $("#publishScreen").hidden=false;
+}
+function renderUpdateDiff(){
+  const lede=$("#diffLede"),bad=$("#diffBreaking"),good=$("#diffChanges");
+  const base=library.baselines?.[project.id];
+  $("#diffHeading").textContent=base?"Since the file you imported":"First release";
+  if(!base){
+    lede.innerHTML="<strong>This looks like a first release.</strong> There is no imported "
+      +"file to compare against, so nothing here can break a reader\u2019s library yet. "
+      +"Keep the <code>.aoopack.json</code> you save \u2014 importing it next time is what "
+      +"makes this comparison possible.";
+    bad.hidden=true; good.hidden=true; return;
+  }
+  let d;
+  try{ d=diffProjects(base.project,project); }
+  catch(err){
+    lede.textContent="The comparison could not be made: "+err.message;
+    bad.hidden=true; good.hidden=true; return;
+  }
+  const when=base.file?` (${esc(base.file)})`:"";
+  lede.innerHTML=(d.ok
+    ? "<strong>Nothing here costs a reader anything.</strong> "
+    : `<strong>${d.breaking.length} ${d.breaking.length===1?"change":"changes"} below ${d.breaking.length===1?"will":"will"} cost readers something.</strong> `)
+    +`Compared against the file you imported${when}, version `
+    +`<code>${esc(base.project.pack.version)}</code>.`;
+  bad.innerHTML=d.breaking.map(b=>`<li>${esc(b.what)}<small>${esc(b.why)}</small></li>`).join("");
+  bad.hidden=d.breaking.length===0;
+  good.innerHTML=d.changes.map(c=>`<li>${esc(c.what)}</li>`).join("");
+  good.hidden=d.changes.length===0;
 }
 function renderNexusPage(){
     // Regenerated every time the publish screen opens, so it always reflects

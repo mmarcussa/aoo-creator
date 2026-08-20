@@ -1751,3 +1751,20 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
 .nexus-actions{display:flex;align-items:center;gap:.7rem;padding:.8rem 1rem 1rem}
 .nexus-copied{font-size:.78rem;color:var(--green);letter-spacing:.06em;
   text-transform:uppercase}
+
+
+/* ---- update diff on the publish screen ----
+   Reader-breaking changes are red and first; ordinary ones are quiet. Both use
+   theme tokens, so the panel holds up in all 24 themes. */
+.diff-block{margin-top:1.1rem;padding:.9rem 1rem 1rem;border:1px solid var(--line);
+  border-radius:var(--radius);background:var(--panel2)}
+.diff-lede{margin:.35rem 0 0;color:var(--muted);font-size:.86rem;line-height:1.6;max-width:74ch}
+.diff-lede strong{color:var(--text)}
+.diff-list{display:grid;gap:.5rem;margin:.8rem 0 0;padding:0;list-style:none}
+.diff-list[hidden]{display:none}
+.diff-list li{padding:.6rem .8rem;border-left:3px solid var(--red);
+  background:color-mix(in srgb,var(--red) 9%,transparent);border-radius:0 2px 2px 0;
+  font-size:.86rem;line-height:1.55;color:var(--text)}
+.diff-list li small{display:block;margin-top:.2rem;color:var(--muted)}
+.diff-list.ok li{border-left-color:var(--cyan);
+  background:color-mix(in srgb,var(--cyan) 7%,transparent);color:var(--muted)}
