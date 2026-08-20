@@ -84,7 +84,18 @@ addEventListener("load",function(){
        out.push("diff panel filled: "
          +(!!document.getElementById("diffLede")
            &&document.getElementById("diffLede").textContent.length>20));
-       done();
+       // the ready chip is the other way in, and had its own dead end
+       ps.hidden=true;
+       var rs=document.getElementById("readyState");
+       out.push("ready chip visible: "+(rs&&!rs.hidden));
+       if(rs&&!rs.hidden){
+         rs.click();
+         setTimeout(function(){
+           out.push("ready chip opens publish: "
+             +!document.getElementById("publishScreen").hidden);
+           done();
+         },700);
+       } else { done(); }
      },1200);
    },1500);
   },600);

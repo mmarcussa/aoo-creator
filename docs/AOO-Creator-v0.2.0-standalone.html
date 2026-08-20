@@ -2753,7 +2753,7 @@ function renderReadyState(){const el=$("#readyState");if(!el)return;
   const errors=validateProject(project).filter(i=>i.kind==="error").length;
   el.hidden=false;el.textContent=errors?`${errors} to fix`:"Ready to build";
   el.className=`ready-state ${errors?"blocked":"ready"}`;
-  el.title=errors?"Validation errors block the export. Click to see them.":"Validation passes. This collection can be built."}
+  el.title=errors?"Validation errors block the export. Click to see them.":"Validation passes. Click to build the mod."}
 function renderValidationBadges(){scheduleWorks();renderReadyState();const badge=$("#issueCount");if(pristine){badge.textContent="–";badge.title="Nothing to check yet";return}const issues=validateProject(project),errors=issues.filter(i=>i.kind==="error").length;badge.textContent=errors||issues.length;badge.title=`${errors} errors, ${issues.filter(i=>i.kind==="warning").length} warnings`}
 function renderValidation(){const host=$("#validationList");if(pristine){$("#validationSummary").innerHTML=`<p class="help-callout">Nothing checked yet. Start writing and this report fills in automatically.</p>`;host.innerHTML="";renderValidationBadges();return}const issues=validateProject(project),errors=issues.filter(i=>i.kind==="error").length,warnings=issues.filter(i=>i.kind==="warning").length;$("#validationSummary").innerHTML=`<p class="help-callout"><strong>${errors}</strong> errors · <strong>${warnings}</strong> warnings. Errors block ZIP export; warnings are advisory.</p>`;host.innerHTML=issues.length?issues.map(i=>`<article class="issue ${i.kind}"><span class="issue-kind">${i.kind}</span><div><strong>${esc(i.path)}</strong><br>${esc(i.message)}</div></article>`).join(""):`<article class="issue ok"><span class="issue-kind">ready</span><div><strong>Framework contract passed.</strong><br>The collection is ready to build.</div></article>`;renderValidationBadges()}
 function renderProjectForm(){$$('[data-pack]').forEach(el=>el.value=project.pack[el.dataset.pack]??"")}
@@ -2775,7 +2775,7 @@ $("#commentList").addEventListener("input",event=>{const card=event.target.close
 
 $("#addAuthorBtn").addEventListener("click",()=>{mutate(()=>project.authors.push(makeAuthor("newauthor",false)),{full:true,message:"Author added — give it a pseud."});showTab("authors");const rows=$$("[data-author-row]"),input=rows[rows.length-1]?.querySelector('[data-author-field="pseud"]');if(input){input.focus();input.select()}});
 $("#backupState").addEventListener("click",()=>$("#saveProjectBtn").click());
-$("#readyState").addEventListener("click",()=>showTab("validate"));
+$("#readyState").addEventListener("click",startBuild);
 $("#livePreviewBtn").addEventListener("click",()=>{const p=$("#writePreview"),b=$("#livePreviewBtn");
   const on=p.hidden;p.hidden=!on;b.setAttribute("aria-pressed",String(on));
   b.textContent=on?"Hide preview":"Show preview";$("#writePane").classList.toggle("with-preview",on);
@@ -2928,11 +2928,15 @@ $("#publishGo").addEventListener("click",()=>{
     status(`Built ${name}. Upload it to Nexus and list AOO as a requirement.`,"success");
   }catch(error){closePublish();status(error.message,"error")}
 });
-$("#buildBtn").addEventListener("click",()=>{renderValidation();
+// One action behind both ways in: the toolbar button and the ready chip.
+// The chip used to jump to the validation report even when it read "Ready to
+// build", which is a dead end and reads as a button that does nothing.
+function startBuild(){renderValidation();
   const errors=validateProject(project).filter(x=>x.kind==="error");
   if(errors.length){activeTab="validate";showTab("validate");
     status(`Build blocked: ${errors.length} validation error(s).`,"error");return}
-  openPublish()});
+  openPublish()}
+$("#buildBtn").addEventListener("click",startBuild);
 
 // Ctrl+Z inside a text field belongs to the browser. Hijacking it there meant a
 // writer taking back their last sentence lost every structural change instead.
