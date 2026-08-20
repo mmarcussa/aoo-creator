@@ -68,8 +68,8 @@ const bool=v=>String(v)==="true";
 const list=v=>String(v||"").split(",").map(x=>x.trim()).filter(Boolean);
 const esc=v=>String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-function mutate(fn,{full=false,message,undoable=false}={}){snapshot();fn();deriveWork(currentWork());save(message);if(undoable)offerUndo();if(full)render();else{renderSummary();renderPreview();renderValidationBadges();updateCounters();updateDerivedFields()}}
-function render(){renderCollections();renderBackupState();renderSummary();renderAuthors();renderWorks();renderWorkForm();renderChapterStrip();renderChapterEditor();renderComments();renderPreview();renderValidation();showTab(activeTab)}
+function mutate(fn,{full=false,message}={}){snapshot();fn();deriveWork(currentWork());save(message);renderHistory();if(full)render();else{renderSummary();renderPreview();renderValidationBadges();updateCounters();updateDerivedFields()}}
+function render(){renderHistory();renderCollections();renderBackupState();renderSummary();renderAuthors();renderWorks();renderWorkForm();renderChapterStrip();renderChapterEditor();renderComments();renderPreview();renderValidation();showTab(activeTab)}
 function perWorkIssues(){const map={},issues=validateProject(project);project.works.forEach((w,i)=>{const mine=issues.filter(x=>String(x.path).startsWith(`work ${i+1}:`));map[w.id]={errors:mine.filter(x=>x.kind==="error").length,warnings:mine.filter(x=>x.kind==="warning").length}});return map}
 function renderBackupState(){const el=$("#backupState");if(!el)return;const saved=library.saved?.[project.id],dirty=saved!==project.updatedAt;el.textContent=dirty?"Not saved to a file":"Saved to a file";el.className=`backup-state ${dirty?"dirty":"clean"}`;el.title=dirty?"Autosave lives only in this browser. Use Save project to write a .aoopack.json you keep — it is the only way to publish an update later.":`Written to a file ${new Date(saved).toLocaleString()}. Autosave since then lives only in this browser.`}
 function renderCollections(){const m=$("#mastheadName");if(m)m.textContent=project.pack.name||"Untitled collection";
@@ -117,13 +117,13 @@ function renderValidation(){const host=$("#validationList");if(pristine){$("#val
 function renderProjectForm(){$$('[data-pack]').forEach(el=>el.value=project.pack[el.dataset.pack]??"")}
 function showTab(tab){activeTab=tab;$$('.editor-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));$$('.pane').forEach(p=>p.classList.remove('active'));const w=currentWork(),needsWork=tab!=="project"&&tab!=="authors";$("#emptyState").hidden=!(needsWork&&!w);if(needsWork&&!w)return;const pane=document.querySelector(`#${tab}Pane`);if(pane)pane.classList.add("active");if(tab==="authors")renderAuthorsPane();if(tab==="project")renderProjectForm();if(tab==="validate")renderValidation();if(tab==="preview")renderPreview();if(tab==="write"){renderChapterStrip();renderChapterEditor()}}
 
-document.addEventListener("click",event=>{const tab=event.target.closest("[data-tab]");if(tab)return showTab(tab.dataset.tab);const workBtn=event.target.closest("[data-work]");if(workBtn){selectedWorkId=workBtn.dataset.work;selectedChapterId=currentWork()?.chapters[0]?.id||null;activeTab="write";return render()}const delAuthor=event.target.closest("[data-delete-author]");if(delAuthor){const row=delAuthor.closest("[data-author-row]");const a=project.authors.find(x=>x.id===row.dataset.authorRow);if(!a)return;const uses=project.works.filter(w=>w.authorId===a.id).length;if(uses){status(`Reassign ${a.pseud}\u2019s ${uses} work(s) to another author first.`,"error");return}if(project.authors.length<=1){status("A collection needs at least one author.","error");return}ask(`\u201c${a.pseud}\u201d will be removed from this collection.`,{title:"Delete author?",okLabel:"Delete",danger:true}).then(yes=>{if(yes)mutate(()=>{project.authors=project.authors.filter(x=>x.id!==a.id)},{full:true,message:"Author deleted.",undoable:true})});return}
+document.addEventListener("click",event=>{const tab=event.target.closest("[data-tab]");if(tab)return showTab(tab.dataset.tab);const workBtn=event.target.closest("[data-work]");if(workBtn){selectedWorkId=workBtn.dataset.work;selectedChapterId=currentWork()?.chapters[0]?.id||null;activeTab="write";return render()}const delAuthor=event.target.closest("[data-delete-author]");if(delAuthor){const row=delAuthor.closest("[data-author-row]");const a=project.authors.find(x=>x.id===row.dataset.authorRow);if(!a)return;const uses=project.works.filter(w=>w.authorId===a.id).length;if(uses){status(`Reassign ${a.pseud}\u2019s ${uses} work(s) to another author first.`,"error");return}if(project.authors.length<=1){status("A collection needs at least one author.","error");return}ask(`\u201c${a.pseud}\u201d will be removed from this collection.`,{title:"Delete author?",okLabel:"Delete",danger:true}).then(yes=>{if(yes)mutate(()=>{project.authors=project.authors.filter(x=>x.id!==a.id)},{full:true,message:"Author deleted."})});return}
   const pick=event.target.closest("[data-chapter-select]");if(pick){selectedChapterId=pick.dataset.chapterSelect;renderChapterStrip();renderChapterEditor();return}
   const w=currentWork(),chapter=currentChapter();
-  if(w&&chapter&&event.target.closest("[data-delete-chapter]")){const i=w.chapters.indexOf(chapter);ask(`\u201c${chapter.title||"Untitled chapter"}\u201d and its text will be removed.`,{title:"Delete chapter?",okLabel:"Delete",danger:true}).then(yes=>{if(yes)mutate(()=>{w.chapters.splice(i,1);selectedChapterId=w.chapters[Math.max(0,i-1)]?.id||null},{full:true,message:"Chapter deleted.",undoable:true})});return}
+  if(w&&chapter&&event.target.closest("[data-delete-chapter]")){const i=w.chapters.indexOf(chapter);ask(`\u201c${chapter.title||"Untitled chapter"}\u201d and its text will be removed.`,{title:"Delete chapter?",okLabel:"Delete",danger:true}).then(yes=>{if(yes)mutate(()=>{w.chapters.splice(i,1);selectedChapterId=w.chapters[Math.max(0,i-1)]?.id||null},{full:true,message:"Chapter deleted."})});return}
   const move=event.target.closest("[data-move-chapter]")?.dataset.moveChapter;
   if(w&&chapter&&move){const i=w.chapters.indexOf(chapter),j=move==="up"?i-1:i+1;if(j>=0&&j<w.chapters.length)mutate(()=>{[w.chapters[i],w.chapters[j]]=[w.chapters[j],w.chapters[i]]},{full:true,message:"Chapter reordered."});return}
-  const commentCard=event.target.closest("[data-comment]");if(commentCard&&event.target.closest("[data-delete-comment]")){const w=currentWork(),i=w.comments.findIndex(c=>c.id===commentCard.dataset.comment);ask("This archived comment will be removed.",{title:"Delete comment?",okLabel:"Delete",danger:true}).then(yes=>{if(yes)mutate(()=>w.comments.splice(i,1),{full:true,message:"Comment deleted.",undoable:true})});return}
+  const commentCard=event.target.closest("[data-comment]");if(commentCard&&event.target.closest("[data-delete-comment]")){const w=currentWork(),i=w.comments.findIndex(c=>c.id===commentCard.dataset.comment);ask("This archived comment will be removed.",{title:"Delete comment?",okLabel:"Delete",danger:true}).then(yes=>{if(yes)mutate(()=>w.comments.splice(i,1),{full:true,message:"Comment deleted."})});return}
 });
 
 $("#workForm").addEventListener("input",event=>{const w=currentWork();if(!w)return;const bind=event.target.dataset.bind,listKey=event.target.dataset.bindList,stat=event.target.dataset.bindStat;snapshot();if(bind){let value=event.target.value;if(["complete","active"].includes(bind))value=bool(value);if(["releaseIntervalDays","wordCount"].includes(bind))value=Number(value)||0;w[bind]=value;if(bind==="authorId"){const a=project.authors.find(x=>x.id===value);if(a){w.pseud=a.pseud;document.querySelector('[data-bind="pseud"]').value=a.pseud}}if(bind==="title"){$("#workHeading").textContent=value||"Untitled work";$("#detailsHeading").textContent=value||"Untitled work"}if(bind==="complete"){if(value===true)w.active=false;toggleConditionalFields(w);const a=document.querySelector('[data-bind="active"]');if(a)a.value=String(w.active)}}else if(listKey)w[listKey]=list(event.target.value);else if(stat)w.stats[stat]=Number(event.target.value)||0;save();renderSummary();renderPreview();renderValidationBadges();updateCounters()});
@@ -166,7 +166,7 @@ $("#addWorkBtn").addEventListener("click",()=>{if(!project.authors.length){statu
 $("#addChapterBtn").addEventListener("click",()=>{const w=currentWork();if(!w)return;mutate(()=>{const c=makeChapter(`Chapter ${w.chapters.length+1}`);w.chapters.push(c);selectedChapterId=c.id},{full:true,message:"Chapter added."})});
 $("#addCommentBtn").addEventListener("click",()=>mutate(()=>currentWork().comments.push(makeComment()),{full:true,message:"Comment added."}));
 $("#duplicateWorkBtn").addEventListener("click",()=>{const source=currentWork();if(!source)return;mutate(()=>{const copy=structuredClone(source);copy.id=`work_${crypto.randomUUID().replaceAll("-","")}`;copy.title=`${copy.title} (Copy)`;copy.chapters.forEach(c=>c.id=`chapter_${crypto.randomUUID().replaceAll("-","")}`);copy.comments.forEach(c=>c.id=`comment_${crypto.randomUUID().replaceAll("-","")}`);project.works.push(copy);selectedWorkId=copy.id},{full:true,message:"Work duplicated with new stable IDs."})});
-$("#deleteWorkBtn").addEventListener("click",async()=>{const w=currentWork();if(!w)return;const yes=await ask(`\u201c${w.title||"Untitled work"}\u201d and all of its chapters will be removed.`,{title:"Delete work?",okLabel:"Delete",danger:true});if(!yes)return;mutate(()=>{project.works=project.works.filter(x=>x.id!==w.id);selectedWorkId=project.works[0]?.id||null;selectedChapterId=currentWork()?.chapters[0]?.id||null},{full:true,message:"Work deleted.",undoable:true})});
+$("#deleteWorkBtn").addEventListener("click",async()=>{const w=currentWork();if(!w)return;const yes=await ask(`\u201c${w.title||"Untitled work"}\u201d and all of its chapters will be removed.`,{title:"Delete work?",okLabel:"Delete",danger:true});if(!yes)return;mutate(()=>{project.works=project.works.filter(x=>x.id!==w.id);selectedWorkId=project.works[0]?.id||null;selectedChapterId=currentWork()?.chapters[0]?.id||null},{full:true,message:"Work deleted."})});
 $("#projectSettingsBtn").addEventListener("click",()=>showTab("project"));$("#workSearch").addEventListener("input",renderWorks);$("#runValidationBtn").addEventListener("click",renderValidation);
 function showWelcome(){$("#welcomeScreen").hidden=false;$("#welcomeExamples").hidden=true;$("#welcomeClose").textContent=localStorage.getItem("aoo-creator-welcome-seen")?"Close":"Skip";const s=$("#welcomeSuppress");if(s)s.checked=!!localStorage.getItem("aoo-creator-welcome-off")}
 function closeWelcome(){$("#welcomeScreen").hidden=true;localStorage.setItem("aoo-creator-welcome-seen","1");const s=$("#welcomeSuppress");if(s){if(s.checked)localStorage.setItem("aoo-creator-welcome-off","1");else localStorage.removeItem("aoo-creator-welcome-off")}}
@@ -305,24 +305,29 @@ function inTextField(el){
 }
 function undoOnce(){
   if(!undoStack.length){status("Nothing left to undo.");return false}
-  hideUndoOffer();
   redoStack.push(JSON.stringify(project));
   project=normalizeProject(JSON.parse(undoStack.pop()));
   selectedWorkId=project.works.find(w=>w.id===selectedWorkId)?.id||project.works[0]?.id||null;
   save("Undo autosaved.");render();
   return true;
 }
-let undoOfferTimer=null;
-function hideUndoOffer(){clearTimeout(undoOfferTimer);const b=$("#undoOffer");if(b)b.hidden=true}
-function offerUndo(){
-  // the status bar already carries the message; this only adds the way back
-  const b=$("#undoOffer");if(!b)return;
-  b.hidden=false;
-  clearTimeout(undoOfferTimer);
-  undoOfferTimer=setTimeout(hideUndoOffer,9000);
+function redoOnce(){
+  if(!redoStack.length){status("Nothing to redo.");return false}
+  undoStack.push(JSON.stringify(project));
+  project=normalizeProject(JSON.parse(redoStack.pop()));
+  selectedWorkId=project.works.find(w=>w.id===selectedWorkId)?.id||project.works[0]?.id||null;
+  save("Redo autosaved.");render();
+  return true;
 }
-$("#undoOffer").addEventListener("click",()=>{undoOnce()});
-document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){if(inTextField(event.target))return;event.preventDefault();undoOnce()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){if(inTextField(event.target))return;event.preventDefault();if(!redoStack.length)return;undoStack.push(JSON.stringify(project));project=normalizeProject(JSON.parse(redoStack.pop()));selectedWorkId=project.works[0]?.id||null;save("Redo autosaved.");render()}});
+// the buttons carry the state, so a writer can see whether there is a way back
+function renderHistory(){
+  const u=$("#undoBtn"),r=$("#redoBtn");
+  if(u)u.disabled=undoStack.length===0;
+  if(r)r.disabled=redoStack.length===0;
+}
+$("#undoBtn").addEventListener("click",()=>{undoOnce()});
+$("#redoBtn").addEventListener("click",()=>{redoOnce()});
+document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){if(inTextField(event.target))return;event.preventDefault();undoOnce()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){if(inTextField(event.target))return;event.preventDefault();redoOnce()}});
 
 if(localStorage.getItem("aoo-creator-live-preview")){$("#writePreview").hidden=false;$("#writePane").classList.add("with-preview");$("#livePreviewBtn").textContent="Hide preview";$("#livePreviewBtn").setAttribute("aria-pressed","true")}
 const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();function afterBoot(){if(!localStorage.getItem("aoo-creator-welcome-off"))showWelcome()}

@@ -13,7 +13,7 @@
       <button id="welcomeBtn" class="brand-button" type="button" title="Show the welcome screen"><span class="brand-logo" role="img" aria-label="Archive of Our Overwrites"></span></button>
       <div class="masthead"><strong id="mastheadName">Untitled collection</strong><span class="masthead-sub">AOO Creator <i>v0.2.0</i></span></div>
     </div>
-    <div class="header-actions">
+    <div class="header-actions"><div class="history-group" role="group" aria-label="History"><button id="undoBtn" class="history-btn" type="button" disabled title="Undo (Ctrl+Z outside a text box)" aria-label="Undo">&#8630;</button><button id="redoBtn" class="history-btn" type="button" disabled title="Redo (Ctrl+Y)" aria-label="Redo">&#8631;</button></div>
       <label class="compact">Theme
         <select id="themeSelect">
           <optgroup label="Core">
@@ -55,7 +55,6 @@
 
   <div class="status-bar">
     <span id="statusBar" class="status-text" role="status">Autosave ready.</span>
-      <button id="undoOffer" class="undo-offer" type="button" hidden>Undo that</button>
     <button id="backupState" class="backup-state" type="button"></button>
   </div>
 

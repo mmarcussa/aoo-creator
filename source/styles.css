@@ -1771,17 +1771,13 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
 
 
 
-/* ---- undo offer ----
-   In the status bar, beside the message it belongs to. It began as a floating
-   toast; measurement showed that covered the manuscript, and elementFromPoint
-   confirmed the toast was taking clicks meant for the writing surface. Another
-   corner would only cover a different control. */
-.undo-offer[hidden]{display:none}
-.undo-offer{flex:none;margin-left:.7rem;margin-right:auto;/* margin-right:auto keeps it beside its message; the status bar is
-   space-between, which otherwise strands it mid-bar */padding:.16rem .6rem;
-  border:1px solid var(--yellow);border-radius:2px;
-  background:color-mix(in srgb,var(--yellow) 14%,transparent);
-  color:var(--yellow-ink);font-size:.7rem;font-weight:700;letter-spacing:.08em;
-  text-transform:uppercase;white-space:nowrap}
-.undo-offer:hover{background:color-mix(in srgb,var(--yellow) 26%,transparent);
-  color:var(--yellow-ink);border-color:var(--yellow)}
+
+/* ---- history buttons ----
+   Undo and redo live in the toolbar, where every editor keeps them. They began
+   in the status bar, which exists for messages: an action parked among them
+   reads as an oddity and nobody scans a status line for a control. */
+.history-group{display:inline-flex;gap:.25rem;margin-right:.4rem}
+.history-btn{width:2rem;height:2rem;padding:0;display:grid;place-items:center;
+  font-size:1.05rem;line-height:1;background:transparent;color:var(--muted)}
+.history-btn:not(:disabled):hover{color:var(--cyan);border-color:var(--cyan)}
+.history-btn:disabled{opacity:.32}

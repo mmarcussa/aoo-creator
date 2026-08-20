@@ -205,8 +205,9 @@ Do not change the namespace. Do not start from a blank collection.
 
 ## Taking something back
 
-Deleting a work, chapter, author or comment is reversible. The status bar says
-what happened and offers **Undo that** beside it for a few seconds.
+Deleting a work, chapter, author or comment is reversible. The two arrows at the
+left of the toolbar undo and redo, and they dim when there is nothing to take
+back, so you can see at a glance whether there is a way out.
 
 **Ctrl+Z** works too, but only outside a text box. Inside the manuscript or any
 other field it belongs to your browser, undoing your typing the way it does
