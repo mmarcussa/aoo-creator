@@ -228,6 +228,19 @@ def main():
     if "<script" not in (OUT / "app.html").read_text(encoding="utf-8"):
         sys.exit("FAIL: app.html lost its script tag")
 
+    # Nothing unreferenced ships. The sequence uses six of the eight in-game
+    # frames; the spares were quietly adding 61 KB to every visitor's download.
+    # This is the mirror of the check below: there, every reference must resolve;
+    # here, everything shipped must be referenced.
+    pages = "".join((OUT / n).read_text(encoding="utf-8") for n in ("index.html", "app.html"))
+    orphans = [f for f in sorted((OUT / "assets" / "ingame").glob("*"))
+               if f.name not in pages]
+    for f in orphans:
+        f.unlink()
+    if orphans:
+        print("  pruned %d unreferenced frame(s): %s"
+              % (len(orphans), ", ".join(f.name for f in orphans)))
+
     # every url() inside the stylesheet must resolve too. A missing font file
     # does not throw; it silently renders in the fallback face, so nothing but
     # a check like this would catch it.
