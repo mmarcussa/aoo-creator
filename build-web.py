@@ -110,6 +110,9 @@ HEADERS = """/*
 /assets/*
   Cache-Control: public, max-age=604800
 
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
 /*.css
   Cache-Control: public, max-age=86400
 
@@ -151,6 +154,11 @@ def main():
         shutil.copy2(SRC / src_name, OUT / out_name)
     for name in ASSETS:
         shutil.copy2(SRC / "assets" / name, OUT / "assets" / name)
+    # fonts stay real files here: the browser caches them and fetches them in
+    # parallel, where the standalone has to carry them base64 inside one file
+    (OUT / "assets" / "fonts").mkdir()
+    for woff in sorted((SRC / "assets" / "fonts").glob("*.woff2")):
+        shutil.copy2(woff, OUT / "assets" / "fonts" / woff.name)
     shutil.copy2(src_standalone, OUT / STANDALONE)
 
     # ---- landing page ---------------------------------------------------
@@ -204,6 +212,16 @@ def main():
         checked += len(refs)
     if "<script" not in (OUT / "app.html").read_text(encoding="utf-8"):
         sys.exit("FAIL: app.html lost its script tag")
+
+    # every url() inside the stylesheet must resolve too. A missing font file
+    # does not throw; it silently renders in the fallback face, so nothing but
+    # a check like this would catch it.
+    sheet = (OUT / "styles.css").read_text(encoding="utf-8")
+    css_refs = set(re.findall(r"url\(['\"]?(assets/[^)'\"]+)['\"]?\)", sheet))
+    css_missing = sorted(r for r in css_refs if not (OUT / r).exists())
+    if css_missing:
+        sys.exit("FAIL: unresolved url() in docs/styles.css: " + ", ".join(css_missing))
+    checked += len(css_refs)
 
     total = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
     print(f"  docs/ built: {len(list(OUT.rglob('*')))} entries, {total // 1024} KB total")

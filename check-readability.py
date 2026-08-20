@@ -53,6 +53,9 @@ addEventListener("load", function () {
       if (w && !w.hidden) { var c = document.getElementById("welcomeClose"); if (c) c.click(); }
       var sel = document.getElementById("themeSelect");
       var themes = Array.prototype.map.call(sel.options, function (o) { return o.value; });
+      // measuring before document.fonts.ready races the loader and
+      // reports fallback metrics for every theme
+      document.fonts.ready.then(function () {
       var i = 0, out = [];
       (function nxt() {
         if (i >= themes.length) {
@@ -78,11 +81,17 @@ addEventListener("load", function () {
           var inner = m.clientWidth
             - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
           var fam = cs.fontFamily.split(",")[0].replace(/["']/g, "");
+          // the stack's first name is what was ASKED for. With embedded faces
+          // that is not proof it arrived: a missing woff2 silently renders in
+          // the fallback, and reporting the request would hide it.
+          var ok = document.fonts.check(cs.fontSize + " '" + fam + "'");
           out.push([th, size.toFixed(1), lh.toFixed(2), (inner / ch).toFixed(0),
-                    ratio(cs.color, solid(m)).toFixed(2), fam].join("|"));
+                    ratio(cs.color, solid(m)).toFixed(2), fam,
+                    ok ? "loaded" : "MISSING"].join("|"));
           nxt();
         }, 90);
       })();
+      });
     }, 500);
   }, 2900);
 });
@@ -106,17 +115,20 @@ m = re.search(r"RD9(.*?)RD9END", dom, re.S)
 if not m:
     sys.exit("FAIL: readability probe did not report; the page likely threw")
 
-print("  %-10s %6s %8s %9s %9s  %s" % ("theme", "size", "leading", "measure", "contrast", "family"))
+print("  %-10s %6s %8s %9s %9s  %-20s %s"
+      % ("theme", "size", "leading", "measure", "contrast", "family", "face"))
 fails = []
 for row in m.group(1).split(" ;; "):
-    th, size, lh, meas, con, fam = row.split("|")
+    th, size, lh, meas, con, fam, loaded = row.split("|")
     flags = []
     if float(size) < MIN_SIZE:      flags.append("size")
     if float(lh) < MIN_LEADING:     flags.append("leading")
     if float(meas) > MAX_MEASURE:   flags.append("measure")
     if float(con) < MIN_CONTRAST:   flags.append("contrast")
+    if loaded != "loaded":          flags.append("font-not-loaded")
     mark = "  <-- " + ",".join(flags) if flags else ""
-    print("  %-10s %6s %8s %9s %9s  %-22s%s" % (th, size, lh, meas, con, fam[:22], mark))
+    print("  %-10s %6s %8s %9s %9s  %-20s %-8s%s"
+          % (th, size, lh, meas, con, fam[:20], loaded, mark))
     if flags:
         fails.append("%s (%s)" % (th, ",".join(flags)))
 

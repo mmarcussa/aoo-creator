@@ -89,6 +89,39 @@ The share image itself is `source/assets/share-card.png`, 1200×630.
 `file://`. That is the bug the standalone build exists to solve. Serve it over HTTP
 (`python -m http.server`) to develop against it directly.
 
+## Fonts
+
+Two OFL families are embedded: **Literata** for prose and **IBM Plex Sans** for
+the interface. `python get-fonts.py` re-fetches them and regenerates the
+`@font-face` block; the `.woff2` files are committed, so a normal build never
+touches the network.
+
+They are not there to make the prose more readable &mdash; measured, it already was.
+They are there because every face the tool previously resolved to (Constantia,
+Sitka Text, Georgia, Palatino Linotype, Consolas, Bahnschrift, MS Sans Serif) is
+a **Windows** font. On macOS and Linux all of them fell back to generic defaults.
+
+What is *not* embedded, and why:
+
+- **No italic.** `--font-prose` reaches exactly three elements: the manuscript
+  textarea, the notes textarea, and the write pane's `h1`. A textarea renders one
+  style throughout, so italic runs are structurally impossible there. Literata
+  Italic would have been ~38&nbsp;KB of unreachable payload.
+- **Weight 700, not 600.** The stylesheet asks for 700 twenty-seven times and 800
+  thirteen times; 600 appears twice.
+- **latin and latin-ext only.** latin-ext costs ~123&nbsp;KB and covers U+0100&ndash;024F,
+  where Polish, Czech and Hungarian letters live. This is an archive for fiction
+  with international pseuds, and a name set half in Literata and half in a
+  fallback reads as a bug. Cyrillic, Greek and Vietnamese are not fetched.
+
+Themes that name a face deliberately &mdash; AO3's Georgia, Windows 95's MS Sans Serif,
+BIOS/Matrix/Nokia's monospace, Bauhaus's Palatino &mdash; keep it. Those are flavour
+choices, not defaults.
+
+Delivery differs by artifact, the same way the logo does: base64 inside the
+standalone (there is no server to fetch from), real cached `.woff2` files in
+`docs/`.
+
 ## Testing
 
     python run-tests.py

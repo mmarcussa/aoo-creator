@@ -1,3 +1,17 @@
+/* @@FONT-FACES@@ */
+/* ================= embedded faces =================
+   Fetched by get-fonts.py. Both families are OFL, so redistributing them
+   inside a mod tool is permitted. swap, not block: a writer should never
+   watch an empty page while a font loads. */
+@font-face{font-family:'Literata';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/Literata-400-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Literata';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/Literata-400-latin.woff2') format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Literata';font-style:normal;font-weight:700;font-display:swap;src:url('assets/fonts/Literata-700-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Literata';font-style:normal;font-weight:700;font-display:swap;src:url('assets/fonts/Literata-700-latin.woff2') format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/IBMPlexSans-400-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/IBMPlexSans-400-latin.woff2') format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:700;font-display:swap;src:url('assets/fonts/IBMPlexSans-700-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:700;font-display:swap;src:url('assets/fonts/IBMPlexSans-700-latin.woff2') format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+/* @@END-FONT-FACES@@ */
 :root{color-scheme:dark;--bg:#090d10;--panel:#10171b;--panel2:#151e22;--line:#24464a;--line2:#71343c;--text:#dce9e7;--muted:#88a09e;--cyan:#31d5d6;--yellow:#f0c94a;--red:#ef5867;--green:#38d28d;--yellow-ink:var(--yellow);--red-ink:var(--red);--shadow:0 18px 50px #0008;--radius:5px;font:16px/1.45 var(--font-ui)}
 [data-theme=night]{--bg:#0e1116;--panel:#171b22;--panel2:#202632;--line:#485568;--line2:#694651;--text:#edf0f5;--muted:#aab3c0;--cyan:#6fc5ff;--yellow:#f1c86b;--red:#ff7987;--green:#6fdba4}
 [data-theme=light]{color-scheme:light;--bg:#edf1f2;--panel:#fff;--panel2:#f4f7f7;--line:#9cb4b7;--line2:#ca9da4;--text:#182326;--muted:#5d7074;--cyan:#007d86;--yellow:#8a6500;--red:#b3293c;--green:#087848;--shadow:0 18px 45px #25404a24}
@@ -41,7 +55,7 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
 .editor-bar label.grow{flex:1;min-width:220px}
 .editor-bar label.tight{width:8.5rem}
 .editor-bar input{padding:.5rem .6rem;width:100%;color:var(--text)}
-.manuscript{flex:1;min-height:300px;width:100%;padding:1.15rem 1.35rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--text);font:1rem/1.75 Georgia,"Iowan Old Style",serif;resize:none}
+.manuscript{flex:1;min-height:300px;width:100%;padding:1.15rem 1.35rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--text);font:1rem/1.75 "Literata",Georgia,"Iowan Old Style",serif;resize:none}
 .manuscript:focus-visible{border-color:var(--cyan)}
 .editor-foot{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted)}
 .notes{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
@@ -869,8 +883,8 @@ dialog[open]::backdrop{animation:scrim-in 150ms ease-out}
 :root{--logo:url("assets/aoo-logo.png")}
 :root{
   --font-display:"Bahnschrift SemiCondensed","Bahnschrift","Franklin Gothic Medium","Segoe UI",sans-serif;
-  --font-ui:"Corbel","Candara","Segoe UI",system-ui,sans-serif;
-  --font-prose:"Constantia","Sitka Text","Palatino Linotype",Georgia,serif;
+  --font-ui:"IBM Plex Sans","Corbel","Candara","Segoe UI",system-ui,sans-serif;
+  --font-prose:"Literata","Constantia","Sitka Text","Palatino Linotype",Georgia,serif;
   --font-mono:"Cascadia Mono","Consolas","Lucida Console",monospace}
 
 body{font-family:var(--font-ui)}

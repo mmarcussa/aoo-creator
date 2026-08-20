@@ -20,6 +20,20 @@ core  = (SRC / "core.js").read_text(encoding="utf-8")
 app   = (SRC / "app.js").read_text(encoding="utf-8")
 logo  = base64.b64encode((SRC / "assets" / "aoo-logo.png").read_bytes()).decode("ascii")
 
+# --- embed the WOFF2 faces: the whole point of the standalone is that it opens
+# from a desktop with no server, so a font referenced by path would simply not
+# load. base64 costs 33% over the wire but there is no wire here. ---
+n_fonts = 0
+for woff in sorted((SRC / "assets" / "fonts").glob("*.woff2")):
+    ref = "url('assets/fonts/%s')" % woff.name
+    if ref not in css:
+        sys.exit("FAIL: %s is on disk but no @font-face references it" % woff.name)
+    data = base64.b64encode(woff.read_bytes()).decode("ascii")
+    css = css.replace(ref, "url(data:font/woff2;base64,%s)" % data)
+    n_fonts += 1
+if "assets/fonts/" in css:
+    sys.exit("FAIL: a font reference survived embedding")
+
 # --- de-module core.js: strip the `export ` keyword only in declaration position ---
 core_n, n_core = re.subn(r'(?m)^export\s+(?=(const|let|var|function|class|async)\b)', '', core)
 if re.search(r'(?m)^\s*export\b', core_n):
@@ -84,9 +98,10 @@ html_n, n3 = re.subn(r'<script type="module" src="app\.js"></script>',
 if n1 != 1 or n2 < 1 or n3 != 1:
     sys.exit(f"FAIL: html rewrite counts were {(n1, n2, n3)}; expected 1 stylesheet, >=1 logo, 1 script")
 
-if "styles.css" in html_n or 'src="app.js"' in html_n or "assets/aoo-logo.png" in html_n:
+if ("styles.css" in html_n or 'src="app.js"' in html_n
+        or "assets/aoo-logo.png" in html_n or "assets/fonts/" in html_n):
     sys.exit("FAIL: an external reference survived inlining")
 
 OUT.write_text(html_n, encoding="utf-8")
-print(f"OK  exports stripped: {n_core}  localStorage rewired: {n_ls}")
+print(f"OK  exports stripped: {n_core}  localStorage rewired: {n_ls}  fonts embedded: {n_fonts}")
 print(f"OK  wrote {OUT}  ({OUT.stat().st_size:,} bytes)")
