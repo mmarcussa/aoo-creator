@@ -1461,24 +1461,26 @@ button{font-family:var(--font-display);letter-spacing:.02em}
   font-size:.72rem;line-height:1.45}
 
 /* --- 3. the pointer belongs to the theme -----------------------------------
-   Requested: the cursor should read as part of each theme. Kept to real
-   system cursors rather than image files -- a self-contained HTML file
-   should not carry cursor art, and system cursors respect the user's own
-   pointer size and accessibility settings. */
-[data-theme=win95],[data-theme=bios],[data-theme=nokia]{cursor:default}
-[data-theme=win95] button,[data-theme=win95] .nav-item,
-[data-theme=bios] button,[data-theme=nokia] button{cursor:default}
-[data-theme=matrix],[data-theme=matrix] button{cursor:cell}
+   The cursor reads as part of each theme. These are now drawn cursors:
+   URL-encoded SVG in custom properties, so the single-file build still
+   carries no external art. The cost, accepted deliberately: unlike system
+   cursors these do not scale with the OS pointer-size setting, so every one
+   ends in a keyword fallback and none is ever placed over a text field. */
+:root[data-theme=win95]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ffffff' stroke='%23000000' stroke-width='2' stroke-linejoin='miter' shape-rendering='crispEdges'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ffffff' stroke='%23000000' stroke-width='2' stroke-linejoin='miter' shape-rendering='crispEdges'/></svg>") 3 2}
+:root[data-theme=bios]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23d8d8d8' stroke='%23000000' stroke-width='2' stroke-linejoin='miter' shape-rendering='crispEdges'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23aaaaff' stroke='%23000000' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23ffffff' stroke='%23000000' stroke-width='1.3'/></svg>") 3 2}
+:root[data-theme=nokia]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23c8d8a0' stroke='%23172714' stroke-width='2' stroke-linejoin='miter' shape-rendering='crispEdges'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23172714' stroke='%23c8d8a0' stroke-width='2' stroke-linejoin='miter' shape-rendering='crispEdges'/></svg>") 3 2}
+:root[data-theme=matrix]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2300ff41' stroke='%23021a06' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2300ff41' stroke='%23021a06' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23c8ffd4' stroke='%23021a06' stroke-width='1.3'/></svg>") 3 2}
 [data-theme=matrix] .manuscript,[data-theme=matrix] input,
 [data-theme=matrix] textarea{cursor:text}
-[data-theme=doom],[data-theme=brutal],[data-theme=bastard]{cursor:crosshair}
+:root[data-theme=doom]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='7' fill='none' stroke='%231a0f08' stroke-width='4.4'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%231a0f08' stroke-width='4.4'/><circle cx='14' cy='14' r='7' fill='none' stroke='%23e04a2a' stroke-width='2'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23e04a2a' stroke-width='2'/><circle cx='14' cy='14' r='1.7' fill='%23e04a2a'/></svg>") 14 14;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='7' fill='none' stroke='%231a0f08' stroke-width='4.4'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%231a0f08' stroke-width='4.4'/><circle cx='14' cy='14' r='7' fill='none' stroke='%23ffd21e' stroke-width='2'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23ffd21e' stroke-width='2'/><circle cx='14' cy='14' r='1.7' fill='%23ffd21e'/></svg>") 14 14}
+:root[data-theme=brutal]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='7' fill='none' stroke='%23ffffff' stroke-width='4.4'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23ffffff' stroke-width='4.4'/><circle cx='14' cy='14' r='7' fill='none' stroke='%23000000' stroke-width='2'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23000000' stroke-width='2'/><circle cx='14' cy='14' r='1.7' fill='%23000000'/></svg>") 14 14;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='7' fill='none' stroke='%23ffffff' stroke-width='4.4'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23ffffff' stroke-width='4.4'/><circle cx='14' cy='14' r='7' fill='none' stroke='%23000000' stroke-width='2'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23000000' stroke-width='2'/><circle cx='14' cy='14' r='1.7' fill='%23000000'/></svg>") 14 14}
+:root[data-theme=bastard]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='7' fill='none' stroke='%23140014' stroke-width='4.4'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23140014' stroke-width='4.4'/><circle cx='14' cy='14' r='7' fill='none' stroke='%23c8ff00' stroke-width='2'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23c8ff00' stroke-width='2'/><circle cx='14' cy='14' r='1.7' fill='%23c8ff00'/></svg>") 14 14;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='7' fill='none' stroke='%23140014' stroke-width='4.4'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23140014' stroke-width='4.4'/><circle cx='14' cy='14' r='7' fill='none' stroke='%23c8ff00' stroke-width='2'/><path d='M14 2v6M14 20v6M2 14h6M20 14h6' stroke='%23c8ff00' stroke-width='2'/><circle cx='14' cy='14' r='1.7' fill='%23c8ff00'/></svg>") 14 14}
+:root[data-theme=workout]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ff1f8f' transform='translate%282.4%2C2.4%29'/><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ffcc00' stroke='%23170a1c' stroke-width='1.6' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ff1f8f' transform='translate%282.4%2C2.4%29'/><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ffcc00' stroke='%23170a1c' stroke-width='1.6' stroke-linejoin='round'/></svg>") 3 2}
 [data-theme=doom] input,[data-theme=doom] textarea,
 [data-theme=brutal] input,[data-theme=brutal] textarea,
 [data-theme=bastard] input,[data-theme=bastard] textarea{cursor:text}
-[data-theme=gyaru] button,[data-theme=mcbling] button,
-[data-theme=vapor] button,[data-theme=y2k] button{cursor:pointer}
-[data-theme=dream],[data-theme=liminal],[data-theme=weird],
-[data-theme=trauma]{cursor:default}
+/* dream/liminal/weird/trauma keep the system `help` cursor: the question mark
+   is the joke there, and no drawing improves on it */
 [data-theme=dream] button,[data-theme=liminal] button,
 [data-theme=weird] button,[data-theme=trauma] button{cursor:help}
 /* a text cursor everywhere prose is actually written, in every theme */
@@ -1642,6 +1644,23 @@ html:not([data-theme=ao3]):not([data-theme=win95]):not([data-theme=doom]):not([d
 [data-theme=workout]{--yellow-ink:#8a6a00;--red-ink:#c2005f;--on-accent:#170a1c}
 [data-theme=gyaru]{--yellow-ink:#9a6600;--on-accent:#2a0a20}
 [data-theme=mtv]{--red-ink:#ffb098}
+
+
+/* ================= cursors: the base pair =================
+   Two custom properties drive every rule, so a theme swaps its cursor with two
+   declarations instead of one rule per element. Each declaration ends in a
+   system keyword: a browser refusing SVG cursors lands on the normal arrow or
+   hand rather than on nothing. */
+:root{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2331d5d6' stroke='%23050a0c' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23f0c94a' stroke='%23050a0c' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23ef5867' stroke='%23050a0c' stroke-width='1.3'/></svg>") 3 2}
+body{cursor:var(--cursor-arrow),default}
+button,summary,select,label,a,[role=button],.nav-item,.strip-item,.welcome-card,
+.editor-tabs button,.rating-chips button{cursor:var(--cursor-point),pointer}
+
+/* The writing surface keeps the system I-beam everywhere, in every theme. A
+   drawn arrow here would sit on top of the caret. */
+input[type=text],input[type=number],input:not([type]),textarea,[contenteditable],
+.manuscript,.record-summary,.tag-entry{cursor:text}
+button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allowed}
 
 /* hosted build only: pointer to the downloadable single-file copy */
 .welcome-offline{margin:.35rem 0 0;font-size:.86rem;line-height:1.55;color:var(--muted)}

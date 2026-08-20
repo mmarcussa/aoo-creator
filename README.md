@@ -43,7 +43,7 @@ The only things `docs/` adds are what a URL needs and a `file://` page cannot us
 | For | Nexus, direct sending, offline, archival | the public site, later a Cloudflare domain |
 | Opens by | double-clicking | visiting a URL |
 | Files | one, ~412 KB | six + assets, cached separately |
-| Logo | base64 inlined (~37% larger than the PNG) | a real PNG the browser caches |
+| Logo | base64 inlined (33% larger than the PNG) | a real PNG the browser caches |
 | Adds | nothing external, by assertion | favicon, link-preview metadata, cache headers, a download link back to the standalone |
 | Guard | no external reference survives inlining | every reference resolves to a shipped file |
 

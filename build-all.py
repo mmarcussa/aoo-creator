@@ -21,6 +21,7 @@ STEPS = [
     ("export tests",     ["run-tests.py"]),
     ("ui contract",      ["check-ui-contract.py"]),
     ("theme audit",      ["check-themes.py"]),
+    ("cursor audit",     ["check-cursors.py"]),
 ]
 
 for label, cmd in STEPS:
