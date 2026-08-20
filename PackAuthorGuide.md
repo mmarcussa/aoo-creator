@@ -137,14 +137,30 @@ Because it is all namespaced, any number of fic packs coexist safely.
 
 ## Publishing to Nexus
 
-Upload the ZIP as a normal Cyberpunk 2077 mod. On your mod page:
+Upload the ZIP as a normal Cyberpunk 2077 mod. Players install it with Vortex
+like any other mod and deploy.
 
-- **List Archive of Our Overwrites as a required mod.** Your pack does nothing without it.
-- Note the minimum AOO version. The Creator writes it into `README.txt` and `manifest.json`.
-- Say who the authors are, roughly how many works and chapters, and the rating range.
-- Mention if any work is an ongoing WIP with timed chapter releases.
+### The Creator writes your mod page for you
 
-Players install it with Vortex like any other mod and deploy.
+Press **Validate & build ZIP** and open **Your Nexus page**. The tool has every
+fact a mod page needs, so it writes one: the description, every work with its
+rating and tags, the word and chapter counts, the AOO version readers need, and
+install and update notes. Press **Copy the page** and paste it into the Nexus
+description box.
+
+It is a starting point, not a template you must keep. Edit it however you like.
+
+Read the notes above the text before you post. The important one:
+
+- **If any work is rated Explicit, the tool tells you to tick "Contains adult
+  content" when uploading.** Nexus can remove a mod that does not. The tool
+  knows your ratings, so it checks for you.
+- Square brackets in a title or summary are left exactly as you wrote them, but
+  Nexus may read them as formatting. The tool flags it so you can check the
+  preview.
+
+Word counts on the page come from the prose you actually wrote, not from a
+stored number, so they stay honest even in a collection you just imported.
 
 ---
 

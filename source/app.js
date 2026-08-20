@@ -1,4 +1,4 @@
-import {CREATOR_VERSION,LIMITS,makeProject,makeAuthor,makeWork,makeChapter,makeComment,getExample,normalizeProject,validateProject,generatePackFiles,createZip} from "./core.js";
+import {CREATOR_VERSION,LIMITS,makeProject,makeAuthor,makeWork,makeChapter,makeComment,getExample,normalizeProject,validateProject,generatePackFiles,generateNexusPage,workWordCount,createZip} from "./core.js";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const STORAGE="aoo-creator-project-v1", LIBRARY="aoo-creator-library-v1", THEME="aoo-creator-theme";
@@ -40,7 +40,7 @@ const tourSteps=[
  {tab:"preview",sel:"#aooPreview",title:"How it looks in game",text:"The work card as Archive of Our Overwrites will render it, including long titles and large tag walls."},
  {tab:"validate",sel:"#validationList",title:"Errors block the build",text:"Every problem names the work and what to fix. Errors stop the export on purpose; warnings are only advice."},
  {tab:"write",sel:"#backupState",title:"This is the one that matters",text:"Autosave lives only in this browser. Save project writes a .aoopack.json \u2014 keep it. Re-importing that file is the only way to publish an update your readers keep their library through."},
- {tab:"write",sel:"#buildBtn",title:"Build the mod",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
+ {tab:"write",sel:"#buildBtn",title:"Build the mod, and get your Nexus page",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
 ];
 let tourOn=false,tourAt=0;
 function startTour(){tourOn=true;tourAt=0;renderTourStep()}
@@ -197,7 +197,7 @@ $("#saveProjectBtn").addEventListener("click",()=>{download(new Blob([JSON.strin
 $("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;pendingFileSave=true;adoptCollection(next,`Imported ${file.name}.`);status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
 function openPublish(){
   const p=project.pack,works=project.works,chapters=works.reduce((t,w)=>t+w.chapters.length,0);
-  const words=works.reduce((t,w)=>t+(Number(w.wordCount)||0),0);
+  const words=works.reduce((t,w)=>t+workWordCount(w),0);
   const ns=p.namespace||"UnnamedPack";
   $("#publishTitle").textContent=p.name||"Untitled collection";
   $("#publishFacts").innerHTML=[
@@ -213,8 +213,40 @@ function openPublish(){
     ? "Your <code>.aoopack.json</code> is up to date. Keep it — re-importing it is how you publish a compatible update."
     : "<strong>You have not saved this collection to a file since your last edit.</strong> Do that before you publish: re-importing the <code>.aoopack.json</code> is the only way to ship an update your readers keep their library through.";
   $("#publishNote").className="publish-note "+(saved===project.updatedAt?"ok":"warn");
+  renderNexusPage();
   $("#publishScreen").hidden=false;
 }
+function renderNexusPage(){
+    // Regenerated every time the publish screen opens, so it always reflects
+    // the collection as it stands rather than a stale copy from an earlier edit.
+    let page;
+    try{ page=generateNexusPage(project); }
+    catch(err){
+      $("#nexusText").value="The page could not be generated: "+err.message;
+      $("#nexusNotes").hidden=true;
+      return;
+    }
+    $("#nexusText").value=page.text;
+    const notes=$("#nexusNotes");
+    notes.innerHTML=page.notes.map(t=>`<li>${esc(t)}</li>`).join("");
+    notes.hidden=page.notes.length===0;
+    $("#nexusCopied").hidden=true;
+  }
+$("#nexusCopy").addEventListener("click",async()=>{
+    const field=$("#nexusText");
+    try{
+      // navigator.clipboard needs a secure context; file:// is not one, so the
+      // selection fallback is the path the standalone actually takes
+      await navigator.clipboard.writeText(field.value);
+    }catch(err){
+      field.focus(); field.select();
+      try{ document.execCommand("copy"); }
+      catch(e){ status("Press Ctrl+C to copy the selected text.","error"); return; }
+    }
+    const flag=$("#nexusCopied");
+    flag.hidden=false;
+    setTimeout(()=>{flag.hidden=true},2200);
+  });
 function closePublish(){$("#publishScreen").hidden=true}
 $("#publishCancel").addEventListener("click",closePublish);
 addEventListener("keydown",event=>{if(event.key==="Escape"&&!$("#publishScreen").hidden)closePublish()});

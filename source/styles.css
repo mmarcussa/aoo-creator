@@ -1724,3 +1724,30 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
 :root[data-theme=mtv]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2300e5ff' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23ffd400' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23ff5722' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
 :root[data-theme=aero]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2300a3b8' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%231a7fc4' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23cf3b2b' stroke='%23f2f6f5' stroke-width='1.3'/></svg>") 3 2}
 :root[data-theme=bauhaus]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%230b5fa5' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23f0c000' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23d1301f' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
+
+
+/* ---- Nexus page block on the publish screen ----
+   Every colour is a theme token: a hardcoded one would pass in AOO and fail the
+   contrast audit somewhere in the other 23. */
+.nexus-block{margin-top:1.1rem;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--panel2)}
+.nexus-block>summary{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;
+  padding:.8rem 1rem;cursor:var(--cursor-point),pointer;list-style:none}
+.nexus-block>summary::-webkit-details-marker{display:none}
+.nexus-block>summary::before{content:"\25B8";color:var(--cyan);font-size:.8rem;
+  transition:transform 140ms ease}
+.nexus-block[open]>summary::before{transform:rotate(90deg);display:inline-block}
+.nexus-block>summary small{color:var(--muted);font-size:.78rem}
+.nexus-lede{margin:0 1rem .7rem;color:var(--muted);font-size:.86rem;line-height:1.6;
+  max-width:74ch}
+.nexus-notes[hidden]{display:none}
+.nexus-notes{margin:0 1rem .7rem;padding:.7rem .9rem;list-style:none;display:grid;gap:.4rem;
+  border-left:3px solid var(--yellow);background:color-mix(in srgb,var(--yellow) 9%,transparent);
+  color:var(--muted);font-size:.84rem;line-height:1.5}
+.nexus-notes li strong{color:var(--yellow-ink)}
+.nexus-text{width:calc(100% - 2rem);margin:0 1rem;padding:.8rem .9rem;resize:vertical;
+  border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);
+  color:var(--text);font:.82rem/1.6 var(--font-mono)}
+.nexus-actions{display:flex;align-items:center;gap:.7rem;padding:.8rem 1rem 1rem}
+.nexus-copied{font-size:.78rem;color:var(--green);letter-spacing:.06em;
+  text-transform:uppercase}

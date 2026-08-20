@@ -115,3 +115,151 @@ export function createZip(files){
   for(const [path,value] of Object.entries(files)){const name=encoder.encode(path.replaceAll("\\","/")),data=encoder.encode(String(value)),crc=crc32(data),local=join([u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(dosTime),u16(dosDate),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0),name,data]);locals.push(local);central.push(join([u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(dosTime),u16(dosDate),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),name]));offset+=local.length}
   const directory=join(central),end=join([u32(0x06054b50),u16(0),u16(0),u16(central.length),u16(central.length),u32(directory.length),u32(offset),u16(0)]);return new Blob([...locals,directory,end],{type:"application/zip"});
 }
+
+/* ---------------------------------------------------------------------------
+   Nexus page generator.
+
+   The ZIP has always been ready to upload; the mod page was not. Every writer
+   publishing a collection had to hand-write a description, list the works,
+   restate the ratings and remember which core version they depend on - from
+   data this tool already holds.
+
+   Pure, like everything else here: project in, text out, no DOM. Returns the
+   BBCode plus any notes the writer should read before pasting it.
+
+   Square brackets in titles and summaries are left exactly as written. A title
+   like "[WIP] Static" is the writer's, not ours to rewrite, so instead of
+   mangling it we detect it and say so - Nexus may read it as formatting.
+   --------------------------------------------------------------------------- */
+/* The one place a work's length is decided.
+
+   The publish facts used to read w.wordCount while the Nexus page counted the
+   prose, so one screen showed two different totals. wordCount is kept current
+   while editing but is stale in a bundled or freshly imported project, so the
+   prose wins and the stored value is only a fallback. */
+export function workWordCount(work) {
+  const written = (work.chapters || []).reduce(function (n, c) {
+    const t = (c.body || "").trim();
+    return n + (t ? t.split(/\s+/).length : 0);
+  }, 0);
+  return written || Number(work.wordCount) || 0;
+}
+
+export function generateNexusPage(project) {
+  const p = normalizeProject(project);
+  const pack = p.pack;
+  const authors = p.authors || [];
+  const works = p.works || [];
+
+  const nf = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const pseudOf = (w) => w.pseud || (authors.find(a => a.id === w.authorId) || {}).pseud || "unknown";
+
+  const chapters = works.reduce((n, w) => n + (w.chapters || []).length, 0);
+  // Count from the prose, not from w.wordCount. That field is derived while
+  // editing and can be stale in a saved or bundled project - a page announcing
+  // "0 words" for a collection full of writing is worse than no page at all.
+  const wordsIn = workWordCount;
+  const words = works.reduce((n, w) => n + wordsIn(w), 0);
+  const comments = works.reduce((n, w) => n + (w.comments || []).length, 0);
+
+  const RATING_LABEL = { General: "General", Teen: "Teen And Up", Mature: "Mature",
+                         Explicit: "Explicit", NotRated: "Not Rated" };
+  const WARNING_LABEL = { None: "No Archive Warnings Apply",
+                          ChooseNotToWarn: "Creator Chose Not To Use Archive Warnings",
+                          GraphicViolence: "Graphic Depictions Of Violence",
+                          MajorDeath: "Major Character Death",
+                          Underage: "Underage", NonCon: "Rape/Non-Con" };
+
+  const uniq = (xs) => xs.filter((v, i) => v && xs.indexOf(v) === i);
+  const ratings = uniq(works.map(w => RATING_LABEL[w.rating] || w.rating));
+  const warnings = uniq(works.map(w => WARNING_LABEL[w.warning] || w.warning))
+                     .filter(w => w !== "No Archive Warnings Apply");
+  const fandoms = uniq([].concat.apply([], works.map(w => w.fandoms || [])));
+
+  const L = [];
+  L.push("[size=5][b]" + pack.name + "[/b][/size]");
+  if (pack.creator) L.push("[i]a fanwork collection by " + pack.creator + "[/i]");
+  L.push("");
+  if (pack.description) { L.push(pack.description); L.push(""); }
+  L.push("[line]");
+  L.push("");
+
+  L.push("[b]REQUIREMENTS[/b]");
+  L.push("[list]");
+  L.push("[*]Archive of Our Overwrites " + AOO_MIN_VERSION + " or newer");
+  L.push("[*]Cyberpunk 2077 with REDscript");
+  L.push("[/list]");
+  L.push("");
+
+  L.push("[b]WHAT'S INSIDE[/b]");
+  L.push(works.length + (works.length === 1 ? " work" : " works") +
+         " by " + authors.length + (authors.length === 1 ? " author" : " authors") +
+         " · " + chapters + (chapters === 1 ? " chapter" : " chapters") +
+         " · " + nf(words) + " words" +
+         (comments ? " · " + comments + (comments === 1 ? " archived comment"
+                                              : " archived comments") : ""));
+  if (fandoms.length) L.push("Fandoms: " + fandoms.join(", "));
+  L.push("");
+
+  L.push("[b]THE WORKS[/b]");
+  L.push("[list]");
+  works.forEach(function (w) {
+    const meta = [RATING_LABEL[w.rating] || w.rating, w.category].filter(Boolean).join(" · ");
+    L.push("[*][b]" + w.title + "[/b] by " + pseudOf(w) + " — " + meta);
+    if (w.summary) L.push(w.summary);
+    const bits = [];
+    bits.push((w.chapters || []).length + " ch");
+    const ww = wordsIn(w);
+    if (ww) bits.push(nf(ww) + " words");
+    bits.push(w.complete ? "complete" : "work in progress");
+    if (!w.complete && w.active) bits.push("chapters release every " + w.releaseIntervalDays + " days");
+    L.push("[i]" + bits.join(" · ") + "[/i]");
+    const tags = (w.relationships || []).concat(w.characters || [], w.tags || []);
+    if (tags.length) L.push("[i]" + tags.join(", ") + "[/i]");
+  });
+  L.push("[/list]");
+  L.push("");
+
+  L.push("[b]CONTENT[/b]");
+  L.push("Ratings in this collection: " + (ratings.join(", ") || "none set"));
+  L.push("Archive warnings: " + (warnings.length ? warnings.join(", ") : "none apply"));
+  L.push("");
+
+  L.push("[b]INSTALLATION[/b]");
+  L.push("[list=1]");
+  L.push("[*]Install Archive of Our Overwrites and its requirements.");
+  L.push("[*]Install this file with Vortex, or extract it into your Cyberpunk 2077 folder.");
+  L.push("[*]The works appear on the in-game archive at NETdir://aoo.pub.");
+  L.push("[/list]");
+  L.push("");
+
+  L.push("[b]UPDATING[/b]");
+  L.push("Replace the files with the newer version. Readers keep everything they " +
+         "recovered: the works, chapters and authors keep their identities across " +
+         "updates, so nothing is lost from a library.");
+  L.push("");
+
+  if (pack.credits) { L.push("[b]CREDITS[/b]"); L.push(pack.credits); L.push(""); }
+  L.push("[b]LICENCE[/b]");
+  L.push(pack.license || "All rights reserved");
+
+  const text = L.join("\n");
+
+  const notes = [];
+  if (ratings.indexOf("Explicit") >= 0) {
+    notes.push("This collection contains an Explicit work. Tick “Contains adult " +
+               "content” when you upload, or Nexus may remove the mod.");
+  }
+  if (warnings.length) {
+    notes.push("Archive warnings apply to at least one work. Keep them on the page — " +
+               "readers choose what to open based on them.");
+  }
+  if (!pack.creator) notes.push("No creator name is set, so the page has no byline.");
+  if (!pack.description) notes.push("The collection has no description, so the page opens on its title.");
+  const bracketed = works.filter(w => /[\[\]]/.test(w.title + " " + (w.summary || "")));
+  if (bracketed.length) {
+    notes.push(bracketed.length + " work(s) use square brackets in the title or summary. " +
+               "Nexus may read those as formatting — check the preview before posting.");
+  }
+  return { text: text, notes: notes };
+}

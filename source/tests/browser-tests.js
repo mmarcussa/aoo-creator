@@ -54,6 +54,54 @@ function runTests() {
   ok("invalid: tag count rejected", /open tags/.test(said), said);
   ok("invalid: release interval rejected", /at least/.test(said), said);
 
+  /* ---- Nexus page generator ----------------------------------------------
+     A pure transform, so testable the same way the exporter is. These check
+     the claims a writer would be embarrassed by: that every work appears,
+     that the counts come from the prose rather than a stale field, and that
+     an Explicit collection is flagged for Nexus's adult-content rule. */
+  for (const kind of ["oneshot", "complete", "active", "collection"]) {
+    const proj = getExample(kind);
+    const page = generateNexusPage(proj);
+    const body = page.text;
+
+    ok(`${kind}: nexus page is non-empty`, body.length > 200, `${body.length} chars`);
+    ok(`${kind}: nexus page names the collection`, body.indexOf(proj.pack.name) >= 0);
+    ok(`${kind}: nexus page states the core version`,
+       body.indexOf(AOO_MIN_VERSION) >= 0, AOO_MIN_VERSION);
+
+    const missing = proj.works.filter(w => body.indexOf(w.title) < 0);
+    ok(`${kind}: nexus page lists every work`, missing.length === 0,
+       missing.map(w => w.title).join(", "));
+
+    let written = 0;
+    for (const w of proj.works) {
+      for (const c of (w.chapters || [])) {
+        const t = (c.body || "").trim();
+        if (t) written += t.split(/\s+/).length;
+      }
+    }
+    if (written > 0) {
+      ok(`${kind}: nexus word count is real`, body.indexOf(" 0 words") < 0,
+         `${written} words of prose`);
+    }
+    ok(`${kind}: nexus page returns notes array`, Array.isArray(page.notes));
+  }
+
+  const expl = getExample("oneshot");
+  expl.works[0].rating = "Explicit";
+  const explNotes = generateNexusPage(expl).notes.join(" ").toLowerCase();
+  ok("explicit: adult-content note raised", explNotes.indexOf("adult") >= 0, explNotes);
+
+  const br = getExample("oneshot");
+  br.works[0].title = "[WIP] Static in the Walls";
+  const brPage = generateNexusPage(br);
+  ok("brackets: title left intact",
+     brPage.text.indexOf("[WIP] Static in the Walls") >= 0);
+  ok("brackets: writer is warned",
+     brPage.notes.join(" ").toLowerCase().indexOf("square bracket") >= 0,
+     brPage.notes.join(" | "));
+
+
   return results;
 }
 

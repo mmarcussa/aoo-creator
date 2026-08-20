@@ -322,6 +322,23 @@
         <span class="tag-kind">What the ZIP contains</span>
         <ol id="publishFileList"></ol>
       </div>
+
+      <details class="nexus-block" id="nexusBlock">
+        <summary><span class="tag-kind">Your Nexus page</span>
+          <small>Written for you from this collection &mdash; open, copy, paste.</small>
+        </summary>
+        <p class="nexus-lede">The ZIP is ready to upload. So is the description:
+          every work, its rating, the tags and the core version readers need. Paste
+          it into the Nexus description box and edit freely &mdash; it is a starting
+          point, not a template you must keep.</p>
+        <ul class="nexus-notes" id="nexusNotes" hidden></ul>
+        <textarea id="nexusText" class="nexus-text" readonly rows="12"
+          spellcheck="false" aria-label="Nexus page text in BBCode"></textarea>
+        <div class="nexus-actions">
+          <button type="button" id="nexusCopy" class="primary">Copy the page</button>
+          <span id="nexusCopied" class="nexus-copied" hidden>Copied</span>
+        </div>
+      </details>
       <p class="publish-note" id="publishNote"></p>
       <div class="publish-actions">
         <button id="publishCancel" class="ghost">Not yet</button>

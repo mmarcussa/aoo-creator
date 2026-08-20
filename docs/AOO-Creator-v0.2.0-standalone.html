@@ -1733,6 +1733,33 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
 :root[data-theme=aero]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%2300a3b8' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%231a7fc4' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23cf3b2b' stroke='%23f2f6f5' stroke-width='1.3'/></svg>") 3 2}
 :root[data-theme=bauhaus]{--cursor-arrow:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%230b5fa5' stroke='%23f2f6f5' stroke-width='1.5' stroke-linejoin='round'/></svg>") 3 2;--cursor-point:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M3 2 L3 18.6 L7.3 14.6 L10.1 20.9 L12.7 19.7 L10 13.8 L15.6 13.5 Z' fill='%23f0c000' stroke='%230a0d0e' stroke-width='1.5' stroke-linejoin='round'/><circle cx='18.4' cy='6' r='3.1' fill='%23d1301f' stroke='%230a0d0e' stroke-width='1.3'/></svg>") 3 2}
 
+
+/* ---- Nexus page block on the publish screen ----
+   Every colour is a theme token: a hardcoded one would pass in AOO and fail the
+   contrast audit somewhere in the other 23. */
+.nexus-block{margin-top:1.1rem;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--panel2)}
+.nexus-block>summary{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;
+  padding:.8rem 1rem;cursor:var(--cursor-point),pointer;list-style:none}
+.nexus-block>summary::-webkit-details-marker{display:none}
+.nexus-block>summary::before{content:"\25B8";color:var(--cyan);font-size:.8rem;
+  transition:transform 140ms ease}
+.nexus-block[open]>summary::before{transform:rotate(90deg);display:inline-block}
+.nexus-block>summary small{color:var(--muted);font-size:.78rem}
+.nexus-lede{margin:0 1rem .7rem;color:var(--muted);font-size:.86rem;line-height:1.6;
+  max-width:74ch}
+.nexus-notes[hidden]{display:none}
+.nexus-notes{margin:0 1rem .7rem;padding:.7rem .9rem;list-style:none;display:grid;gap:.4rem;
+  border-left:3px solid var(--yellow);background:color-mix(in srgb,var(--yellow) 9%,transparent);
+  color:var(--muted);font-size:.84rem;line-height:1.5}
+.nexus-notes li strong{color:var(--yellow-ink)}
+.nexus-text{width:calc(100% - 2rem);margin:0 1rem;padding:.8rem .9rem;resize:vertical;
+  border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);
+  color:var(--text);font:.82rem/1.6 var(--font-mono)}
+.nexus-actions{display:flex;align-items:center;gap:.7rem;padding:.8rem 1rem 1rem}
+.nexus-copied{font-size:.78rem;color:var(--green);letter-spacing:.06em;
+  text-transform:uppercase}
+
 </style>
 </head>
 <body>
@@ -2050,6 +2077,23 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
         <span class="tag-kind">What the ZIP contains</span>
         <ol id="publishFileList"></ol>
       </div>
+
+      <details class="nexus-block" id="nexusBlock">
+        <summary><span class="tag-kind">Your Nexus page</span>
+          <small>Written for you from this collection &mdash; open, copy, paste.</small>
+        </summary>
+        <p class="nexus-lede">The ZIP is ready to upload. So is the description:
+          every work, its rating, the tags and the core version readers need. Paste
+          it into the Nexus description box and edit freely &mdash; it is a starting
+          point, not a template you must keep.</p>
+        <ul class="nexus-notes" id="nexusNotes" hidden></ul>
+        <textarea id="nexusText" class="nexus-text" readonly rows="12"
+          spellcheck="false" aria-label="Nexus page text in BBCode"></textarea>
+        <div class="nexus-actions">
+          <button type="button" id="nexusCopy" class="primary">Copy the page</button>
+          <span id="nexusCopied" class="nexus-copied" hidden>Copied</span>
+        </div>
+      </details>
       <p class="publish-note" id="publishNote"></p>
       <div class="publish-actions">
         <button id="publishCancel" class="ghost">Not yet</button>
@@ -2273,6 +2317,154 @@ function createZip(files){
   const directory=join(central),end=join([u32(0x06054b50),u16(0),u16(0),u16(central.length),u16(central.length),u32(directory.length),u32(offset),u16(0)]);return new Blob([...locals,directory,end],{type:"application/zip"});
 }
 
+/* ---------------------------------------------------------------------------
+   Nexus page generator.
+
+   The ZIP has always been ready to upload; the mod page was not. Every writer
+   publishing a collection had to hand-write a description, list the works,
+   restate the ratings and remember which core version they depend on - from
+   data this tool already holds.
+
+   Pure, like everything else here: project in, text out, no DOM. Returns the
+   BBCode plus any notes the writer should read before pasting it.
+
+   Square brackets in titles and summaries are left exactly as written. A title
+   like "[WIP] Static" is the writer's, not ours to rewrite, so instead of
+   mangling it we detect it and say so - Nexus may read it as formatting.
+   --------------------------------------------------------------------------- */
+/* The one place a work's length is decided.
+
+   The publish facts used to read w.wordCount while the Nexus page counted the
+   prose, so one screen showed two different totals. wordCount is kept current
+   while editing but is stale in a bundled or freshly imported project, so the
+   prose wins and the stored value is only a fallback. */
+function workWordCount(work) {
+  const written = (work.chapters || []).reduce(function (n, c) {
+    const t = (c.body || "").trim();
+    return n + (t ? t.split(/\s+/).length : 0);
+  }, 0);
+  return written || Number(work.wordCount) || 0;
+}
+
+function generateNexusPage(project) {
+  const p = normalizeProject(project);
+  const pack = p.pack;
+  const authors = p.authors || [];
+  const works = p.works || [];
+
+  const nf = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const pseudOf = (w) => w.pseud || (authors.find(a => a.id === w.authorId) || {}).pseud || "unknown";
+
+  const chapters = works.reduce((n, w) => n + (w.chapters || []).length, 0);
+  // Count from the prose, not from w.wordCount. That field is derived while
+  // editing and can be stale in a saved or bundled project - a page announcing
+  // "0 words" for a collection full of writing is worse than no page at all.
+  const wordsIn = workWordCount;
+  const words = works.reduce((n, w) => n + wordsIn(w), 0);
+  const comments = works.reduce((n, w) => n + (w.comments || []).length, 0);
+
+  const RATING_LABEL = { General: "General", Teen: "Teen And Up", Mature: "Mature",
+                         Explicit: "Explicit", NotRated: "Not Rated" };
+  const WARNING_LABEL = { None: "No Archive Warnings Apply",
+                          ChooseNotToWarn: "Creator Chose Not To Use Archive Warnings",
+                          GraphicViolence: "Graphic Depictions Of Violence",
+                          MajorDeath: "Major Character Death",
+                          Underage: "Underage", NonCon: "Rape/Non-Con" };
+
+  const uniq = (xs) => xs.filter((v, i) => v && xs.indexOf(v) === i);
+  const ratings = uniq(works.map(w => RATING_LABEL[w.rating] || w.rating));
+  const warnings = uniq(works.map(w => WARNING_LABEL[w.warning] || w.warning))
+                     .filter(w => w !== "No Archive Warnings Apply");
+  const fandoms = uniq([].concat.apply([], works.map(w => w.fandoms || [])));
+
+  const L = [];
+  L.push("[size=5][b]" + pack.name + "[/b][/size]");
+  if (pack.creator) L.push("[i]a fanwork collection by " + pack.creator + "[/i]");
+  L.push("");
+  if (pack.description) { L.push(pack.description); L.push(""); }
+  L.push("[line]");
+  L.push("");
+
+  L.push("[b]REQUIREMENTS[/b]");
+  L.push("[list]");
+  L.push("[*]Archive of Our Overwrites " + AOO_MIN_VERSION + " or newer");
+  L.push("[*]Cyberpunk 2077 with REDscript");
+  L.push("[/list]");
+  L.push("");
+
+  L.push("[b]WHAT'S INSIDE[/b]");
+  L.push(works.length + (works.length === 1 ? " work" : " works") +
+         " by " + authors.length + (authors.length === 1 ? " author" : " authors") +
+         " · " + chapters + (chapters === 1 ? " chapter" : " chapters") +
+         " · " + nf(words) + " words" +
+         (comments ? " · " + comments + (comments === 1 ? " archived comment"
+                                              : " archived comments") : ""));
+  if (fandoms.length) L.push("Fandoms: " + fandoms.join(", "));
+  L.push("");
+
+  L.push("[b]THE WORKS[/b]");
+  L.push("[list]");
+  works.forEach(function (w) {
+    const meta = [RATING_LABEL[w.rating] || w.rating, w.category].filter(Boolean).join(" · ");
+    L.push("[*][b]" + w.title + "[/b] by " + pseudOf(w) + " — " + meta);
+    if (w.summary) L.push(w.summary);
+    const bits = [];
+    bits.push((w.chapters || []).length + " ch");
+    const ww = wordsIn(w);
+    if (ww) bits.push(nf(ww) + " words");
+    bits.push(w.complete ? "complete" : "work in progress");
+    if (!w.complete && w.active) bits.push("chapters release every " + w.releaseIntervalDays + " days");
+    L.push("[i]" + bits.join(" · ") + "[/i]");
+    const tags = (w.relationships || []).concat(w.characters || [], w.tags || []);
+    if (tags.length) L.push("[i]" + tags.join(", ") + "[/i]");
+  });
+  L.push("[/list]");
+  L.push("");
+
+  L.push("[b]CONTENT[/b]");
+  L.push("Ratings in this collection: " + (ratings.join(", ") || "none set"));
+  L.push("Archive warnings: " + (warnings.length ? warnings.join(", ") : "none apply"));
+  L.push("");
+
+  L.push("[b]INSTALLATION[/b]");
+  L.push("[list=1]");
+  L.push("[*]Install Archive of Our Overwrites and its requirements.");
+  L.push("[*]Install this file with Vortex, or extract it into your Cyberpunk 2077 folder.");
+  L.push("[*]The works appear on the in-game archive at NETdir://aoo.pub.");
+  L.push("[/list]");
+  L.push("");
+
+  L.push("[b]UPDATING[/b]");
+  L.push("Replace the files with the newer version. Readers keep everything they " +
+         "recovered: the works, chapters and authors keep their identities across " +
+         "updates, so nothing is lost from a library.");
+  L.push("");
+
+  if (pack.credits) { L.push("[b]CREDITS[/b]"); L.push(pack.credits); L.push(""); }
+  L.push("[b]LICENCE[/b]");
+  L.push(pack.license || "All rights reserved");
+
+  const text = L.join("\n");
+
+  const notes = [];
+  if (ratings.indexOf("Explicit") >= 0) {
+    notes.push("This collection contains an Explicit work. Tick “Contains adult " +
+               "content” when you upload, or Nexus may remove the mod.");
+  }
+  if (warnings.length) {
+    notes.push("Archive warnings apply to at least one work. Keep them on the page — " +
+               "readers choose what to open based on them.");
+  }
+  if (!pack.creator) notes.push("No creator name is set, so the page has no byline.");
+  if (!pack.description) notes.push("The collection has no description, so the page opens on its title.");
+  const bracketed = works.filter(w => /[\[\]]/.test(w.title + " " + (w.summary || "")));
+  if (bracketed.length) {
+    notes.push(bracketed.length + " work(s) use square brackets in the title or summary. " +
+               "Nexus may read those as formatting — check the preview before posting.");
+  }
+  return { text: text, notes: notes };
+}
+
 /* ===== app.js ===== */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const STORAGE="aoo-creator-project-v1", LIBRARY="aoo-creator-library-v1", THEME="aoo-creator-theme";
@@ -2314,7 +2506,7 @@ const tourSteps=[
  {tab:"preview",sel:"#aooPreview",title:"How it looks in game",text:"The work card as Archive of Our Overwrites will render it, including long titles and large tag walls."},
  {tab:"validate",sel:"#validationList",title:"Errors block the build",text:"Every problem names the work and what to fix. Errors stop the export on purpose; warnings are only advice."},
  {tab:"write",sel:"#backupState",title:"This is the one that matters",text:"Autosave lives only in this browser. Save project writes a .aoopack.json \u2014 keep it. Re-importing that file is the only way to publish an update your readers keep their library through."},
- {tab:"write",sel:"#buildBtn",title:"Build the mod",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
+ {tab:"write",sel:"#buildBtn",title:"Build the mod, and get your Nexus page",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
 ];
 let tourOn=false,tourAt=0;
 function startTour(){tourOn=true;tourAt=0;renderTourStep()}
@@ -2471,7 +2663,7 @@ $("#saveProjectBtn").addEventListener("click",()=>{download(new Blob([JSON.strin
 $("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;pendingFileSave=true;adoptCollection(next,`Imported ${file.name}.`);status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
 function openPublish(){
   const p=project.pack,works=project.works,chapters=works.reduce((t,w)=>t+w.chapters.length,0);
-  const words=works.reduce((t,w)=>t+(Number(w.wordCount)||0),0);
+  const words=works.reduce((t,w)=>t+workWordCount(w),0);
   const ns=p.namespace||"UnnamedPack";
   $("#publishTitle").textContent=p.name||"Untitled collection";
   $("#publishFacts").innerHTML=[
@@ -2487,8 +2679,40 @@ function openPublish(){
     ? "Your <code>.aoopack.json</code> is up to date. Keep it — re-importing it is how you publish a compatible update."
     : "<strong>You have not saved this collection to a file since your last edit.</strong> Do that before you publish: re-importing the <code>.aoopack.json</code> is the only way to ship an update your readers keep their library through.";
   $("#publishNote").className="publish-note "+(saved===project.updatedAt?"ok":"warn");
+  renderNexusPage();
   $("#publishScreen").hidden=false;
 }
+function renderNexusPage(){
+    // Regenerated every time the publish screen opens, so it always reflects
+    // the collection as it stands rather than a stale copy from an earlier edit.
+    let page;
+    try{ page=generateNexusPage(project); }
+    catch(err){
+      $("#nexusText").value="The page could not be generated: "+err.message;
+      $("#nexusNotes").hidden=true;
+      return;
+    }
+    $("#nexusText").value=page.text;
+    const notes=$("#nexusNotes");
+    notes.innerHTML=page.notes.map(t=>`<li>${esc(t)}</li>`).join("");
+    notes.hidden=page.notes.length===0;
+    $("#nexusCopied").hidden=true;
+  }
+$("#nexusCopy").addEventListener("click",async()=>{
+    const field=$("#nexusText");
+    try{
+      // navigator.clipboard needs a secure context; file:// is not one, so the
+      // selection fallback is the path the standalone actually takes
+      await navigator.clipboard.writeText(field.value);
+    }catch(err){
+      field.focus(); field.select();
+      try{ document.execCommand("copy"); }
+      catch(e){ status("Press Ctrl+C to copy the selected text.","error"); return; }
+    }
+    const flag=$("#nexusCopied");
+    flag.hidden=false;
+    setTimeout(()=>{flag.hidden=true},2200);
+  });
 function closePublish(){$("#publishScreen").hidden=true}
 $("#publishCancel").addEventListener("click",closePublish);
 addEventListener("keydown",event=>{if(event.key==="Escape"&&!$("#publishScreen").hidden)closePublish()});
