@@ -31,8 +31,10 @@ for woff in sorted((SRC / "assets" / "fonts").glob("*.woff2")):
     data = base64.b64encode(woff.read_bytes()).decode("ascii")
     css = css.replace(ref, "url(data:font/woff2;base64,%s)" % data)
     n_fonts += 1
-if "assets/fonts/" in css:
-    sys.exit("FAIL: a font reference survived embedding")
+# test for an unresolved url(), not for the bare path text: the licence
+# attribution comment legitimately names assets/fonts/OFL-*.txt
+if re.search(r"url\([^)]*assets/fonts/", css):
+    sys.exit("FAIL: a font url() survived embedding")
 
 # --- de-module core.js: strip the `export ` keyword only in declaration position ---
 core_n, n_core = re.subn(r'(?m)^export\s+(?=(const|let|var|function|class|async)\b)', '', core)
@@ -98,8 +100,11 @@ html_n, n3 = re.subn(r'<script type="module" src="app\.js"></script>',
 if n1 != 1 or n2 < 1 or n3 != 1:
     sys.exit(f"FAIL: html rewrite counts were {(n1, n2, n3)}; expected 1 stylesheet, >=1 logo, 1 script")
 
+# fonts are tested as url() rather than bare text: the OFL attribution comment
+# legitimately names assets/fonts/OFL-*.txt inside the inlined stylesheet
 if ("styles.css" in html_n or 'src="app.js"' in html_n
-        or "assets/aoo-logo.png" in html_n or "assets/fonts/" in html_n):
+        or "assets/aoo-logo.png" in html_n
+        or re.search(r"url\([^)]*assets/fonts/", html_n)):
     sys.exit("FAIL: an external reference survived inlining")
 
 OUT.write_text(html_n, encoding="utf-8")

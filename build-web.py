@@ -38,15 +38,14 @@ VERSION = (SRC / "VERSION").read_text(encoding="utf-8").strip()
 STANDALONE = f"AOO-Creator-v{VERSION}-standalone.html"
 
 # source name -> name in docs/. The tool moves to app.html so the landing page
-# can own the root URL. schema.json rides along because it is the published
-# contract a pack author may want to read.
+# can own the root URL. schema.json is NOT published: nothing links to it and
+# it reads as developer scaffolding on a writer's site. It stays in source/.
 COPY_AS = {
     "landing.html": "index.html",
     "index.html": "app.html",
     "styles.css": "styles.css",
     "app.js": "app.js",
     "core.js": "core.js",
-    "schema.json": "schema.json",
 }
 ASSETS = ["aoo-logo.png", "share-card.png", "screenshot-app.png"]
 
@@ -159,6 +158,12 @@ def main():
     (OUT / "assets" / "fonts").mkdir()
     for woff in sorted((SRC / "assets" / "fonts").glob("*.woff2")):
         shutil.copy2(woff, OUT / "assets" / "fonts" / woff.name)
+    # the OFL obliges us to distribute the licence with the fonts
+    licences = sorted((SRC / "assets" / "fonts").glob("OFL-*.txt"))
+    if len(licences) != 2:
+        sys.exit("FAIL: expected 2 OFL licence texts, found %d" % len(licences))
+    for lic in licences:
+        shutil.copy2(lic, OUT / "assets" / "fonts" / lic.name)
     shutil.copy2(src_standalone, OUT / STANDALONE)
 
     # ---- landing page ---------------------------------------------------

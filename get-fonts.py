@@ -82,6 +82,9 @@ def main():
     # font-display:swap so prose is readable immediately in the fallback and
     # reflows once, rather than blanking while the face loads
     lines = ["/* ================= embedded faces =================",
+             "   Literata (c) 2017 The Literata Project Authors.",
+             "   IBM Plex Sans (c) 2017 IBM Corp, Reserved Font Name \"Plex\".",
+             "   Both under the SIL Open Font License 1.1; texts in assets/fonts/OFL-*.txt.",
              "   Fetched by get-fonts.py. Both families are OFL, so redistributing them",
              "   inside a mod tool is permitted. swap, not block: a writer should never",
              "   watch an empty page while a font loads. */"]

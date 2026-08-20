@@ -1,8 +1,8 @@
 # AOO Creator v0.2.0 — working copy
 
-Self-contained working copy of the AOO Creator, split out of the Codex project on
-2026-08-18. The Codex project (`Documents/Codex/.../ArchiveOfOurOverwrites/creator/`)
-was reverted to v0.1.0 and is untouched by this work.
+The browser tool writers use to build Archive of Our Overwrites fic collection
+mods and export a Nexus-ready ZIP. Everything runs client-side: no account, no
+upload, no server.
 
 ## What's here
 
