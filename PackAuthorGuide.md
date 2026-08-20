@@ -1,7 +1,7 @@
 # Publishing a fic collection for Archive of Our Overwrites
 
 This is the guide for people writing and releasing fic collections. You need no coding
-knowledge — the AOO Creator builds the mod for you.
+knowledge. The AOO Creator builds the mod for you.
 
 A **collection** is one mod. It can hold as many authors, works and chapters as you like, and
 it publishes as a single ZIP on Nexus. Players install it alongside Archive of Our Overwrites,
@@ -15,7 +15,7 @@ Two decisions are permanent. Everything else can be changed later.
 
 ### 1. The namespace
 
-Collection settings (the gear beside **Collection**) holds a **namespace** — letters, numbers
+Collection settings (the gear beside **Collection**) holds a **namespace**: letters, numbers
 and underscores, no spaces. It is the internal name of your mod.
 
 **Never change it after your first public release.** It determines where your files install
@@ -29,7 +29,7 @@ Pick something specific to your collection, not generic: `AfterlifeOneShots`, no
 **Save project** writes a `.aoopack.json` file. Keep it forever, backed up.
 
 Every author, work, chapter and comment carries a hidden permanent ID. Player saves key on
-those IDs — which chapters they recovered, what they propped, stashed and followed. To
+those IDs: which chapters they recovered, what they propped, stashed and followed. To
 publish version 1.1, you **import your saved project file**, edit it, and rebuild.
 
 If you rebuild a collection from scratch instead, every ID is regenerated. To the game it is
@@ -46,22 +46,22 @@ The tool keeps a library. The switcher at the top of the left rail moves between
 **New** starts another, **Delete** removes one from your browser. Each keeps its own works,
 authors and settings, and the library survives closing the browser.
 
-This is convenience, not backup — the rule above still holds. Save a `.aoopack.json` for every
+This is convenience, not backup. The rule above still holds. Save a `.aoopack.json` for every
 collection you care about.
 
 ---
 
 ## The workflow
 
-1. **Collection settings** — name, namespace, version, your creator name, licence.
-2. **Authors** — add everyone who "wrote" the fics. Pseuds are in-world handles, up to 24
+1. **Collection settings**: name, namespace, version, your creator name, licence.
+2. **Authors**: add everyone who "wrote" the fics. Pseuds are in-world handles, up to 24
    characters. Mark each Active or Inactive (see below).
-3. **Write** — add chapters and write. Word count is counted for you.
-4. **Details** — rating, archive warning, category, tags, summary for each work.
-5. **AOO preview** — check how the work card looks in-game, especially long titles and many tags.
-6. **Validation** — fix every error. Warnings are advice you can ignore.
-7. **Save project** — write your `.aoopack.json`.
-8. **Validate & build ZIP** — produces the mod.
+3. **Write**: add chapters and write. Word count is counted for you.
+4. **Details**: rating, archive warning, category, tags, summary for each work.
+5. **AOO preview**: check how the work card looks in-game, especially long titles and many tags.
+6. **Validation**: fix every error. Warnings are advice you can ignore.
+7. **Save project**: write your `.aoopack.json`.
+8. **Validate & build ZIP**: produces the mod.
 
 ---
 
@@ -71,11 +71,11 @@ This decides whether a work's chapters unlock over time.
 
 | | Inactive author | Active author |
 |---|---|---|
-| Complete work | All chapters available immediately | Same — timing is ignored |
+| Complete work | All chapters available immediately | Same; timing is ignored |
 | Work in progress | **Not allowed** | Chapter 1 available immediately, each later chapter unlocks after the release interval |
 
 The release interval is a minimum of **3 in-game days**. AOO owns the timer and the
-follower alerts — you do not write any of that.
+follower alerts. You do not write any of that.
 
 An incomplete work must use an Active author. If you mark a work as a WIP, the release fields
 appear in Details automatically.
@@ -86,7 +86,7 @@ appear in Details automatically.
 
 You can ship reader comments as part of a work, so it feels like an archive with history.
 
-They are only valid on a **complete work by an inactive author** — the fiction being that the
+They are only valid on a **complete work by an inactive author**: the fiction being that the
 author finished, moved on, and the comments are what's left behind. An ongoing work by an
 active author cannot have them.
 
@@ -108,14 +108,14 @@ stat cannot be lower than the number of comments you actually included.
 | Chapter price | 1 eddie or more; leaving it at zero is a warning and exports as 300 |
 | Release interval | at least 3 in-game days |
 
-**Rating** — General · Teen And Up · Mature · Explicit · Not Rated
-**Category** — Gen · F/F · F/M · M/M · Multi · Other
-**Archive warning** — No Archive Warnings Apply · Creator Chose Not To Use Archive Warnings ·
+**Rating**: General · Teen And Up · Mature · Explicit · Not Rated
+**Category**: Gen · F/F · F/M · M/M · Multi · Other
+**Archive warning**: No Archive Warnings Apply · Creator Chose Not To Use Archive Warnings ·
 Graphic Depictions Of Violence · Major Character Death · Underage · Rape/Non-Con
 
 Label your rating honestly. The game itself is Mature/Explicit, so all ratings are welcome.
 
-Every chapter has an eddie price — that is how players recover it from the Shard Market. You
+Every chapter has an eddie price. That is how players recover it from the Shard Market. You
 set the price; you do not create vendors, items or icons.
 
 ---
@@ -140,7 +140,7 @@ Because it is all namespaced, any number of fic packs coexist safely.
 Upload the ZIP as a normal Cyberpunk 2077 mod. On your mod page:
 
 - **List Archive of Our Overwrites as a required mod.** Your pack does nothing without it.
-- Note the minimum AOO version — the Creator writes it into `README.txt` and `manifest.json`.
+- Note the minimum AOO version. The Creator writes it into `README.txt` and `manifest.json`.
 - Say who the authors are, roughly how many works and chapters, and the rating range.
 - Mention if any work is an ongoing WIP with timed chapter releases.
 
@@ -150,7 +150,7 @@ Players install it with Vortex like any other mod and deploy.
 
 ## Publishing an update
 
-1. **Import project** — load your saved `.aoopack.json`.
+1. **Import project**: load your saved `.aoopack.json`.
 2. Make your changes. Add chapters, fix typos, add works.
 3. Bump the **version** in Collection settings.
 4. Save the project file again, replacing your copy.
@@ -163,7 +163,7 @@ Do not change the namespace. Do not start from a blank collection.
 ## When something is wrong
 
 **Validation shows errors.** Each one names the work and what to fix. Errors block the build
-on purpose — they are the things that would break in-game.
+on purpose: they are the things that would break in-game.
 
 **The build button does nothing.** You have validation errors. The tool switches you to the
 Validation tab and says how many.
@@ -173,7 +173,7 @@ a specific warning when it rejects a malformed work. Confirm AOO itself is insta
 its version is at least the one your pack requires.
 
 **You lost your `.aoopack.json`.** If the pack is not yet released, rebuild it and move on. If
-it *is* released, do not rebuild and re-upload under the same namespace — ask before doing
+it *is* released, do not rebuild and re-upload under the same namespace. Ask before doing
 anything, because a mismatched rebuild is what breaks readers' libraries.
 
 ---
