@@ -158,6 +158,13 @@ def main():
     (OUT / "assets" / "fonts").mkdir()
     for woff in sorted((SRC / "assets" / "fonts").glob("*.woff2")):
         shutil.copy2(woff, OUT / "assets" / "fonts" / woff.name)
+    # the in-game and tool frames for the landing-page sequence
+    (OUT / "assets" / "ingame").mkdir()
+    frames = sorted((SRC / "assets" / "ingame").glob("*.webp"))
+    if len(frames) < 6:
+        sys.exit("FAIL: expected at least 6 sequence frames, found %d" % len(frames))
+    for f in frames:
+        shutil.copy2(f, OUT / "assets" / "ingame" / f.name)
     # the OFL obliges us to distribute the licence with the fonts
     licences = sorted((SRC / "assets" / "fonts").glob("OFL-*.txt"))
     if len(licences) != 2:

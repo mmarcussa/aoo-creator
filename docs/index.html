@@ -145,6 +145,47 @@ section{padding:clamp(3.2rem,7vw,5.4rem) 0;border-bottom:1px solid #12262a}
 footer{padding:3rem 0 4rem;color:var(--muted);font-size:.86rem}
 .foot-row{display:flex;flex-wrap:wrap;gap:1.4rem;justify-content:space-between;align-items:center}
 .foot-row code{font-family:var(--mono);color:var(--cyan)}
+
+/* ---------- write-to-Night-City sequence ---------- */
+.seq{position:relative;border:1px solid var(--edge);border-radius:3px;overflow:hidden;
+  background:#05090b;box-shadow:0 40px 90px -46px #000c}
+.seq-stage{position:relative;aspect-ratio:1280/573}
+.seq-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;visibility:hidden;animation:seqShow var(--loop) steps(1,end) infinite;
+  animation-delay:calc(var(--i) * var(--step))}
+.seq-stage img:first-child{opacity:1;visibility:visible}
+@keyframes seqShow{0%{opacity:1;visibility:visible}16.6%{opacity:0;visibility:hidden}100%{opacity:0;visibility:hidden}}
+
+.seq-caption{display:grid;gap:.2rem;padding:.9rem 1.15rem;border-top:1px solid var(--edge);
+  background:var(--panel);min-height:5.1rem}
+.seq-caption p{position:absolute;opacity:0;visibility:hidden;margin:0;
+  animation:seqShow var(--loop) steps(1,end) infinite;
+  animation-delay:calc(var(--i) * var(--step))}
+.seq-caption .wrapline{position:relative;min-height:3.4rem}
+.seq-caption b{display:block;font:800 .72rem/1.6 var(--display);letter-spacing:.24em;
+  text-transform:uppercase;color:var(--red)}
+.seq-caption span{color:var(--muted);font-size:.95rem}
+
+.seq-ticks{display:flex;gap:.3rem;padding:0 1.15rem 1rem;background:var(--panel)}
+.seq-ticks i{flex:1;height:2px;background:#ffffff14;position:relative;overflow:hidden}
+.seq-ticks i::after{content:"";position:absolute;inset:0;background:var(--gold);
+  transform:scaleX(0);transform-origin:left;
+  animation:seqTick var(--loop) linear infinite;
+  animation-delay:calc(var(--i) * var(--step))}
+@keyframes seqTick{0%{transform:scaleX(0)}16.6%{transform:scaleX(1)}
+  16.7%{transform:scaleX(0)}100%{transform:scaleX(0)}}
+
+/* hovering holds a frame, for anyone who wants to actually read one */
+.seq:hover img,.seq:hover p,.seq:hover i::after{animation-play-state:paused}
+
+@media (prefers-reduced-motion:reduce){
+  .seq-stage{aspect-ratio:auto;display:grid;gap:1px;background:var(--edge)}
+  .seq-stage img{position:static;opacity:1;visibility:visible;animation:none;height:auto}
+  .seq-caption p{position:static;opacity:1;visibility:visible;animation:none;padding:.5rem 0;
+    border-top:1px solid #ffffff10}
+  .seq-caption .wrapline{min-height:0}
+  .seq-ticks{display:none}
+}
 </style>
 </head>
 <body>
@@ -246,19 +287,40 @@ footer{padding:3rem 0 4rem;color:var(--muted);font-size:.86rem}
 <section>
   <div class="wrap">
     <div class="head rise d1">
-      <p class="eyebrow">How readers get it</p>
+      <p class="eyebrow">Where it ends up</p>
       <h2>From your desk to Night City</h2>
+      <p class="lede">The same fic, all the way through: written in the Creator,
+        then read on the in-world archive by anyone who installed your mod.</p>
     </div>
-    <ol class="chain rise d2">
-      <li><b>You write the collection here</b>
-        <span>and save a <code>.aoopack.json</code> so you can publish updates later.</span></li>
-      <li><b>You build the ZIP</b>
-        <span>and upload it to Nexus like any other mod.</span></li>
-      <li><b>A reader installs it</b>
-        <span>with Vortex, alongside the Archive of Our Overwrites core mod.</span></li>
-      <li><b>Your work appears on the in-game archive</b>
-        <span>with its tags, byline, summary and comments intact.</span></li>
-    </ol>
+
+    <div class="seq rise d2" style="--loop:19.2s;--step:3.2s">
+      <div class="seq-stage">
+        <img src="assets/ingame/tool-write.webp" width="1280" height="573" loading="lazy" decoding="async" style="--i:0" alt="You write the fic. Chapters, tags, byline, ratings.">
+        <img src="assets/ingame/tool-build.webp" width="1280" height="573" loading="lazy" decoding="async" style="--i:1" alt="Validation passes and it builds the mod file you upload.">
+        <img src="assets/ingame/net-directory.webp" width="1280" height="573" loading="lazy" decoding="async" style="--i:2" alt="Readers reach the archive from the Night City network.">
+        <img src="assets/ingame/archive-index.webp" width="1280" height="573" loading="lazy" decoding="async" style="--i:3" alt="Your collection, with its own stats and byline.">
+        <img src="assets/ingame/shard-market.webp" width="1280" height="573" loading="lazy" decoding="async" style="--i:4" alt="Chapters recovered with eddies, exactly as you priced them.">
+        <img src="assets/ingame/work-page.webp" width="1280" height="573" loading="lazy" decoding="async" style="--i:5" alt="Tags, warnings, props, comments. Your work, in the world.">
+      </div>
+      <div class="seq-caption">
+        <div class="wrapline">
+          <p style="--i:0"><b>In the Creator</b><span>You write the fic. Chapters, tags, byline, ratings.</span></p>
+          <p style="--i:1"><b>One click</b><span>Validation passes and it builds the mod file you upload.</span></p>
+          <p style="--i:2"><b>On the Net</b><span>Readers reach the archive from the Night City network.</span></p>
+          <p style="--i:3"><b>In the archive</b><span>Your collection, with its own stats and byline.</span></p>
+          <p style="--i:4"><b>On the market</b><span>Chapters recovered with eddies, exactly as you priced them.</span></p>
+          <p style="--i:5"><b>Read in Night City</b><span>Tags, warnings, props, comments. Your work, in the world.</span></p>
+        </div>
+      </div>
+      <div class="seq-ticks">
+        <i style="--i:0"></i>
+        <i style="--i:1"></i>
+        <i style="--i:2"></i>
+        <i style="--i:3"></i>
+        <i style="--i:4"></i>
+        <i style="--i:5"></i>
+      </div>
+    </div>
   </div>
 </section>
 
