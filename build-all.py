@@ -22,6 +22,7 @@ STEPS = [
     ("ui contract",      ["check-ui-contract.py"]),
     ("theme audit",      ["check-themes.py"]),
     ("cursor audit",     ["check-cursors.py"]),
+    ("readability",      ["check-readability.py"]),
 ]
 
 for label, cmd in STEPS:
