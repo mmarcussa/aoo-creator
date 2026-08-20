@@ -1769,6 +1769,23 @@ button:disabled,select:disabled,input:disabled,textarea:disabled{cursor:not-allo
 .diff-list.ok li{border-left-color:var(--cyan);
   background:color-mix(in srgb,var(--cyan) 7%,transparent);color:var(--muted)}
 
+
+
+/* ---- undo offer ----
+   In the status bar, beside the message it belongs to. It began as a floating
+   toast; measurement showed that covered the manuscript, and elementFromPoint
+   confirmed the toast was taking clicks meant for the writing surface. Another
+   corner would only cover a different control. */
+.undo-offer[hidden]{display:none}
+.undo-offer{flex:none;margin-left:.7rem;margin-right:auto;/* margin-right:auto keeps it beside its message; the status bar is
+   space-between, which otherwise strands it mid-bar */padding:.16rem .6rem;
+  border:1px solid var(--yellow);border-radius:2px;
+  background:color-mix(in srgb,var(--yellow) 14%,transparent);
+  color:var(--yellow-ink);font-size:.7rem;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;white-space:nowrap}
+.undo-offer:hover{background:color-mix(in srgb,var(--yellow) 26%,transparent);
+  color:var(--yellow-ink);border-color:var(--yellow)}
+
 /* hosted build only: pointer to the downloadable single-file copy */
 .welcome-offline{margin:.35rem 0 0;font-size:.86rem;line-height:1.55;color:var(--muted)}
 .welcome-offline a{color:var(--cyan);text-decoration:underline;text-underline-offset:3px}

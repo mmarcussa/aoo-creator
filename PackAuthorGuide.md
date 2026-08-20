@@ -203,6 +203,23 @@ Do not change the namespace. Do not start from a blank collection.
 
 ---
 
+## Taking something back
+
+Deleting a work, chapter, author or comment is reversible. The status bar says
+what happened and offers **Undo that** beside it for a few seconds.
+
+**Ctrl+Z** works too, but only outside a text box. Inside the manuscript or any
+other field it belongs to your browser, undoing your typing the way it does
+everywhere else. That line matters: taking back a sentence and taking back a
+deleted chapter are different actions, and one keystroke should not do both.
+
+**Ctrl+Y** redoes. Both keep about forty steps.
+
+Autosave still applies. Undo is for the last thing you did, not a way back to
+last week: a `.aoopack.json` saved to disk is the only real safety net.
+
+---
+
 ## When something is wrong
 
 **Validation shows errors.** Each one names the work and what to fix. Errors block the build
