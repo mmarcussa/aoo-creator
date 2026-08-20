@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en" data-theme="aoo">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Build update-safe Archive of Our Overwrites fic collection mods in the browser.">
+  <title>AOO Creator</title>
+  <link rel="icon" href="assets/aoo-logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/aoo-logo.png">
+  <meta name="theme-color" content="#0b1114">
+  <meta name="color-scheme" content="dark light">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AOO Creator">
+  <meta property="og:title" content="AOO Creator — build fic collection mods">
+  <meta property="og:description" content="Write fic collections for Cyberpunk 2077&#x27;s Archive of Our Overwrites and export a Nexus-ready mod. Runs entirely in your browser — no account, nothing uploaded.">
+  <meta property="og:image" content="assets/share-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Archive of Our Overwrites Creator">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AOO Creator — build fic collection mods">
+  <meta name="twitter:description" content="Write fic collections for Cyberpunk 2077&#x27;s Archive of Our Overwrites and export a Nexus-ready mod. Runs entirely in your browser — no account, nothing uploaded.">
+  <meta name="twitter:image" content="assets/share-card.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <button id="welcomeBtn" class="brand-button" type="button" title="Show the welcome screen"><span class="brand-logo" role="img" aria-label="Archive of Our Overwrites"></span></button>
+      <div class="masthead"><strong id="mastheadName">Untitled collection</strong><span class="masthead-sub">AOO Creator <i>v0.2.0</i></span></div>
+    </div>
+    <div class="header-actions">
+      <label class="compact">Theme
+        <select id="themeSelect">
+          <optgroup label="Core">
+            <option value="aoo">AOO</option><option value="night">Midnight</option>
+            <option value="light">Paper</option><option value="contrast">High contrast</option>
+          </optgroup>
+          <optgroup label="Archive">
+            <option value="ao3">AO3</option>
+          </optgroup>
+          <optgroup label="Old hardware">
+            <option value="win95">Windows 95</option><option value="bios">BIOS setup</option>
+            <option value="matrix">The Matrix</option><option value="nokia">Nokia LCD</option>
+            <option value="doom">Doom 1993</option>
+          </optgroup>
+          <optgroup label="Aesthetic">
+            <option value="gyaru">Gyaru</option><option value="workout">80s workout</option>
+            <option value="vapor">Y2K / Vaporwave</option><option value="mcbling">McBling</option>
+            <option value="emo">Emo</option><option value="mtv">MTV green sky</option>
+          </optgroup>
+          <optgroup label="Uneasy">
+            <option value="liminal">Liminal space</option><option value="dream">DreamCore</option>
+            <option value="weird">WeirdCore</option><option value="trauma">TraumaCore</option>
+            <option value="bastard">Bastard core</option>
+          </optgroup>
+          <optgroup label="Design">
+            <option value="aero">Frutiger Aero</option><option value="bauhaus">Bauhaus flat</option>
+            <option value="brutal">Acid neo-brutalism</option>
+          </optgroup>
+        </select>
+      </label>
+      <button id="tutorialBtn" class="ghost">Tutorial</button>
+      <button id="importBtn" class="ghost">Import project</button>
+      <button id="saveProjectBtn" class="secondary">Save project</button>
+      <button id="readyState" class="ready-state" type="button" hidden></button>
+      <button id="buildBtn" class="primary">Validate &amp; build ZIP</button>
+      <input id="importFile" type="file" accept=".json,.aoopack.json,application/json" hidden>
+    </div>
+  </header>
+
+  <div class="status-bar">
+    <span id="statusBar" class="status-text" role="status">Autosave ready.</span>
+    <button id="backupState" class="backup-state" type="button"></button>
+  </div>
+
+  <div class="hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <main class="workspace">
+    <aside class="rail" aria-label="Collection navigator">
+      <section class="rail-section">
+        <div class="section-title"><h2>Collection</h2></div>
+        <select id="collectionSelect" class="collection-select" aria-label="Switch collection"></select>
+        <div id="projectSummary" class="project-summary"></div>
+        <div class="collection-actions"><button id="projectSettingsBtn" class="ghost">Settings</button><button id="newProjectBtn" class="ghost">New</button><button id="deleteCollectionBtn" class="danger danger-strong">Delete</button></div>
+      </section>
+
+      <section class="rail-section">
+        <div class="section-title"><h2>Authors</h2><button id="manageAuthorsBtn" class="icon-button" title="Manage authors">&#9776;</button></div>
+        <button id="authorSummary" class="project-summary author-summary" type="button"></button>
+      </section>
+
+      <section class="rail-section grow">
+        <div class="section-title"><h2>Works <span id="worksAttention" class="attention"></span></h2><button id="addWorkBtn" class="icon-button" title="Add work">＋</button></div>
+        <input id="workSearch" class="rail-search" type="search" placeholder="Find a title or author">
+        <div id="workList" class="nav-list work-list"></div>
+      </section>
+
+      <section class="rail-section examples">
+        <label>Load example
+          <select id="exampleSelect">
+            <option value="">Choose…</option>
+            <option value="oneshot">Inactive one-shot</option>
+            <option value="complete">Complete multi-chapter</option>
+            <option value="active">Active timed WIP</option>
+            <option value="collection">Multi-author collection</option>
+          </select>
+        </label>
+      </section>
+    </aside>
+
+    <section class="editor-shell">
+      <nav class="editor-tabs" aria-label="Editor sections">
+        <button data-tab="write" class="active">Write <span id="chapterCount" class="badge">0</span></button>
+        <button data-tab="details">Details</button>
+        <button data-tab="comments">Comments <span id="commentCount" class="badge">0</span></button>
+        <button data-tab="preview">Proof</button>
+        <button data-tab="validate">Validation <span id="issueCount" class="badge">0</span></button>
+      </nav>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <h1>Build your collection</h1>
+        <p>Add an author and work, or load an example. Stable IDs are created once and survive later title or pseud changes.</p>
+      </div>
+
+      <div id="writePane" class="pane active">
+        <div class="pane-heading">
+          <div><span class="eyebrow">Manuscript</span><h1 id="workHeading">Untitled work</h1></div>
+          <div class="pane-actions"><button id="livePreviewBtn" class="ghost" aria-pressed="false">Show preview</button></div>
+        </div>
+        <div class="write-layout">
+          <aside class="chapter-strip">
+            <div class="strip-head">Chapters<button id="addChapterBtn" class="icon-button" title="Add chapter">+</button></div>
+            <div id="chapterStrip" class="strip-list"></div>
+          </aside>
+          <div id="chapterEditor" class="chapter-editor"></div>
+          <aside id="writePreview" class="write-preview" hidden>
+            <div class="strip-head">As readers see it</div>
+            <div id="aooPreviewLive" class="aoo-preview"></div>
+          </aside>
+        </div>
+      </div>
+
+      <div id="authorsPane" class="pane">
+        <div class="pane-heading">
+          <div><span class="eyebrow">Collection roster</span><h1>Authors</h1></div>
+          <div class="pane-actions"><button id="addAuthorBtn" class="primary">Add author</button></div>
+        </div>
+        <input id="authorSearch" class="author-search" type="search" placeholder="Find an author by pseud">
+        <div id="authorRows" class="author-rows"></div>
+      </div>
+
+      <div id="detailsPane" class="pane">
+        <div class="pane-heading">
+          <div><span class="eyebrow">Work metadata</span><h1 id="detailsHeading">Untitled work</h1></div>
+          <div class="pane-actions"><button id="duplicateWorkBtn" class="ghost">Duplicate</button><button id="deleteWorkBtn" class="danger">Delete</button></div>
+        </div>
+        <form id="workForm" class="record" autocomplete="off">
+
+          <section class="record-block">
+            <h2 class="record-rubric">Byline</h2>
+            <div class="record-grid">
+              <label class="span-2">Title <span class="counter" data-counter="title"></span>
+                <input data-bind="title" maxlength="120" required>
+              </label>
+              <label>Author
+                <select data-bind="authorId" id="authorSelect"></select>
+              </label>
+              <label>Pseud shown on work <span class="counter" data-counter="pseud"></span>
+                <input data-bind="pseud" maxlength="24" required>
+              </label>
+            </div>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Rating and warnings</h2>
+            <div class="rating-row">
+              <div class="rating-chips" id="ratingChips" role="radiogroup" aria-label="Rating">
+                <button type="button" data-rating="General"><b>G</b><span>General</span></button>
+                <button type="button" data-rating="Teen"><b>T</b><span>Teen and up</span></button>
+                <button type="button" data-rating="Mature"><b>M</b><span>Mature</span></button>
+                <button type="button" data-rating="Explicit"><b>E</b><span>Explicit</span></button>
+                <button type="button" data-rating="NotRated"><b>N</b><span>Not rated</span></button>
+              </div>
+              <input data-bind="rating" id="ratingValue" class="visually-bound" tabindex="-1" aria-hidden="true">
+            </div>
+            <div class="record-grid">
+              <label>Archive warning
+                <select data-bind="warning"><option value="None">No Archive Warnings Apply</option><option value="ChooseNotToWarn">Creator Chose Not To Use Archive Warnings</option><option value="GraphicViolence">Graphic Depictions Of Violence</option><option value="MajorDeath">Major Character Death</option><option value="Underage">Underage</option><option value="NonCon">Rape/Non-Con</option></select>
+              </label>
+              <label>Category
+                <select data-bind="category"><option>Gen</option><option>F/F</option><option>F/M</option><option>M/M</option><option>Multi</option><option>Other</option></select>
+              </label>
+              <label>Status
+                <select data-bind="complete"><option value="true">Complete</option><option value="false">Work in progress</option></select>
+              </label>
+              <label id="releaseModelField">Release model
+                <select data-bind="active"><option value="false">Immediate availability</option><option value="true">Timed active-author release</option></select>
+              </label>
+              <label id="releaseIntervalField">Release interval (days)
+                <input data-bind="releaseIntervalDays" type="number" min="3" max="365" step="1">
+                <small>Only used by an incomplete timed work whose registered author is active; minimum 3 days.</small>
+              </label>
+            </div>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Summary <span class="counter" data-counter="summary"></span></h2>
+            <textarea data-bind="summary" maxlength="140" rows="3" class="record-summary"></textarea>
+            <small>Market cards allow 140 characters; the preview shows the final wrap.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Tags <span id="tagTotal" class="badge">0 / 100</span></h2>
+            <div class="tag-fields">
+              <div class="tag-field" data-tagfield="fandoms">
+                <span class="tag-kind">Fandoms</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="fandomPresets" placeholder="Type a fandom, press Enter">
+                <input data-bind-list="fandoms" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="relationships">
+                <span class="tag-kind">Relationships</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="relationshipPresets" placeholder="Type a pairing, press Enter">
+                <input data-bind-list="relationships" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="characters">
+                <span class="tag-kind">Characters</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="characterPresets" placeholder="Type a character, press Enter">
+                <input data-bind-list="characters" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+              <div class="tag-field" data-tagfield="tags">
+                <span class="tag-kind">Additional tags</span>
+                <div class="tag-chips"></div>
+                <input class="tag-entry" list="tagPresets" placeholder="Type a tag, press Enter">
+                <input data-bind-list="tags" class="visually-bound" tabindex="-1" aria-hidden="true">
+              </div>
+            </div>
+            <small>Each tag may be 80 characters. The in-game work page collapses large tag walls behind &ldquo;Show all&rdquo;.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">How the archive received it</h2>
+            <div class="reception">
+              <label><span>Props</span><input data-bind-stat="props" type="number" min="0"></label>
+              <label><span>Reads</span><input data-bind-stat="reads" type="number" min="0"></label>
+              <label><span>Stashes</span><input data-bind-stat="stashes" type="number" min="0"></label>
+              <label><span>Comments</span><input data-bind-stat="comments" type="number" min="0"><small>Never below archived comments.</small></label>
+              <label class="derived"><span>Words</span><input id="wordCountField" type="text" readonly tabindex="-1" aria-readonly="true"><small>Counted as you write.</small></label>
+            </div>
+            <small>These are the numbers a reader sees on the work card. They are fiction, not a real count.</small>
+          </section>
+
+          <section class="record-block">
+            <h2 class="record-rubric">Author&rsquo;s note before the work</h2>
+            <textarea data-bind="notesBefore" rows="3" placeholder="Optional" class="record-summary"></textarea>
+          </section>
+        </form>
+      </div>
+
+      <div id="commentsPane" class="pane">
+        <div class="pane-heading"><div><span class="eyebrow">Optional archive activity</span><h1>Comments</h1></div><button id="addCommentBtn" class="primary">Add comment</button></div>
+        <p class="help-callout">Comments can be included on complete, inactive one-shots and multi-chapter works. Chapter 0 means the whole work.</p>
+        <div id="commentList" class="card-list"></div>
+      </div>
+
+      <div id="previewPane" class="pane">
+        <div class="pane-heading"><div><span class="eyebrow">Before you publish</span><h1>Proof the work card</h1></div></div>
+        <p class="help-callout">Both widths the game renders at, side by side. Long titles and large tag walls fail here first &mdash; if it survives the narrow column it survives the Shard Market.</p>
+        <div class="proof-sheet">
+          <figure><figcaption>Wide &mdash; work page</figcaption><div id="aooPreview" class="aoo-preview"></div></figure>
+          <figure><figcaption>Narrow &mdash; market card</figcaption><div id="aooPreviewNarrow" class="aoo-preview narrow"></div></figure>
+        </div>
+      </div>
+
+      <div id="validatePane" class="pane">
+        <div class="pane-heading"><div><span class="eyebrow">Framework schema v1</span><h1>Validation report</h1></div><button id="runValidationBtn" class="ghost">Run again</button></div>
+        <div id="validationSummary"></div><div id="validationList" class="validation-list"></div>
+      </div>
+
+      <div id="projectPane" class="pane">
+        <div class="pane-heading"><div><span class="eyebrow">Nexus-ready package</span><h1>Collection settings</h1></div></div>
+        <form id="projectForm" class="form-grid">
+          <label class="span-2">Collection name <input data-pack="name" maxlength="80"></label>
+          <label>Namespace <input data-pack="namespace" maxlength="48" pattern="[A-Za-z][A-Za-z0-9_]*"><small>Letters, numbers, underscore; cannot change after release.</small></label>
+          <label>Version <input data-pack="version" value="1.0.0"></label>
+          <label>Collection creator <input data-pack="creator" maxlength="80"></label>
+          <label>License <input data-pack="license" maxlength="80" placeholder="All rights reserved"></label>
+          <label class="span-2">Description <textarea data-pack="description" rows="3" maxlength="400"></textarea></label>
+          <label>Nexus page <input data-pack="nexus" type="url" placeholder="https://www.nexusmods.com/..."></label>
+          <label>Credits <input data-pack="credits" maxlength="240"></label>
+        </form>
+        <div class="contract-card"><strong>Dependency contract</strong><span>Archive of Our Overwrites ≥ 0.3.0-dev.17</span><span>Framework 1.0.0 · Creator schema 1</span></div>
+      </div>
+    </section>
+  </main>
+
+  <datalist id="fandomPresets"><option value="SAMURAI"><option value="Us Cracks"><option value="Legends of Night City"><option value="Cyberpunk 2077"></datalist>
+  <datalist id="relationshipPresets"><option value="Kerry Eurodyne/Johnny Silverhand"><option value="V/Judy Alvarez"><option value="V/Panam Palmer"></datalist>
+  <datalist id="characterPresets"><option value="V"><option value="Johnny Silverhand"><option value="Kerry Eurodyne"><option value="Judy Alvarez"><option value="Panam Palmer"></datalist>
+  <datalist id="tagPresets"><option value="Slow Burn"><option value="Angst"><option value="Found Family"><option value="Fluff"><option value="Alternate Universe"><option value="Unreliable Narrator"></datalist>
+
+  <div id="boot" class="boot" hidden>
+    <div class="boot-frame">
+      <div class="boot-mark">
+        <svg class="boot-reticle" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ret-ring" cx="60" cy="60" r="54" fill="none" stroke="currentColor" stroke-width="1"/>
+          <circle class="ret-spin" cx="60" cy="60" r="46" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-dasharray="42 250" stroke-linecap="round"/>
+          <path class="ret-tick" d="M60 2v10M60 108v10M2 60h10M108 60h10" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span class="boot-logo" role="img" aria-label=""></span>
+      </div>
+      <div class="boot-title">Archive of Our Overwrites</div>
+      <div class="boot-sub">Creator v0.2.0</div>
+      <ol class="boot-lines">
+        <li><span>framework contract 1.0.0</span><b>ok</b></li>
+        <li><span>creator schema v1</span><b>ok</b></li>
+        <li><span>local library</span><b>mounted</b></li>
+        <li><span>network</span><b>not required</b></li>
+      </ol>
+      <div class="boot-bar"><i></i></div>
+      <div class="boot-skip" role="status">press any key to continue</div>
+    </div>
+  </div>
+
+  <div id="publishScreen" class="publish" hidden>
+    <div class="publish-inner">
+      <div class="publish-head">
+        <span class="eyebrow">Ready to publish</span>
+        <h1 id="publishTitle">Untitled collection</h1>
+        <p class="publish-sub">This builds the mod file you upload. Nothing leaves your machine.</p>
+      </div>
+      <dl class="publish-facts" id="publishFacts"></dl>
+      <div class="publish-files">
+        <span class="tag-kind">What the ZIP contains</span>
+        <ol id="publishFileList"></ol>
+      </div>
+      <p class="publish-note" id="publishNote"></p>
+      <div class="publish-actions">
+        <button id="publishCancel" class="ghost">Not yet</button>
+        <button id="publishGo" class="primary">Build the ZIP</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tutorialRoot"></div>
+
+  <dialog id="confirmDialog">
+    <form method="dialog" class="dialog-card confirm-card">
+      <span class="eyebrow" id="confirmEyebrow">Confirm</span>
+      <h1 id="confirmTitle">Are you sure?</h1>
+      <p id="confirmBody"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="ghost">Cancel</button>
+        <button value="ok" class="primary" id="confirmOk">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="welcomeScreen" class="welcome" hidden>
+    <div class="welcome-inner">
+      <div class="welcome-head">
+        <svg class="welcome-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <defs><linearGradient id="wmg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="currentColor" stop-opacity=".85"/>
+            <stop offset="1" stop-color="currentColor" stop-opacity=".25"/>
+          </linearGradient></defs>
+          <path d="M8 46 L32 8 L56 46" fill="none" stroke="url(#wmg)" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M18 46 L32 24 L46 46" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45"/>
+          <line x1="6" y1="54" x2="58" y2="54" stroke="currentColor" stroke-width="2" opacity=".7"/>
+        </svg>
+        <div>
+          <span class="eyebrow">Archive of Our Overwrites</span>
+          <h1>Build a fic collection</h1>
+          <p class="welcome-sub">Everything happens on your machine. Nothing is uploaded, and there is no account.</p>
+        </div>
+      </div>
+
+      <div class="welcome-grid">
+        <button class="welcome-card" data-welcome="blank">
+          <span class="welcome-card-title">Start writing</span>
+          <span class="welcome-card-text">A blank collection with one author and one work. Best if you already know what you are making.</span>
+        </button>
+        <button class="welcome-card" data-welcome="tour">
+          <span class="welcome-card-title">Take the tour</span>
+          <span class="welcome-card-text">Ten steps through the real interface, from naming a collection to building the mod.</span>
+        </button>
+        <button class="welcome-card" data-welcome="example">
+          <span class="welcome-card-title">Open an example</span>
+          <span class="welcome-card-text">Four finished collections to read and pull apart. The fastest way to see what a pack looks like.</span>
+        </button>
+        <button class="welcome-card" data-welcome="import">
+          <span class="welcome-card-title">Import a project</span>
+          <span class="welcome-card-text">Continue from a <code>.aoopack.json</code> you saved earlier, keeping its internal IDs intact.</span>
+        </button>
+      </div>
+
+      <div id="welcomeExamples" class="welcome-examples" hidden>
+        <button data-example="oneshot"><strong>Inactive one-shot</strong><small>One chapter, archived comments</small></button>
+        <button data-example="complete"><strong>Complete multi-chapter</strong><small>Finished, immediately readable</small></button>
+        <button data-example="active"><strong>Active timed WIP</strong><small>Chapters unlock on a schedule</small></button>
+        <button data-example="collection"><strong>Multi-author collection</strong><small>Three authors, three works</small></button>
+      </div>
+
+      <p class="welcome-note"><strong>Your browser is not a backup.</strong> The tool autosaves here, but a
+      <code>.aoopack.json</code> saved to disk is the only thing that lets you publish an update your readers
+      keep their library through. Save one early.</p>
+
+
+      <p class="welcome-offline">Working without a connection, or want to keep a copy?
+      <a href="AOO-Creator-v0.2.0-standalone.html" download>Download the single-file version</a> — one HTML file,
+      identical to this page, opens straight from your desktop.</p>
+
+      <div class="welcome-foot">
+        <label class="welcome-skip"><input type="checkbox" id="welcomeSuppress"> Don&rsquo;t show this again</label>
+        <button id="welcomeClose" class="ghost welcome-close">Skip</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

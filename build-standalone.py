@@ -1,9 +1,18 @@
 # Builds a dependency-free, single-file AOO Creator that runs on file:// (double-click).
-# Source of truth: dist/AOO-Creator-v0.1.0-build2/  (left untouched)
+#
+# This is the download artifact. Its sibling build-web.py produces web/ for hosting.
+# Both read source/, which is the only source of truth.
+#
+#     python build-standalone.py                 # source/ -> AOO-Creator-v<VERSION>-standalone.html
+#     python build-standalone.py SRC OUT         # explicit paths
 import base64, pathlib, re, sys
 
-SRC = pathlib.Path(sys.argv[1])
-OUT = pathlib.Path(sys.argv[2])
+ROOT = pathlib.Path(__file__).resolve().parent
+SRC = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "source"
+if len(sys.argv) > 2:
+    OUT = pathlib.Path(sys.argv[2])
+else:
+    OUT = ROOT / ("AOO-Creator-v%s-standalone.html" % (SRC / "VERSION").read_text(encoding="utf-8").strip())
 
 html  = (SRC / "index.html").read_text(encoding="utf-8")
 css   = (SRC / "styles.css").read_text(encoding="utf-8")

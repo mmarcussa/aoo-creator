@@ -8,9 +8,12 @@ was reverted to v0.1.0 and is untouched by this work.
 
 | Path | What it is |
 |---|---|
-| `AOO-Creator-v0.2.0-standalone.html` | The tool. Double-click it — no server, works offline. This is the file to send people. |
-| `source/` | The editable source. Everything is built from here. |
-| `build-standalone.py` | Regenerates the standalone file from `source/`. |
+| `source/` | The editable source. Both artifacts are built from here. |
+| `AOO-Creator-v0.2.0-standalone.html` | **Download artifact.** Double-click it — no server, works offline. This is the file to send people. |
+| `docs/` | **Hosted artifact.** Built output for GitHub Pages / Cloudflare. Never edit by hand; it is regenerated. |
+| `build-all.py` | Builds both artifacts and runs every guard. The one command to run. |
+| `build-standalone.py` | Builds the standalone file from `source/`. |
+| `build-web.py` | Builds `docs/` from `source/`. |
 | `run-tests.py` | Runs the test suite in a real browser. No Node needed. |
 | `check-ui-contract.py` | Verifies the markup still exposes every field the exporter reads. |
 | `check-themes.py` | Measures WCAG contrast across every theme. No theme ships unread. |
@@ -20,15 +23,59 @@ was reverted to v0.1.0 and is untouched by this work.
 
 Edit files in `source/`, then rebuild:
 
-    python build-standalone.py "./source" "./AOO-Creator-v0.2.0-standalone.html"
+    python build-all.py
 
-The build inlines `styles.css`, `core.js`, `app.js` and the logo into one HTML file,
-strips the ES module syntax, and asserts that no external reference survives — so a
-broken build fails loudly instead of producing a dead page.
+That builds both artifacts and runs all three guards, stopping at the first failure so
+a broken build never reaches either output. To build just one:
 
-`source/` is also directly hostable: serve it over any static web server (or GitHub
-Pages) and `index.html` works as-is. It will NOT work by double-clicking `source/index.html`
-— browsers block ES modules on `file://`. That is what the standalone build exists to solve.
+    python build-standalone.py
+    python build-web.py --base-url https://your.domain
+
+## Two versions, one source
+
+There are two shipping artifacts and they are deliberately the same tool. A writer who
+downloads the offline copy after using the site should get exactly what they just used,
+so the hosted version is not a separate product with web fonts and analytics bolted on.
+The only things `docs/` adds are what a URL needs and a `file://` page cannot use.
+
+| | `AOO-Creator-v0.2.0-standalone.html` | `docs/` |
+|---|---|---|
+| For | Nexus, direct sending, offline, archival | the public site, later a Cloudflare domain |
+| Opens by | double-clicking | visiting a URL |
+| Files | one, ~412 KB | six + assets, cached separately |
+| Logo | base64 inlined (~37% larger than the PNG) | a real PNG the browser caches |
+| Adds | nothing external, by assertion | favicon, link-preview metadata, cache headers, a download link back to the standalone |
+| Guard | no external reference survives inlining | every reference resolves to a shipped file |
+
+Note the two guards are mirror images, and both fail the build loudly.
+
+**Fonts stay system fonts in both.** Self-containment is what forces that constraint, and
+matching the two versions is worth more than a web font would buy. If the standalone is
+ever dropped, that constraint lifts — but not before.
+
+**No analytics, ever.** The boot screen tells the reader `network — not required` and the
+welcome screen says nothing is uploaded. A tracker would make both of those a lie.
+
+### Deploying `docs/`
+
+The name is not arbitrary: GitHub Pages' *deploy from a branch* option only offers the
+repo root or `/docs`, so `docs/` deploys with no Action and no extra machinery. Cloudflare
+Pages lets you point at any directory, so it works there too.
+
+Settings → Pages → Source: *Deploy from a branch* → your branch, folder `/docs`.
+
+It already contains `.nojekyll` (Pages otherwise drops files beginning with `_`),
+`_headers` (Cloudflare Pages cache policy), `robots.txt`, and `404.html`.
+
+Rebuild with `--base-url https://your.domain` once the domain exists: without it the
+`og:image` is a relative path, and Discord, Nexus and X will not render a link preview.
+The share image itself is `source/assets/share-card.png`, 1200×630.
+
+### About `source/`
+
+`source/index.html` will NOT work by double-clicking — browsers block ES modules on
+`file://`. That is the bug the standalone build exists to solve. Serve it over HTTP
+(`python -m http.server`) to develop against it directly.
 
 ## Testing
 
@@ -49,7 +96,7 @@ Before and after any change to `index.html`, also run:
 losing a `data-bind` attribute or an element id while rearranging the page would silently
 drop that field from every exported pack, and the browser tests would not notice because
 they call `core.js` directly. This compares the markup against a recorded baseline of all
-38 binding attributes and 53 element ids. After an intentional change, re-record with
+38 binding attributes and 73 element ids. After an intentional change, re-record with
 `--update`.
 
 ## What changed from v0.1.0
