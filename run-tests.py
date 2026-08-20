@@ -14,11 +14,43 @@ ROOT = pathlib.Path(__file__).resolve().parent
 SRC = ROOT / "source"
 
 BROWSERS = [
-    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-    r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+    # %LOCALAPPDATA% first: a per-user Chrome install is easy to miss, and an Edge
+    # that is already running can return an empty dump instead of failing loudly
+    os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
 ]
+
+
+def dump_dom(page_uri, budget):
+    """Render a page and return its DOM, trying each browser until one answers.
+
+    A browser that exits 0 with no output has not run the page; treating that as
+    a page failure sent me looking for a bug in the tool that was not there.
+    """
+    tried = []
+    for browser in BROWSERS:
+        if not os.path.exists(browser):
+            continue
+        tmp = tempfile.mkdtemp(prefix="aoo-run-")
+        try:
+            out = subprocess.run(
+                [browser, "--headless=new", "--disable-gpu", "--no-first-run",
+                 f"--virtual-time-budget={budget}", f"--user-data-dir={tmp}",
+                 "--dump-dom", page_uri],
+                capture_output=True, text=True, encoding="utf-8",
+                errors="replace", timeout=300).stdout
+        except Exception as exc:
+            tried.append(f"{os.path.basename(browser)}: {exc}")
+            continue
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        if out.strip():
+            return out
+        tried.append(f"{os.path.basename(browser)}: exited cleanly but produced no DOM")
+    sys.exit("FAIL: no browser rendered the page.\n  " + "\n  ".join(tried or ["none installed"]))
 
 
 def find_browser():
