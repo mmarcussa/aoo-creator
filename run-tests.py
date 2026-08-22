@@ -1,4 +1,4 @@
-"""Run the AOO Creator test suite in a real browser (headless Edge/Chrome).
+"""Run the AOO Creator test suite in a real browser (headless Chrome).
 
 The project's original tests/creator.test.mjs needs Node. This runner executes the
 same assertions (see source/tests/browser-tests.js) against the same core.js, in the
@@ -14,13 +14,11 @@ ROOT = pathlib.Path(__file__).resolve().parent
 SRC = ROOT / "source"
 
 BROWSERS = [
-    # %LOCALAPPDATA% first: a per-user Chrome install is easy to miss, and an Edge
-    # that is already running can return an empty dump instead of failing loudly
+    # Keep this gate on Chrome. Edge's headless executable can surface a native
+    # breakpoint dialog on this machine instead of returning a useful failure.
     os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-    r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
 ]
 
 
@@ -57,7 +55,7 @@ def find_browser():
     for p in BROWSERS:
         if os.path.exists(p):
             return p
-    sys.exit("FAIL: no Edge or Chrome found; edit BROWSERS in run-tests.py")
+    sys.exit("FAIL: no Chrome found; edit BROWSERS in run-tests.py")
 
 
 def build_page():
@@ -74,17 +72,12 @@ def build_page():
 
 
 def main():
-    browser = find_browser()
+    find_browser()
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="aoo-tests-"))
     try:
         page = tmp / "tests.html"
         page.write_text(build_page(), encoding="utf-8")
-        out = subprocess.run(
-            [browser, "--headless=new", "--disable-gpu", "--no-first-run",
-             "--virtual-time-budget=10000", f"--user-data-dir={tmp / 'profile'}",
-             "--dump-dom", page.as_uri()],
-            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
-        ).stdout
+        out = dump_dom(page.as_uri(), 10000)
         m = re.search(r"\[\[(.*?)\]\]", out, re.S)
         if not m:
             sys.exit("FAIL: tests did not report; the page likely threw before finishing")

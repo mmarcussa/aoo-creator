@@ -22,7 +22,8 @@ Exits 0 if every measurable pair clears its threshold, 1 otherwise.
 import json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent
-PAGE = ROOT / "AOO-Creator-v0.2.0-standalone.html"
+VERSION = (ROOT / "source" / "VERSION").read_text(encoding="utf-8").strip()
+PAGE = ROOT / ("AOO-Creator-v%s-standalone.html" % VERSION)
 
 THRESHOLD_TEXT = 4.5   # WCAG AA, body text
 THRESHOLD_UI = 3.0     # WCAG AA, large text and UI components

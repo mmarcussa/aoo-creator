@@ -1,4 +1,4 @@
-# AOO Creator v0.2.0 — working copy
+# AOO Creator v0.2.1 — working copy
 
 The browser tool writers use to build Archive of Our Overwrites fic collection
 mods and export a Nexus-ready ZIP. Everything runs client-side: no account, no
@@ -9,7 +9,7 @@ upload, no server.
 | Path | What it is |
 |---|---|
 | `source/` | The editable source. Both artifacts are built from here. |
-| `AOO-Creator-v0.2.0-standalone.html` | **Download artifact.** Double-click it — no server, works offline. This is the file to send people. |
+| `AOO-Creator-v0.2.1-standalone.html` | **Download artifact.** Double-click it — no server, works offline. This is the file to send people. |
 | `docs/` | **Hosted artifact.** Built output for GitHub Pages / Cloudflare. Never edit by hand; it is regenerated. |
 | `build-all.py` | Builds both artifacts and runs every guard. The one command to run. |
 | `build-standalone.py` | Builds the standalone file from `source/`. |
@@ -41,7 +41,7 @@ downloads the offline copy after using the site should get exactly what they jus
 so the hosted version is not a separate product with web fonts and analytics bolted on.
 The only things `docs/` adds are what a URL needs and a `file://` page cannot use.
 
-| | `AOO-Creator-v0.2.0-standalone.html` | `docs/` |
+| | `AOO-Creator-v0.2.1-standalone.html` | `docs/` |
 |---|---|---|
 | For | Nexus, direct sending, offline, archival | the public site, later a Cloudflare domain |
 | Opens by | double-clicking | visiting a URL |
@@ -65,7 +65,7 @@ welcome screen says nothing is uploaded. A tracker would make both of those a li
 |---|---|
 | `index.html` | The landing page. Built from `source/landing.html`. |
 | `app.html` | The tool. Built from `source/index.html`. |
-| `AOO-Creator-v0.2.0-standalone.html` | The download the landing page offers. |
+| `AOO-Creator-v0.2.1-standalone.html` | The download the landing page offers. |
 
 The landing page is the one place the two versions diverge, and it can, because
 it is not the tool: no bindings, no themes, no export path, no contract. Nothing
@@ -129,7 +129,7 @@ standalone (there is no server to fetch from), real cached `.woff2` files in
 
     python run-tests.py
 
-Runs `source/tests/browser-tests.js` against `source/core.js` in headless Edge or Chrome,
+Runs `source/tests/browser-tests.js` against `source/core.js` in headless Chrome,
 and exits non-zero if anything fails. These are the assertions from the project's original
 `tests/creator.test.mjs` — which needs Node — plus guards on the pack layout. Run it after
 any change to `core.js`.
@@ -281,18 +281,20 @@ they call `core.js` directly. This compares the markup against a recorded baseli
   colour — the default result of deciding nothing. Optional actions are now plain text that
   gain a background on hover, the primary action is a solid fill so it is unmistakable, tabs
   are underlined rather than boxed, and several nested outlines were removed so surfaces read
-  by tone. Save project deliberately keeps its border: it is the one that prevents permanent
+  by tone. Download project file deliberately keeps its border: it is the one that prevents permanent
   loss. Text on solid accents uses `var(--bg)`, which inverts correctly in the light theme.
 - **Action hierarchy.** Three action tiers rather than two: primary for the build, a new
-  secondary tier for Save project (not the goal, but the one that prevents permanent loss),
+  secondary tier for Download project file (not the goal, but the one that prevents permanent loss),
   ghost for everything optional. Deleting a whole collection is now visually heavier than
   deleting a chapter. Rail entries dropped their button-like borders for an inset accent
   bar, so navigation no longer looks like actions.
-- **Autosave no longer lies.** The status bar used to say "local autosave active", which
-  reads as "your work is safe" — it isn't. A chip at the right of the status bar now shows *Not saved
-  to a file* or *Saved to a file* per collection, and clicking it saves, and the wording says autosave lives only
-  in this browser. This is the highest-stakes misunderstanding in the tool: losing the
-  `.aoopack.json` means never publishing a compatible update.
+- **Recovery is larger, but still not a backup.** Draft recovery now uses IndexedDB and
+  migrates the v0.1/v0.2 localStorage library on first open. A chip at the right of the
+  status bar shows *Unsaved changes — download project* or *Project file saved* per
+  collection. Clicking it or pressing Ctrl+S downloads the `.aoopack.json`; after fifteen
+  minutes of browser-only edits the tool reminds the writer, and closing a dirty project
+  invokes the browser's unsaved-work warning. The standalone falls back safely where a
+  `file://` browser denies IndexedDB. The machine file remains the canonical update source.
 - **Import is explicit about replacing.** A project file carries the collection's identity,
   so importing one whose id matches a collection already in the browser replaces it — that
   is the update flow. It now says so and asks first, naming the collection; importing a file
@@ -317,11 +319,11 @@ files import cleanly.
 
 ## Verified
 
-Tested on `file://` in headless Edge: the bundle executes fully, the Write/Details flow
+Tested in Chromium on the hosted build and as a generated standalone: the bundle executes fully, IndexedDB recovery survives reload, Ctrl+S marks a machine project copy, the Write/Details flow
 works, derived word count updates across tabs, conditional fields toggle, and export
 produces a valid ZIP — 6 files, `PK\x03\x04` signature, CRC clean when opened with a real
 ZIP reader, correct `r6/scripts/<Namespace>/` REDscript layout, manifest stamped
-`creatorVersion 0.2.0 / schemaVersion 1 / frameworkVersion 1.0.0`.
+`creatorVersion 0.2.1 / schemaVersion 1 / frameworkVersion 1.0.0`.
 
 ## Waiting on the core mod (not tool defects)
 

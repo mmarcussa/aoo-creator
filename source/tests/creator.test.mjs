@@ -8,7 +8,9 @@ for (const kind of ["oneshot","complete","active","collection"]) {
   const files=generatePackFiles(project);
   assert.ok(Object.keys(files).some(path=>path.endsWith(".Content.reds")));
   assert.ok(Object.keys(files).some(path=>path.endsWith(".Localization.reds")));
-  assert.match(files["manifest.json"],/"schemaVersion": 1/);
+  const manifestPath=Object.keys(files).find(path=>path.endsWith("manifest.json"));
+  assert.ok(manifestPath,"manifest must be namespaced inside the pack folder");
+  assert.match(files[manifestPath],/"schemaVersion": 1/);
   const bytes=new Uint8Array(await createZip(files).arrayBuffer());
   assert.deepEqual([...bytes.slice(0,4)],[0x50,0x4b,0x03,0x04],"ZIP must have a local-file signature");
 }

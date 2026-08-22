@@ -203,7 +203,7 @@ fieldset legend{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em}
 
 /* --- three action tiers, not two ---
    primary   the build, the thing you came here to do
-   secondary Save project: not the goal, but the one that prevents loss
+   secondary Download project file: not the goal, but the one that prevents loss
    ghost     everything optional                                        */
 .secondary{border-color:color-mix(in srgb,var(--text) 34%,var(--line));color:var(--text);font-weight:700;background:var(--panel2)}
 .secondary:hover{border-color:var(--cyan);color:var(--cyan)}

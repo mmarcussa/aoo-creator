@@ -1,5 +1,5 @@
 // Assertions ported from creator.test.mjs so they run in a real browser
-// (no Node required). Executed by ../../run-tests.py via headless Edge.
+// (no Node required). Executed by ../../run-tests.py via headless Chrome.
 // `core.js` is inlined ahead of this file, so its exports are in scope.
 
 function runTests() {

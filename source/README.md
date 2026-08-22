@@ -1,4 +1,4 @@
-# AOO Creator v0.2.0
+# AOO Creator v0.2.1
 
 A dependency-free browser tool for building Archive of Our Overwrites fic collection mods. It runs entirely on the user's device and is ready for static hosting on GitHub Pages.
 
@@ -12,7 +12,7 @@ Opening `index.html` by double-clicking it will **not** work — browsers block 
 2. Add your authors in the Authors roster.
 3. Write chapters in the Write tab; fill in metadata in Details.
 4. Review AOO preview and Validation.
-5. Save the `.aoopack.json` project file and keep it — it is required to publish updates.
+5. Choose **Download project file** (or press **Ctrl+S**) and keep the `.aoopack.json` — it is required to publish updates.
 6. Select **Validate & build ZIP** to export a Nexus-ready collection mod.
 
 The exported ZIP requires Archive of Our Overwrites `v0.3.0-dev.17` or newer. It contains REDscript registration, localization, a manifest, project source, version, and readme. Every file lives under `r6/scripts/<Namespace>/`, so any number of fic packs can be installed side by side without colliding. No fic text is uploaded anywhere by the creator.
@@ -41,10 +41,10 @@ The exported ZIP requires Archive of Our Overwrites `v0.3.0-dev.17` or newer. It
 
 ## Included safeguards
 
-A library of collections with a switcher, local autosave, undo/redo, import/export, four visual themes, first-run tutorial, examples, long-title and tag-wall preview, fixed AO3 selections plus custom open tags, validation severity, guarded author deletion, in-page confirmations rather than browser popups, and a browser-side ZIP builder with no third-party service dependency.
+A library of collections with a switcher, IndexedDB recovery autosave with migration from the older localStorage library, undo/redo, import/export, 24 visual themes, first-run tutorial, examples, long-title and tag-wall preview, fixed AO3 selections plus custom open tags, validation severity, guarded author deletion, in-page confirmations rather than browser popups, and a browser-side ZIP builder with no third-party service dependency. Recovery is device- and browser-local; the tool reminds writers after 15 minutes of unsaved edits, Ctrl+S downloads the canonical project file, and closing with browser-only changes triggers the browser's unsaved-work warning.
 
 ## Tests
 
     python ../run-tests.py
 
-Runs `tests/browser-tests.js` against `core.js` in headless Edge or Chrome. `tests/creator.test.mjs` holds equivalent assertions for `node --test` where Node is available.
+Runs `tests/browser-tests.js` against `core.js` in headless Chrome. `tests/creator.test.mjs` provides a Node smoke gate where Node is available.

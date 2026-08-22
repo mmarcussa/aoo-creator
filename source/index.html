@@ -11,7 +11,7 @@
   <header class="app-header">
     <div class="brand">
       <button id="welcomeBtn" class="brand-button" type="button" title="Show the welcome screen"><span class="brand-logo" role="img" aria-label="Archive of Our Overwrites"></span></button>
-      <div class="masthead"><strong id="mastheadName">Untitled collection</strong><span class="masthead-sub">AOO Creator <i>v0.2.0</i></span></div>
+      <div class="masthead"><strong id="mastheadName">Untitled collection</strong><span class="masthead-sub">AOO Creator <i>v0.2.1</i></span></div>
     </div>
     <div class="header-actions"><div class="history-group" role="group" aria-label="History"><button id="undoBtn" class="history-btn" type="button" disabled title="Undo (Ctrl+Z outside a text box)" aria-label="Undo">&#8630;</button><button id="redoBtn" class="history-btn" type="button" disabled title="Redo (Ctrl+Y)" aria-label="Redo">&#8631;</button></div>
       <label class="compact">Theme
@@ -46,7 +46,7 @@
       </label>
       <button id="tutorialBtn" class="ghost">Tutorial</button>
       <button id="importBtn" class="ghost">Import project</button>
-      <button id="saveProjectBtn" class="secondary">Save project</button>
+      <button id="saveProjectBtn" class="secondary" title="Download the editable .aoopack.json source file (Ctrl+S)">Download project file</button>
       <button id="readyState" class="ready-state" type="button" hidden></button>
       <button id="buildBtn" class="primary">Validate &amp; build ZIP</button>
       <input id="importFile" type="file" accept=".json,.aoopack.json,application/json" hidden>
@@ -54,7 +54,7 @@
   </header>
 
   <div class="status-bar">
-    <span id="statusBar" class="status-text" role="status">Autosave ready.</span>
+    <span id="statusBar" class="status-text" role="status">Starting recovery storage…</span>
     <button id="backupState" class="backup-state" type="button"></button>
   </div>
 
@@ -298,7 +298,7 @@
         <span class="boot-logo" role="img" aria-label=""></span>
       </div>
       <div class="boot-title">Archive of Our Overwrites</div>
-      <div class="boot-sub">Creator v0.2.0</div>
+      <div class="boot-sub">Creator v0.2.1</div>
       <ol class="boot-lines">
         <li><span>framework contract 1.0.0</span><b>ok</b></li>
         <li><span>creator schema v1</span><b>ok</b></li>

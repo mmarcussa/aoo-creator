@@ -26,7 +26,7 @@ Pick something specific to your collection, not generic: `AfterlifeOneShots`, no
 
 ### 2. Your project file
 
-**Save project** writes a `.aoopack.json` file. Keep it forever, backed up.
+**Download project file** (or **Ctrl+S**) writes a `.aoopack.json` file. Keep it forever, backed up.
 
 Every author, work, chapter and comment carries a hidden permanent ID. Player saves key on
 those IDs: which chapters they recovered, what they propped, stashed and followed. To
@@ -36,9 +36,11 @@ If you rebuild a collection from scratch instead, every ID is regenerated. To th
 an entirely new collection, and every reader loses everything they had recovered from the old
 one. There is no way to recover from this after release.
 
-The tool autosaves to your browser, but that is convenience, not backup. Clearing site data,
-switching browsers, or using another computer loses it. The `.aoopack.json` file is the real
-copy.
+The tool keeps recovery drafts in IndexedDB and migrates older browser autosaves on first
+open, but that is convenience, not backup. Clearing site data, switching browsers, or using
+another computer loses it. After fifteen minutes of browser-only edits the tool reminds you
+to download; closing a dirty project also triggers the browser's unsaved-work warning. The
+`.aoopack.json` file on your machine is the real copy.
 
 ### Working on more than one collection
 
@@ -60,7 +62,7 @@ collection you care about.
 4. **Details**: rating, archive warning, category, tags, summary for each work.
 5. **AOO preview**: check how the work card looks in-game, especially long titles and many tags.
 6. **Validation**: fix every error. Warnings are advice you can ignore.
-7. **Save project**: write your `.aoopack.json`.
+7. **Download project file** or press **Ctrl+S**: write your `.aoopack.json`.
 8. **Validate & build ZIP**: produces the mod.
 
 ---

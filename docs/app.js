@@ -2,33 +2,76 @@ import {CREATOR_VERSION,AOO_MIN_VERSION,LIMITS,makeProject,makeAuthor,makeWork,m
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const STORAGE="aoo-creator-project-v1", LIBRARY="aoo-creator-library-v1", THEME="aoo-creator-theme";
-let library=loadLibrary(),project=library.projects[library.currentId],selectedWorkId=project.works[0]?.id||null,selectedChapterId=project.works[0]?.chapters[0]?.id||null,activeTab="write",undoStack=[],redoStack=[],saveTimer=null,pristine=!localStorage.getItem(LIBRARY)&&!localStorage.getItem(STORAGE);
+const RECOVERY_DB="aoo-creator-recovery-v1", RECOVERY_STORE="state", RECOVERY_KEY="library";
+const FILE_REMINDER_MS=15*60*1000;
+const initialProject=makeProject();
+let library={currentId:initialProject.id,projects:{[initialProject.id]:initialProject},saved:{},baselines:{}},project=initialProject,
+  selectedWorkId=project.works[0]?.id||null,selectedChapterId=project.works[0]?.chapters[0]?.id||null,
+  activeTab="write",undoStack=[],redoStack=[],saveTimer=null,fileReminderTimer=null,pristine=true,
+  recoveryDB=null,recoveryMode="browser fallback",pendingDirtyProjects=new Set();
 
-function loadLibrary(){
+function openRecoveryDatabase(){return new Promise((resolve,reject)=>{
+  if(typeof indexedDB==="undefined")return reject(new Error("IndexedDB is unavailable"));
+  let req;try{req=indexedDB.open(RECOVERY_DB,1)}catch(error){reject(error);return}
+  req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(RECOVERY_STORE))db.createObjectStore(RECOVERY_STORE)};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error("Could not open recovery database"));
+  req.onblocked=()=>reject(new Error("Recovery database is blocked by another tab"));
+})}
+function recoveryGet(db){return new Promise((resolve,reject)=>{const req=db.transaction(RECOVERY_STORE,"readonly").objectStore(RECOVERY_STORE).get(RECOVERY_KEY);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}
+function recoveryPut(db,value){return new Promise((resolve,reject)=>{const tx=db.transaction(RECOVERY_STORE,"readwrite");tx.objectStore(RECOVERY_STORE).put(value,RECOVERY_KEY);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error("Recovery write was aborted"))})}
+function loadLocalLibrary(){
   try{
     const raw=localStorage.getItem(LIBRARY);
     if(raw){const lib=normalizeLibrary(JSON.parse(raw));if(Object.keys(lib.projects).length)return lib}
     const legacy=localStorage.getItem(STORAGE);
-    if(legacy){const p=withId(normalizeProject(JSON.parse(legacy)));return{currentId:p.id,projects:{[p.id]:p},saved:{}}}
-  }catch(error){console.warn(error)}
-  const p=makeProject();return{currentId:p.id,projects:{[p.id]:p},saved:{}};
+    if(legacy){const p=withId(normalizeProject(JSON.parse(legacy)));return{currentId:p.id,projects:{[p.id]:p},saved:{},baselines:{}}}
+  }catch(error){console.warn("AOO Creator local recovery could not be read",error)}
+  return null;
+}
+async function loadLibrary(){
+  const local=loadLocalLibrary();
+  try{
+    recoveryDB=await openRecoveryDatabase();recoveryMode="IndexedDB recovery";
+    const recovered=await recoveryGet(recoveryDB);
+    if(recovered){const lib=normalizeLibrary(recovered);if(Object.keys(lib.projects).length)return{library:lib,hadData:true}}
+    if(local){await recoveryPut(recoveryDB,local);return{library:local,hadData:true}}
+  }catch(error){recoveryDB=null;recoveryMode=typeof AOOStorePersistent!=="undefined"&&!AOOStorePersistent?"temporary session memory":"browser fallback";console.warn("AOO Creator IndexedDB recovery is unavailable; using fallback storage",error)}
+  if(local)return{library:local,hadData:true};
+  const p=makeProject();return{library:{currentId:p.id,projects:{[p.id]:p},saved:{},baselines:{}},hadData:false};
+}
+async function persistLibrary(){
+  if(recoveryDB){try{await recoveryPut(recoveryDB,library);return true}catch(error){console.warn("AOO Creator recovery write failed",error);recoveryDB=null;recoveryMode=typeof AOOStorePersistent!=="undefined"&&!AOOStorePersistent?"temporary session memory":"browser fallback"}}
+  try{localStorage.setItem(LIBRARY,JSON.stringify(library));return true}catch(error){console.warn("AOO Creator fallback write failed",error);return false}
 }
 function normalizeLibrary(lib){const projects={};
-  Object.values(lib?.projects||{}).forEach(raw=>{try{const p=withId(normalizeProject(raw));projects[p.id]=p}catch(error){console.warn(error)}});
-  const ids=Object.keys(projects);return{currentId:projects[lib?.currentId]?lib.currentId:ids[0],projects,saved:lib?.saved||{}};
+  Object.values(lib?.projects||{}).forEach(raw=>{try{const updatedAt=raw?.updatedAt,createdAt=raw?.createdAt,p=withId(normalizeProject(raw));if(updatedAt)p.updatedAt=updatedAt;if(createdAt)p.createdAt=createdAt;projects[p.id]=p}catch(error){console.warn(error)}});
+  const ids=Object.keys(projects);return{currentId:projects[lib?.currentId]?lib.currentId:ids[0],projects,saved:lib?.saved||{},baselines:lib?.baselines||{}};
 }
 function withId(p){if(!p.id)p.id=`project_${crypto.randomUUID().replaceAll("-","")}`;return p}
 function collections(){return Object.values(library.projects).sort((a,b)=>String(a.pack.name||"").localeCompare(String(b.pack.name||"")))}
-function adoptCollection(next,message){library.projects[next.id]=next;library.currentId=next.id;project=next;selectedWorkId=project.works[0]?.id||null;selectedChapterId=project.works[0]?.chapters[0]?.id||null;activeTab="write";pristine=false;save(message);render()}
-function snapshot(){pristine=false;undoStack.push(JSON.stringify(project));if(undoStack.length>40)undoStack.shift();redoStack=[]}
-let pendingFileSave=false;
-function save(message="Autosaved in this browser."){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{
-  project.updatedAt=new Date().toISOString();library.projects[project.id]=project;library.currentId=project.id;
-  if(pendingFileSave){library.saved=library.saved||{};library.saved[project.id]=project.updatedAt;pendingFileSave=false}
-  try{localStorage.setItem(LIBRARY,JSON.stringify(library));status(message)}
-  catch(error){status("Browser storage is full, so this change was not autosaved. Use Save project to write a file.","error")}
-  renderBackupState();
+function adoptCollection(next,message,options={}){library.projects[next.id]=next;library.currentId=next.id;project=next;selectedWorkId=project.works[0]?.id||null;selectedChapterId=project.works[0]?.chapters[0]?.id||null;activeTab="write";pristine=false;save(message,options);render()}
+function snapshot(){pristine=false;pendingDirtyProjects.add(project.id);undoStack.push(JSON.stringify(project));if(undoStack.length>40)undoStack.shift();redoStack=[]}
+function isFileDirty(){return pendingDirtyProjects.has(project.id)||library.saved?.[project.id]!==project.updatedAt}
+function cancelFileReminder(){clearTimeout(fileReminderTimer);fileReminderTimer=null}
+function scheduleFileReminder(){if(!isFileDirty()||fileReminderTimer)return;fileReminderTimer=setTimeout(()=>{
+  fileReminderTimer=null;status("Reminder: download your .aoopack.json project file so this work also exists on your machine.","error");scheduleFileReminder()
+},FILE_REMINDER_MS)}
+function save(message="Recovery autosaved in this browser.",{touch=true,markFileSaved=false}={}){clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{
+  if(touch)project.updatedAt=new Date().toISOString();pendingDirtyProjects.delete(project.id);library.projects[project.id]=project;library.currentId=project.id;
+  if(markFileSaved){library.saved=library.saved||{};library.saved[project.id]=project.updatedAt}
+  const ok=await persistLibrary();
+  status(ok?message:"Browser recovery could not be written. Download the project file now so this change is safe.",ok?"":"error");
+  renderBackupState();if(isFileDirty())scheduleFileReminder();else cancelFileReminder();
 },180)}
+async function downloadProjectFile(){
+  clearTimeout(saveTimer);project.updatedAt=new Date().toISOString();library.projects[project.id]=project;library.currentId=project.id;
+  pendingDirtyProjects.delete(project.id);
+  library.saved=library.saved||{};library.saved[project.id]=project.updatedAt;
+  const name=`${project.pack.namespace||"aoo-project"}.aoopack.json`;
+  download(new Blob([JSON.stringify(project,null,2)],{type:"application/json"}),name);
+  const ok=await persistLibrary();cancelFileReminder();renderBackupState();
+  status(ok?`Downloaded ${name}. Keep it on your machine — it is the source for future updates.`:`Downloaded ${name}. Browser recovery failed, so keep this file safe.`,ok?"success":"error")
+}
 function status(message,kind=""){const el=$("#statusBar");el.textContent=message;el.className=`status-text ${kind}`;void el.offsetWidth;el.classList.add("flash")}
 const tourSteps=[
  {tab:"write",sel:"#collectionSelect",title:"Your collections",text:"Every collection you build lives here. Switching keeps each one\u2019s works, authors and settings separate. New starts another; nothing is lost when you do."},
@@ -39,7 +82,7 @@ const tourSteps=[
  {tab:"details",sel:"#workForm",title:"Metadata readers see",text:"Rating, archive warnings, tags and summary. Release timing only appears on a work in progress, and the word count is counted for you."},
  {tab:"preview",sel:"#aooPreview",title:"How it looks in game",text:"The work card as Archive of Our Overwrites will render it, including long titles and large tag walls."},
  {tab:"validate",sel:"#validationList",title:"Errors block the build",text:"Every problem names the work and what to fix. Errors stop the export on purpose; warnings are only advice."},
- {tab:"write",sel:"#backupState",title:"This is the one that matters",text:"Autosave lives only in this browser. Save project writes a .aoopack.json \u2014 keep it. Re-importing that file is the only way to publish an update your readers keep their library through."},
+ {tab:"write",sel:"#backupState",title:"This is the one that matters",text:"Recovery autosave lives only in this browser. Download project file writes a .aoopack.json to your machine \u2014 keep it. Re-importing that file is how you publish updates without breaking readers' libraries."},
  {tab:"write",sel:"#buildBtn",title:"Build it, and see what the update changes",text:"When validation passes, this exports a Nexus-ready ZIP. Upload it and list Archive of Our Overwrites as a required mod."}
 ];
 let tourOn=false,tourAt=0;
@@ -71,7 +114,7 @@ const esc=v=>String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 function mutate(fn,{full=false,message}={}){snapshot();fn();deriveWork(currentWork());save(message);renderHistory();if(full)render();else{renderSummary();renderPreview();renderValidationBadges();updateCounters();updateDerivedFields()}}
 function render(){renderHistory();renderCollections();renderBackupState();renderSummary();renderAuthors();renderWorks();renderWorkForm();renderChapterStrip();renderChapterEditor();renderComments();renderPreview();renderValidation();showTab(activeTab)}
 function perWorkIssues(){const map={},issues=validateProject(project);project.works.forEach((w,i)=>{const mine=issues.filter(x=>String(x.path).startsWith(`work ${i+1}:`));map[w.id]={errors:mine.filter(x=>x.kind==="error").length,warnings:mine.filter(x=>x.kind==="warning").length}});return map}
-function renderBackupState(){const el=$("#backupState");if(!el)return;const saved=library.saved?.[project.id],dirty=saved!==project.updatedAt;el.textContent=dirty?"Not saved to a file":"Saved to a file";el.className=`backup-state ${dirty?"dirty":"clean"}`;el.title=dirty?"Autosave lives only in this browser. Use Save project to write a .aoopack.json you keep — it is the only way to publish an update later.":`Written to a file ${new Date(saved).toLocaleString()}. Autosave since then lives only in this browser.`}
+function renderBackupState(){const el=$("#backupState");if(!el)return;const saved=library.saved?.[project.id],dirty=saved!==project.updatedAt;el.textContent=dirty?"Unsaved changes — download project":"Project file saved";el.className=`backup-state ${dirty?"dirty":"clean"}`;el.title=dirty?"Recovery autosave is browser-local. Download the .aoopack.json project file to keep a machine copy and preserve the source for future updates.":`Project file downloaded ${new Date(saved).toLocaleString()}. New edits are also kept in ${recoveryMode}.`}
 function renderCollections(){const m=$("#mastheadName");if(m)m.textContent=project.pack.name||"Untitled collection";
   const sel=$("#collectionSelect");if(!sel)return;const all=collections();
   sel.innerHTML=all.map(p=>`<option value="${p.id}"${p.id===project.id?" selected":""}>${esc(p.pack.name||"Untitled collection")}</option>`).join("");
@@ -155,13 +198,13 @@ $("#workForm").addEventListener("click",event=>{const drop=event.target.closest(
   writeTagField(field,next);renderTagFields(currentWork())});
 $("#authorSearch").addEventListener("input",renderAuthorsPane);
 $("#authorRows").addEventListener("input",event=>{const row=event.target.closest("[data-author-row]"),field=event.target.dataset.authorField;if(!row||!field)return;const a=project.authors.find(x=>x.id===row.dataset.authorRow);if(!a)return;snapshot();if(field==="pseud"){a.pseud=event.target.value.slice(0,LIMITS.author);project.works.filter(w=>w.authorId===a.id).forEach(w=>w.pseud=a.pseud)}else{a.status=event.target.value;row.querySelector(".author-dot").classList.toggle("active",a.status==="Active")}save("Author updated.");renderAuthors();renderSummary();renderWorkForm();renderPreview();renderValidationBadges()});
-$("#collectionSelect").addEventListener("change",event=>{const next=library.projects[event.target.value];if(!next||next.id===project.id)return;library.projects[project.id]=project;adoptCollection(next,`Switched to ${next.pack.name||"Untitled collection"}.`)});
+$("#collectionSelect").addEventListener("change",event=>{const next=library.projects[event.target.value];if(!next||next.id===project.id)return;library.projects[project.id]=project;adoptCollection(next,`Switched to ${next.pack.name||"Untitled collection"}.`,{touch:false})});
 function freshCollection(){const p=makeProject(),taken=new Set(Object.values(library.projects).map(x=>String(x.pack.name||"")));let name="New collection",i=1;while(taken.has(name)){i++;name=`New collection ${i}`}p.pack.name=name;p.pack.namespace=name.replace(/[^A-Za-z0-9]/g,"")||"NewCollection";return p}
 $("#newProjectBtn").addEventListener("click",()=>{library.projects[project.id]=project;adoptCollection(freshCollection(),"New collection created. The previous one is still in the list.")});
 $("#deleteCollectionBtn").addEventListener("click",async()=>{const all=collections();if(all.length<=1){status("This is your only collection. Create another before deleting it.","error");return}
   const name=project.pack.name||"Untitled collection";
   const yes=await ask(`\u201c${name}\u201d will be removed from this browser. Any unsaved work in it is lost.`,{title:"Delete collection?",eyebrow:"Remove from library",okLabel:"Delete",danger:true});
-  if(!yes)return;const gone=project.id;delete library.projects[gone];const next=collections()[0];library.currentId=next.id;adoptCollection(next,`Deleted ${name}.`)});
+  if(!yes)return;const gone=project.id;delete library.projects[gone];delete library.saved?.[gone];delete library.baselines?.[gone];const next=collections()[0];library.currentId=next.id;adoptCollection(next,`Deleted ${name}.`,{touch:false})});
 $("#addWorkBtn").addEventListener("click",()=>{if(!project.authors.length){status("Add an author before adding a work.","error");return}mutate(()=>{const w=makeWork(project.authors[0]);project.works.push(w);selectedWorkId=w.id;activeTab="write"},{full:true,message:"Work added."})});
 $("#addChapterBtn").addEventListener("click",()=>{const w=currentWork();if(!w)return;mutate(()=>{const c=makeChapter(`Chapter ${w.chapters.length+1}`);w.chapters.push(c);selectedChapterId=c.id},{full:true,message:"Chapter added."})});
 $("#addCommentBtn").addEventListener("click",()=>mutate(()=>currentWork().comments.push(makeComment()),{full:true,message:"Comment added."}));
@@ -193,8 +236,8 @@ $("#themeSelect").addEventListener("change",event=>{const root=document.document
 // once, and some engines keep painting descendants with the previous values
 root.style.display="none";void root.offsetHeight;root.style.display=""});
 $("#exampleSelect").addEventListener("change",event=>{if(!event.target.value)return;snapshot();library.projects[project.id]=project;adoptCollection(withId(getExample(event.target.value)),"Example added as a new collection.");event.target.value=""});
-$("#saveProjectBtn").addEventListener("click",()=>{download(new Blob([JSON.stringify(project,null,2)],{type:"application/json"}),`${project.pack.namespace||"aoo-project"}.aoopack.json`);pendingFileSave=true;save("Project file written. Keep it — you need it to publish updates.")});
-$("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;pendingFileSave=true;library.baselines=library.baselines||{};library.baselines[next.id]={at:new Date().toISOString(),file:file.name,project:JSON.parse(JSON.stringify(next))};adoptCollection(next,`Imported ${file.name}.`);status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
+$("#saveProjectBtn").addEventListener("click",downloadProjectFile);
+$("#importBtn").addEventListener("click",()=>$("#importFile").click());$("#importFile").addEventListener("change",async event=>{const file=event.target.files[0];if(!file)return;try{const next=withId(normalizeProject(JSON.parse(await file.text())));const existing=library.projects[next.id];if(existing){const yes=await ask(`This file is a copy of \u201c${existing.pack.name||"Untitled collection"}\u201d, which is already in this browser. Importing replaces the browser copy with what is in the file. Ctrl+Z undoes it.`,{title:"Replace this collection?",eyebrow:"Same collection",okLabel:"Replace",danger:true});if(!yes){status("Import cancelled.");event.target.value="";return}}snapshot();library.projects[project.id]=project;library.baselines=library.baselines||{};library.baselines[next.id]={at:new Date().toISOString(),file:file.name,project:JSON.parse(JSON.stringify(next))};adoptCollection(next,`Imported ${file.name}.`,{markFileSaved:true});status(existing?`Replaced ${esc(existing.pack.name)} from ${file.name}.`:`Imported ${file.name} as a new collection.`,"success")}catch(error){status(error.message,"error")}event.target.value=""});
 function openPublish(){
   const p=project.pack,works=project.works,chapters=works.reduce((t,w)=>t+w.chapters.length,0);
   const words=works.reduce((t,w)=>t+workWordCount(w),0);
@@ -331,10 +374,10 @@ function renderHistory(){
 }
 $("#undoBtn").addEventListener("click",()=>{undoOnce()});
 $("#redoBtn").addEventListener("click",()=>{redoOnce()});
-document.addEventListener("keydown",event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){if(inTextField(event.target))return;event.preventDefault();undoOnce()}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="y"){if(inTextField(event.target))return;event.preventDefault();redoOnce()}});
+document.addEventListener("keydown",event=>{const command=event.ctrlKey||event.metaKey,key=event.key.toLowerCase();if(command&&key==="s"){event.preventDefault();downloadProjectFile();return}if(command&&key==="z"){if(inTextField(event.target))return;event.preventDefault();undoOnce()}if(command&&key==="y"){if(inTextField(event.target))return;event.preventDefault();redoOnce()}});
+addEventListener("beforeunload",event=>{if(!isFileDirty())return;event.preventDefault();event.returnValue=""});
 
-if(localStorage.getItem("aoo-creator-live-preview")){$("#writePreview").hidden=false;$("#writePane").classList.add("with-preview");$("#livePreviewBtn").textContent="Hide preview";$("#livePreviewBtn").setAttribute("aria-pressed","true")}
-const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;render();function afterBoot(){if(!localStorage.getItem("aoo-creator-welcome-off"))showWelcome()}
+function afterBoot(){if(!localStorage.getItem("aoo-creator-welcome-off"))showWelcome()}
 function runBoot(){
   const el=$("#boot");
   const skip=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -348,7 +391,16 @@ function runBoot(){
   // no timeout: the boot holds until the reader acknowledges it
   setTimeout(()=>el.classList.add("ready"),1850);  // marks the wait, styling is CSS-driven
 }
-runBoot();status(`AOO Creator v${CREATOR_VERSION} · autosaved in this browser only. Use Save project to keep a file copy.`);
+async function initializeApp(){
+  const loaded=await loadLibrary();library=loaded.library;project=library.projects[library.currentId]||Object.values(library.projects)[0];
+  library.currentId=project.id;selectedWorkId=project.works[0]?.id||null;selectedChapterId=project.works[0]?.chapters[0]?.id||null;pristine=!loaded.hadData;
+  if(localStorage.getItem("aoo-creator-live-preview")){$("#writePreview").hidden=false;$("#writePane").classList.add("with-preview");$("#livePreviewBtn").textContent="Hide preview";$("#livePreviewBtn").setAttribute("aria-pressed","true")}
+  const theme=localStorage.getItem(THEME)||"aoo";document.documentElement.dataset.theme=theme;$("#themeSelect").value=theme;
+  render();runBoot();if(isFileDirty())scheduleFileReminder();
+  const warning=recoveryMode==="temporary session memory"?" Recovery is temporary in this browser — download the project file now.":"";
+  status(`AOO Creator v${CREATOR_VERSION} · ${recoveryMode} ready.${warning} Press Ctrl+S to download your project file.`,warning?"error":"")
+}
+initializeApp().catch(error=>{console.error(error);status("Creator startup recovery failed. Reload the page, then import your .aoopack.json project file.","error")});
 
 
 /* ---------------------------------------------------------------------------

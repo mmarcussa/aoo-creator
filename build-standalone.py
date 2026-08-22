@@ -70,9 +70,11 @@ if n_ls < 6:
     sys.exit(f"FAIL: expected at least 6 localStorage uses, found {n_ls}")
 
 PRELUDE = '''/* --- single-file shims: keep the app alive on file:// --- */
+var AOOStorePersistent = false;
 var AOOStore = (function () {
   var mem = {}, ok = false;
   try { var k = "__aoo_probe__"; localStorage.setItem(k, "1"); localStorage.removeItem(k); ok = true; } catch (e) { ok = false; }
+  AOOStorePersistent = ok;
   return ok ? localStorage : {
     getItem: function (k) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
     setItem: function (k, v) { mem[k] = String(v); },
